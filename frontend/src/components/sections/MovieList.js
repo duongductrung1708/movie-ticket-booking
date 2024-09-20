@@ -26,6 +26,25 @@ const Title = styled.h1`
   }
 `;
 
+const SearchBar = styled.input`
+  width: 30%;
+  padding: 0.5rem;
+  margin: 1rem auto;
+  border: 2px solid ${(props) => props.theme.text};
+  border-radius: 10px;
+  text-align: center;
+  font-size: ${(props) => props.theme.fontmd};
+  display: block;
+
+  @media (max-width: 48em) {
+    width: 50%;
+  }
+
+  @media (max-width: 30em) {
+    width: 60%;
+  }
+`;
+
 const Container = styled.div`
   width: 75%;
   margin: 2rem auto;
@@ -135,6 +154,7 @@ const MovieListItem = React.forwardRef(({ image, title, rating }, ref) => {
 
 const MovieList = () => {
   const [visibleMovies, setVisibleMovies] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
   const revealRefs = useRef([]);
   revealRefs.current = [];
   gsap.registerPlugin(ScrollTrigger);
@@ -252,8 +272,12 @@ const MovieList = () => {
     },
   ];
 
+  const filteredMovies = movies.filter((movie) =>
+    movie.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const toggleMovies = () => {
-    if (visibleMovies < movies.length) {
+    if (visibleMovies < filteredMovies.length) {
       setVisibleMovies((prevValue) => prevValue + 10);
     } else {
       setVisibleMovies(10);
@@ -263,8 +287,14 @@ const MovieList = () => {
   return (
     <Section id="movie-list">
       <Title>Now Showing</Title>
+      <SearchBar
+        type="text"
+        placeholder="Search"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
       <Container>
-        {movies.slice(0, visibleMovies).map((movie, index) => (
+        {filteredMovies.slice(0, visibleMovies).map((movie, index) => (
           <MovieListItem
             key={index}
             image={movie.image}
@@ -275,7 +305,9 @@ const MovieList = () => {
       </Container>
       <ButtonWrapper>
         <ShowMoreButton onClick={toggleMovies}>
-          {visibleMovies < movies.length ? "Show More →" : "Show Less ←"}
+          {visibleMovies < filteredMovies.length
+            ? "Show More →"
+            : "Show Less ←"}
         </ShowMoreButton>
       </ButtonWrapper>
     </Section>

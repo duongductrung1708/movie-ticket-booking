@@ -25,6 +25,25 @@ const Title = styled.h1`
   }
 `;
 
+const SearchBar = styled.input`
+  width: 30%;
+  padding: 0.5rem;
+  margin: 1rem auto;
+  border: 2px solid ${(props) => props.theme.text};
+  border-radius: 10px;
+  text-align: center;
+  font-size: ${(props) => props.theme.fontmd};
+  display: block;
+
+  @media (max-width: 48em) {
+    width: 50%;
+  }
+
+  @media (max-width: 30em) {
+    width: 60%;
+  }
+`;
+
 const Container = styled.div`
   width: 75%;
   margin: 2rem auto;
@@ -134,6 +153,7 @@ const Movie = ({ img, name = "", releaseDate = "" }) => {
 
 const UpcomingMovies = () => {
   const [visibleMovies, setVisibleMovies] = useState(5);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const movies = [
     {
@@ -183,9 +203,13 @@ const UpcomingMovies = () => {
     },
   ];
 
+  const filteredMovies = movies.filter((movie) =>
+    movie.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const toggleMovies = () => {
-    if (visibleMovies < movies.length) {
-      setVisibleMovies(movies.length);
+    if (visibleMovies < filteredMovies.length) {
+      setVisibleMovies((prevValue) => prevValue + 5);
     } else {
       setVisibleMovies(5);
     }
@@ -195,8 +219,14 @@ const UpcomingMovies = () => {
     <Section id="upcoming-movies">
       <ConfettiComponent />
       <Title>Upcoming Movies</Title>
+      <SearchBar
+        type="text"
+        placeholder="Search"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
       <Container>
-        {movies.slice(0, visibleMovies).map((movie, index) => (
+        {filteredMovies.slice(0, visibleMovies).map((movie, index) => (
           <Movie
             key={index}
             img={movie.img}
@@ -204,12 +234,14 @@ const UpcomingMovies = () => {
             releaseDate={movie.releaseDate}
           />
         ))}
-        </Container>
-        <ButtonWrapper>
-          <ShowMoreButton onClick={toggleMovies}>
-            {visibleMovies < movies.length ? "Show More →" : "Show Less ←"}
-          </ShowMoreButton>
-        </ButtonWrapper>
+      </Container>
+      <ButtonWrapper>
+        <ShowMoreButton onClick={toggleMovies}>
+          {visibleMovies < filteredMovies.length
+            ? "Show More →"
+            : "Show Less ←"}
+        </ShowMoreButton>
+      </ButtonWrapper>
     </Section>
   );
 };
