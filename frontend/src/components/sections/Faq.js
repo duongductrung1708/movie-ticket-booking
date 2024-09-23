@@ -65,10 +65,14 @@ const Box = styled.div`
 
 const Faq = () => {
   const ref = useRef(null);
+  const scrollTriggerRef = useRef(null);
+
   gsap.registerPlugin(ScrollTrigger);
+
   useLayoutEffect(() => {
     let element = ref.current;
-    ScrollTrigger.create({
+
+    scrollTriggerRef.current = ScrollTrigger.create({
       trigger: element,
       start: "top top",
       end: "bottom top",
@@ -78,9 +82,12 @@ const Faq = () => {
     });
 
     return () => {
-      ScrollTrigger.kill();
+      if (scrollTriggerRef.current) {
+        scrollTriggerRef.current.kill();
+      }
     };
   }, []);
+
   return (
     <Section ref={ref} id="faq">
       <Title>FAQ</Title>

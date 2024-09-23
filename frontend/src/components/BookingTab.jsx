@@ -5,6 +5,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 const Title = styled.h2`
   font-family: "Arial", sans-serif;
@@ -15,6 +16,16 @@ const Title = styled.h2`
   padding-left: 1.5rem;
   text-transform: uppercase;
   border-left: 5px solid #fff;
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.8rem;
+    margin-bottom: 0.8rem;
+  }
 `;
 
 const Subtitle = styled.p`
@@ -22,6 +33,14 @@ const Subtitle = styled.p`
   font-size: 1.6rem;
   color: #fff;
   margin-bottom: 1rem;
+
+  @media (max-width: 768px) {
+    font-size: 1.4rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.2rem;
+  }
 `;
 
 const ShowtimeButton = styled.button`
@@ -41,10 +60,21 @@ const ShowtimeButton = styled.button`
     background-color: gray;
     color: white;
   }
+
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+    padding: 0.7rem 1.2rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
 `;
 
 const Showtime = styled.div`
   display: flex;
+  flex-wrap: wrap;
 `;
 
 const Overlay = styled.div`
@@ -76,6 +106,14 @@ const BookingWrapper = styled.div`
   clip-path: polygon(0 0, 100% 0, 0% 400%);
   display: flex;
   flex-direction: column;
+
+  @media (max-width: 1024px) {
+    width: 80%;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const ScrollableContent = styled.div`
@@ -83,6 +121,16 @@ const ScrollableContent = styled.div`
   overflow-y: auto;
   max-height: 60vh;
   padding-right: 1.5rem;
+
+  @media (max-width: 768px) {
+    max-height: 50vh;
+    padding-right: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    max-height: 40vh;
+    padding-right: 0.5rem;
+  }
 `;
 
 const CloseButton = styled.button`
@@ -100,18 +148,35 @@ const SelectWrapper = styled.div`
   margin-bottom: 1.5rem;
   font-size: 1.4rem;
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    font-size: 1.2rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+  }
 `;
 
 const TheaterLogos = styled.div`
   display: flex;
-  gap: 6rem;
+  gap: 5rem;
   margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    gap: 3rem;
+  }
+
+  @media (max-width: 480px) {
+    gap: 2rem;
+  }
 `;
 
 const TheaterLogo = styled.img`
-  width: 80px;
-  height: 80px;
+  width: 70px;
+  height: 70px;
   cursor: pointer;
   border-radius: 50%;
   filter: ${(props) => (props.selected ? "brightness(1)" : "brightness(0.5)")};
@@ -120,13 +185,38 @@ const TheaterLogo = styled.img`
   &:hover {
     filter: brightness(1);
   }
+
+  @media (max-width: 768px) {
+    width: 60px;
+    height: 60px;
+  }
+
+  @media (max-width: 480px) {
+    width: 50px;
+    height: 50px;
+  }
+`;
+
+const Address = styled.div`
+  margin-left: 20rem;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    margin-left: 10rem;
+  }
+
+  @media (max-width: 480px) {
+    margin-left: 5rem;
+  }
 `;
 
 const BookingTab = ({ isOpen, onClose }) => {
   const cities = ["HCMC", "Hanoi", "Da Nang"];
   const theaters = {
     HCMC: ["BHD Star Cineplex - 3/2", "CineStar Hai Ba Trung"],
-    Hanoi: ["Lotte Cinema Ba Dinh", "CGV Royal City"],
+    Hanoi: ["Lotte Cinema Ba Dinh", "CGV Royal City", "MegaGS - Cao Thang"],
     DaNang: ["CGV Vincom Plaza", "Galaxy Da Nang"],
   };
 
@@ -134,7 +224,11 @@ const BookingTab = ({ isOpen, onClose }) => {
     {
       name: "BHD",
       logo: "https://upload.wikimedia.org/wikipedia/commons/5/57/Logo_BHD_Star_Cineplex.png",
-      theaters: theaters.HCMC.filter((t) => t.includes("BHD")),
+      theaters: [
+        ...theaters.HCMC.filter((t) => t.includes("BHD")),
+        ...theaters.Hanoi.filter((t) => t.includes("BHD")),
+        ...theaters.DaNang.filter((t) => t.includes("BHD")),
+      ],
     },
     {
       name: "CGV",
@@ -148,12 +242,38 @@ const BookingTab = ({ isOpen, onClose }) => {
     {
       name: "Galaxy",
       logo: "https://static.ybox.vn/2020/12/3/1608715814588-15.png",
-      theaters: theaters.DaNang.filter((t) => t.includes("Galaxy")),
+      theaters: [
+        ...theaters.HCMC.filter((t) => t.includes("Galaxy")),
+        ...theaters.Hanoi.filter((t) => t.includes("Galaxy")),
+        ...theaters.DaNang.filter((t) => t.includes("Galaxy")),
+      ],
     },
     {
       name: "Lotte",
       logo: "https://play-lh.googleusercontent.com/XfF2Hv8BIuX8h60TG_MI7xUbsIfofLSP98TeJK1YMQ-O3UeHp1S-JBOpj7UngiQZvg",
-      theaters: theaters.Hanoi.filter((t) => t.includes("Lotte")),
+      theaters: [
+        ...theaters.HCMC.filter((t) => t.includes("Lotte")),
+        ...theaters.Hanoi.filter((t) => t.includes("Lotte")),
+        ...theaters.DaNang.filter((t) => t.includes("Lotte")),
+      ],
+    },
+    {
+      name: "CNS",
+      logo: "https://cinestar.com.vn/assets/images/logo-meta.png",
+      theaters: [
+        ...theaters.HCMC.filter((t) => t.includes("CineStar")),
+        ...theaters.Hanoi.filter((t) => t.includes("CineStar")),
+        ...theaters.DaNang.filter((t) => t.includes("CineStar")),
+      ],
+    },
+    {
+      name: "MegaGS",
+      logo: "https://yt3.googleusercontent.com/ytc/AIdro_kAogUzys6HT78bL9_vITcF9xNdzolVER0Rb-D8s1kxmQ=s900-c-k-c0x00ffffff-no-rj",
+      theaters: [
+        ...theaters.HCMC.filter((t) => t.includes("MegaGS")),
+        ...theaters.Hanoi.filter((t) => t.includes("MegaGS")),
+        ...theaters.DaNang.filter((t) => t.includes("MegaGS")),
+      ],
     },
   ];
 
@@ -290,6 +410,7 @@ const BookingTab = ({ isOpen, onClose }) => {
                     ))}
                   </Select>
                 </FormControl>
+                <Address><LocationOnIcon/> 19 Cao Thang, Q.3</Address>
               </SelectWrapper>
             )}
           </>

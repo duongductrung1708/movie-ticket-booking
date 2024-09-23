@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useNavigate } from "react-router-dom";
 
 const Section = styled.section`
   min-height: 100vh;
@@ -140,13 +141,18 @@ const ShowMoreButton = styled.button`
 `;
 
 const MovieListItem = React.forwardRef(({ image, title, rating }, ref) => {
+  const navigate = useNavigate();
+
+  const handleBooking = () => {
+    navigate(`/movie/${encodeURIComponent(title)}`);
+  };
   return (
     <MovieItem ref={ref}>
       <MovieImage src={image} alt={title} />
       <MovieInfo>
         <MovieTitle>{title}</MovieTitle>
         <MovieRating>Rating: {rating} / 10</MovieRating>
-        <Button>Book Now</Button>
+        <Button onClick={handleBooking}>Book Now</Button>
       </MovieInfo>
     </MovieItem>
   );

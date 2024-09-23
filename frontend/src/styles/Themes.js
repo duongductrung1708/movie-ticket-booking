@@ -39,3 +39,5 @@ export const dark = {
 
   navHeight: "5rem",
 };
+
+export default light;
