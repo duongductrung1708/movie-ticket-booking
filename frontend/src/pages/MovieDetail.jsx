@@ -17,6 +17,10 @@ import YouTube from "react-youtube";
 import Logo from "../components/Logo";
 import Button from "../components/Button";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import Footer from "../components/Footer";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 const NavBar = styled.nav`
   display: flex;
@@ -51,6 +55,7 @@ const Container = styled.div`
   width: 75%;
   min-height: 80vh;
   margin: 0 auto;
+  margin-bottom: 10rem;
 
   @media (max-width: 64em) {
     width: 85%;
@@ -148,6 +153,7 @@ const Heading = styled.div`
   font-size: 1.3rem;
   padding-left: 0.5rem;
   margin-bottom: 0.5rem;
+  margin-top: 2.5rem;
 `;
 
 const VideoWrapper = styled.div`
@@ -240,6 +246,60 @@ const BookingOptions = styled.div`
   margin-top: 5rem;
 `;
 
+const Showtime = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+`;
+
+const Title = styled.h2`
+  font-family: "Sora", sans-serif;
+  font-size: 1rem;
+  color: gray;
+  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
+  text-transform: uppercase;
+  border-left: 5px solid #fff;
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.8rem;
+    margin-bottom: 0.8rem;
+  }
+`;
+
+const ShowtimeButton = styled.button`
+  font-family: "Sora", sans-serif;
+  font-size: 0.8rem;
+  color: ${(props) => (props.selected ? "#fff" : "#000")};
+  background-color: ${(props) => (props.selected ? "orange" : "transparent")};
+  border: 1px solid orange;
+  border-radius: 15px;
+  padding: 0.8rem 1.5rem;
+  margin: 0 1rem 1rem 0;
+  cursor: pointer;
+  display: block;
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+  &:hover {
+    background-color: #f8ca7f;
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+    padding: 0.7rem 1.2rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
+`;
+
 const movies = [
   {
     title: "The Matrix",
@@ -262,92 +322,52 @@ const movies = [
       "Hugo Weaving",
       "Gloria Foster",
     ],
+    showtimes: {
+      "2024-09-23": ["10:00", "12:00", "14:00"],
+      "2024-09-24": ["11:00", "13:00", "15:00"],
+      "2024-09-25": ["16:00", "17:00", "18:00"],
+    },
   },
 ];
 
 const MovieDetail = () => {
   const cities = ["HCMC", "Hanoi", "Da Nang"];
   const theaters = {
-    HCMC: ["BHD Star Cineplex - 3/2", "CineStar Hai Ba Trung"],
-    Hanoi: ["Lotte Cinema Ba Dinh", "CGV Royal City", "MegaGS - Cao Thang"],
-    DaNang: ["CGV Vincom Plaza", "Galaxy Da Nang"],
+    HCMC: ["K.CINEMA Star Cineplex - 3/2 HCMC", "K.CINEMA Hai Ba Trung HCMC"],
+    Hanoi: [
+      "K.CINEMA Ba Dinh Ha Noi",
+      "K.CINEMA Royal City Ha Noi",
+      "K.CINEMA - Cao Thang Ha Noi",
+    ],
+    "Da Nang": ["K.CINEMA Vincom Plaza Da Nang", "K.CINEMA Da Nang"],
   };
+
   const theaterLogos = [
     {
-      name: "BHD",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/5/57/Logo_BHD_Star_Cineplex.png",
-      theaters: [
-        ...theaters.HCMC.filter((t) => t.includes("BHD")),
-        ...theaters.Hanoi.filter((t) => t.includes("BHD")),
-        ...theaters.DaNang.filter((t) => t.includes("BHD")),
-      ],
-    },
-    {
-      name: "CGV",
-      logo: "https://banner2.cleanpng.com/20181203/orv/kisspng-cj-cgv-vietnam-cinema-cj-group-film-1713914319903.webp",
-      theaters: [
-        ...theaters.HCMC.filter((t) => t.includes("CGV")),
-        ...theaters.Hanoi.filter((t) => t.includes("CGV")),
-        ...theaters.DaNang.filter((t) => t.includes("CGV")),
-      ],
-    },
-    {
-      name: "Galaxy",
-      logo: "https://static.ybox.vn/2020/12/3/1608715814588-15.png",
-      theaters: [
-        ...theaters.HCMC.filter((t) => t.includes("Galaxy")),
-        ...theaters.Hanoi.filter((t) => t.includes("Galaxy")),
-        ...theaters.DaNang.filter((t) => t.includes("Galaxy")),
-      ],
-    },
-    {
-      name: "Lotte",
-      logo: "https://play-lh.googleusercontent.com/XfF2Hv8BIuX8h60TG_MI7xUbsIfofLSP98TeJK1YMQ-O3UeHp1S-JBOpj7UngiQZvg",
-      theaters: [
-        ...theaters.HCMC.filter((t) => t.includes("Lotte")),
-        ...theaters.Hanoi.filter((t) => t.includes("Lotte")),
-        ...theaters.DaNang.filter((t) => t.includes("Lotte")),
-      ],
-    },
-    {
-      name: "CNS",
-      logo: "https://cinestar.com.vn/assets/images/logo-meta.png",
-      theaters: [
-        ...theaters.HCMC.filter((t) => t.includes("CineStar")),
-        ...theaters.Hanoi.filter((t) => t.includes("CineStar")),
-        ...theaters.DaNang.filter((t) => t.includes("CineStar")),
-      ],
-    },
-    {
-      name: "MegaGS",
-      logo: "https://yt3.googleusercontent.com/ytc/AIdro_kAogUzys6HT78bL9_vITcF9xNdzolVER0Rb-D8s1kxmQ=s900-c-k-c0x00ffffff-no-rj",
-      theaters: [
-        ...theaters.HCMC.filter((t) => t.includes("MegaGS")),
-        ...theaters.Hanoi.filter((t) => t.includes("MegaGS")),
-        ...theaters.DaNang.filter((t) => t.includes("MegaGS")),
-      ],
+      name: "K.CINEMA",
+      logo: "https://www.shutterstock.com/image-vector/abstract-letter-k-logo-negative-260nw-403225240.jpg",
     },
   ];
-
-  const movieShowtimes = {
-    "John Wick II": ["10:10", "12:10", "14:10"],
-    "Avengers: Endgame": ["16:10", "18:10", "20:10"],
-    "Spider-Man: No Way Home": ["10:10", "12:10", "16:10", "20:10"],
-  };
 
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedTheater, setSelectedTheater] = useState("");
   const [filteredTheaters, setFilteredTheaters] = useState([]);
-  const [selectedTheaterLogo, setSelectedTheaterLogo] = useState({});
+  const [selectedTheaterLogo, setSelectedTheaterLogo] = useState(null);
   const [selectedShowtimes, setSelectedShowtimes] = useState({});
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const { title } = useParams();
   const movie = movies.find((m) => m.title === title);
 
-  const filterTheatersByLogo = (theaterLogo) => {
-    setSelectedTheaterLogo(theaterLogo.name);
-    setFilteredTheaters(theaterLogo.theaters);
-    setSelectedTheater("");
+  const filterTheatersByLogo = (theater) => {
+    setSelectedTheaterLogo(theater.name);
+  };
+
+  const handleShowtimeSelect = (movie, time) => {
+    setSelectedShowtimes((prev) => ({
+      ...prev,
+      [movie]: time,
+    }));
   };
 
   const opts = {
@@ -449,9 +469,13 @@ const MovieDetail = () => {
                     id="city-select-label"
                     label="City"
                     onChange={(e) => {
-                      setSelectedCity(e.target.value);
-                      setFilteredTheaters([]);
+                      const selectedCity = e.target.value;
+                      setSelectedCity(selectedCity);
+
+                      const filteredTheaters = theaters[selectedCity] || [];
+                      setFilteredTheaters(filteredTheaters);
                       setSelectedTheaterLogo("");
+                      setSelectedTheater("");
                     }}
                     value={selectedCity}
                   >
@@ -515,12 +539,56 @@ const MovieDetail = () => {
                   )}
                 </>
               )}
+              {selectedTheater && (
+                <div>
+                  <Heading>Select date</Heading>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Select a date"
+                      value={selectedDate}
+                      onChange={(newValue) => setSelectedDate(newValue)}
+                      sx={{
+                        width: "40%",
+                        ".MuiInputBase-input": { color: "black" },
+                        svg: { color: "black" },
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#ffcc00",
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                  {selectedDate && selectedTheater && (
+                    <div>
+                      <Heading>Select showtimes</Heading>
+                      <Title>{selectedTheater}</Title>
+                      <div style={{display: "flex"}}>
+                      {movie.showtimes[selectedDate.format("YYYY-MM-DD")]?.map(
+                        (time, timeIndex) => (
+                          <Showtime key={timeIndex}>
+                            <ShowtimeButton
+                              key={timeIndex}
+                              selected={selectedShowtimes[movie.title] === time}
+                              onClick={() =>
+                                handleShowtimeSelect(movie.title, time)
+                              }
+                            >
+                              {time}
+                            </ShowtimeButton>
+                          </Showtime>
+                        )
+                      )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </BookingOptions>
           </>
         ) : (
           <Typography variant="h5">Movie not found</Typography>
         )}
       </Container>
+      <Footer />
     </Section>
   );
 };
