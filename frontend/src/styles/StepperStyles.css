@@ -1,0 +1,11 @@
+.css-18ltxn-MuiStepConnector-line {
+    height: 55rem;
+}
+
+.css-15rfbsb-MuiSvgIcon-root-MuiStepIcon-root.Mui-active {
+    color: orange !important;
+}
+
+.css-15rfbsb-MuiSvgIcon-root-MuiStepIcon-root.Mui-completed {
+    color: orange !important;
+}

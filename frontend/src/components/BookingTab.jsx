@@ -5,7 +5,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-import LocationOnIcon from '@mui/icons-material/LocationOn';
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import klogo from "../assets/kcinema.png";
 
 const Title = styled.h2`
   font-family: "Arial", sans-serif;
@@ -212,82 +213,48 @@ const Address = styled.div`
   }
 `;
 
+const movies = [
+  {
+    title: "The Matrix",
+    showtimes: {
+      "2024-09-23": ["10:00", "12:00", "14:00"],
+      "2024-09-24": ["11:00", "13:00", "15:00"],
+    },
+  },
+  {
+    title: "Inception",
+    showtimes: {
+      "2024-09-23": ["10:30", "12:30", "14:30"],
+      "2024-09-24": ["11:30", "13:30", "15:30"],
+    },
+  },
+];
+
 const BookingTab = ({ isOpen, onClose }) => {
   const cities = ["HCMC", "Hanoi", "Da Nang"];
   const theaters = {
-    HCMC: ["BHD Star Cineplex - 3/2", "CineStar Hai Ba Trung"],
-    Hanoi: ["Lotte Cinema Ba Dinh", "CGV Royal City", "MegaGS - Cao Thang"],
-    DaNang: ["CGV Vincom Plaza", "Galaxy Da Nang"],
+    HCMC: ["K.CINEMA Star Cineplex - 3/2 HCMC", "K.CINEMA Hai Ba Trung HCMC"],
+    Hanoi: [
+      "K.CINEMA Ba Dinh Ha Noi",
+      "K.CINEMA Royal City Ha Noi",
+      "K.CINEMA - Cao Thang Ha Noi",
+    ],
+    "Da Nang": ["K.CINEMA Vincom Plaza Da Nang", "K.CINEMA Da Nang"],
   };
 
   const theaterLogos = [
     {
-      name: "BHD",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/5/57/Logo_BHD_Star_Cineplex.png",
-      theaters: [
-        ...theaters.HCMC.filter((t) => t.includes("BHD")),
-        ...theaters.Hanoi.filter((t) => t.includes("BHD")),
-        ...theaters.DaNang.filter((t) => t.includes("BHD")),
-      ],
-    },
-    {
-      name: "CGV",
-      logo: "https://banner2.cleanpng.com/20181203/orv/kisspng-cj-cgv-vietnam-cinema-cj-group-film-1713914319903.webp",
-      theaters: [
-        ...theaters.HCMC.filter((t) => t.includes("CGV")),
-        ...theaters.Hanoi.filter((t) => t.includes("CGV")),
-        ...theaters.DaNang.filter((t) => t.includes("CGV")),
-      ],
-    },
-    {
-      name: "Galaxy",
-      logo: "https://static.ybox.vn/2020/12/3/1608715814588-15.png",
-      theaters: [
-        ...theaters.HCMC.filter((t) => t.includes("Galaxy")),
-        ...theaters.Hanoi.filter((t) => t.includes("Galaxy")),
-        ...theaters.DaNang.filter((t) => t.includes("Galaxy")),
-      ],
-    },
-    {
-      name: "Lotte",
-      logo: "https://play-lh.googleusercontent.com/XfF2Hv8BIuX8h60TG_MI7xUbsIfofLSP98TeJK1YMQ-O3UeHp1S-JBOpj7UngiQZvg",
-      theaters: [
-        ...theaters.HCMC.filter((t) => t.includes("Lotte")),
-        ...theaters.Hanoi.filter((t) => t.includes("Lotte")),
-        ...theaters.DaNang.filter((t) => t.includes("Lotte")),
-      ],
-    },
-    {
-      name: "CNS",
-      logo: "https://cinestar.com.vn/assets/images/logo-meta.png",
-      theaters: [
-        ...theaters.HCMC.filter((t) => t.includes("CineStar")),
-        ...theaters.Hanoi.filter((t) => t.includes("CineStar")),
-        ...theaters.DaNang.filter((t) => t.includes("CineStar")),
-      ],
-    },
-    {
-      name: "MegaGS",
-      logo: "https://yt3.googleusercontent.com/ytc/AIdro_kAogUzys6HT78bL9_vITcF9xNdzolVER0Rb-D8s1kxmQ=s900-c-k-c0x00ffffff-no-rj",
-      theaters: [
-        ...theaters.HCMC.filter((t) => t.includes("MegaGS")),
-        ...theaters.Hanoi.filter((t) => t.includes("MegaGS")),
-        ...theaters.DaNang.filter((t) => t.includes("MegaGS")),
-      ],
+      name: "K.CINEMA",
+      logo: klogo,
     },
   ];
-
-  const movieShowtimes = {
-    "John Wick II": ["10:10", "12:10", "14:10"],
-    "Avengers: Endgame": ["16:10", "18:10", "20:10"],
-    "Spider-Man: No Way Home": ["10:10", "12:10", "16:10", "20:10"],
-  };
 
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedTheater, setSelectedTheater] = useState("");
   const [filteredTheaters, setFilteredTheaters] = useState([]);
   const [selectedTheaterLogo, setSelectedTheaterLogo] = useState({});
   const [selectedShowtimes, setSelectedShowtimes] = useState({});
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const handleOutsideClick = (e) => {
     if (e.target.id === "overlay") {
@@ -295,10 +262,8 @@ const BookingTab = ({ isOpen, onClose }) => {
     }
   };
 
-  const filterTheatersByLogo = (theaterLogo) => {
-    setSelectedTheaterLogo(theaterLogo.name);
-    setFilteredTheaters(theaterLogo.theaters);
-    setSelectedTheater("");
+  const filterTheatersByLogo = (theater) => {
+    setSelectedTheaterLogo(theater.name);
   };
 
   const handleShowtimeSelect = (movie, time) => {
@@ -335,9 +300,13 @@ const BookingTab = ({ isOpen, onClose }) => {
               id="city-select-label"
               label="City"
               onChange={(e) => {
-                setSelectedCity(e.target.value);
-                setFilteredTheaters([]);
+                const selectedCity = e.target.value;
+                setSelectedCity(selectedCity);
+
+                const filteredTheaters = theaters[selectedCity] || [];
+                setFilteredTheaters(filteredTheaters);
                 setSelectedTheaterLogo("");
+                setSelectedTheater("");
               }}
               value={selectedCity}
               sx={{
@@ -410,7 +379,9 @@ const BookingTab = ({ isOpen, onClose }) => {
                     ))}
                   </Select>
                 </FormControl>
-                <Address><LocationOnIcon/> 19 Cao Thang, Q.3</Address>
+                <Address>
+                  <LocationOnIcon /> 19 Cao Thang, Q.3
+                </Address>
               </SelectWrapper>
             )}
           </>
@@ -423,6 +394,8 @@ const BookingTab = ({ isOpen, onClose }) => {
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 label="Select a date"
+                value={selectedDate}
+                onChange={(newValue) => setSelectedDate(newValue)}
                 sx={{
                   width: "40%",
                   ".MuiInputBase-input": { color: "white" },
@@ -437,22 +410,31 @@ const BookingTab = ({ isOpen, onClose }) => {
                 }}
               />
             </LocalizationProvider>
-            {Object.keys(movieShowtimes).map((movie, index) => (
-              <div key={index}>
-                <Title>{movie}</Title>
-                <Showtime>
-                  {movieShowtimes[movie].map((time, timeIndex) => (
-                    <ShowtimeButton
-                      key={timeIndex}
-                      selected={selectedShowtimes[movie] === time}
-                      onClick={() => handleShowtimeSelect(movie, time)}
-                    >
-                      {time}
-                    </ShowtimeButton>
-                  ))}
-                </Showtime>
-              </div>
-            ))}
+            {selectedDate && (
+              <>
+                {movies.map((movie, movieIndex) => (
+                  <div key={movieIndex}>
+                    <Title>{movie.title}</Title>
+                    <div style={{ display: "flex" }}>
+                      {movie.showtimes[selectedDate.format("YYYY-MM-DD")]?.map(
+                        (time, timeIndex) => (
+                          <Showtime key={timeIndex}>
+                            <ShowtimeButton
+                              selected={selectedShowtimes[movie.title] === time}
+                              onClick={() =>
+                                handleShowtimeSelect(movie.title, time)
+                              }
+                            >
+                              {time}
+                            </ShowtimeButton>
+                          </Showtime>
+                        )
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </ScrollableContent>
         )}
       </BookingWrapper>

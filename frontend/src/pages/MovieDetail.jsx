@@ -2,7 +2,7 @@ import "@fontsource/akaya-telivigala";
 import "@fontsource/sora";
 
 import React, { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import {
   Breadcrumbs,
@@ -21,6 +21,7 @@ import Footer from "../components/Footer";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import klogo from "../assets/kcinema.png";
 
 const NavBar = styled.nav`
   display: flex;
@@ -331,6 +332,7 @@ const movies = [
 ];
 
 const MovieDetail = () => {
+  const navigate = useNavigate();
   const cities = ["HCMC", "Hanoi", "Da Nang"];
   const theaters = {
     HCMC: ["K.CINEMA Star Cineplex - 3/2 HCMC", "K.CINEMA Hai Ba Trung HCMC"],
@@ -345,7 +347,7 @@ const MovieDetail = () => {
   const theaterLogos = [
     {
       name: "K.CINEMA",
-      logo: "https://www.shutterstock.com/image-vector/abstract-letter-k-logo-negative-260nw-403225240.jpg",
+      logo: klogo,
     },
   ];
 
@@ -363,11 +365,28 @@ const MovieDetail = () => {
     setSelectedTheaterLogo(theater.name);
   };
 
-  const handleShowtimeSelect = (movie, time) => {
-    setSelectedShowtimes((prev) => ({
-      ...prev,
-      [movie]: time,
+  const handleShowtimeSelect = (time) => {
+    setSelectedShowtimes((prevShowtimes) => ({
+      ...prevShowtimes,
+      [selectedDate.format("YYYY-MM-DD")]: [
+        ...(prevShowtimes[selectedDate.format("YYYY-MM-DD")] || []),
+        time,
+      ],
     }));
+
+    const movieImage = movie.image;
+    const movieDuration = movie.duration;
+
+    navigate("/seat-reservation", {
+      state: {
+        movieTitle: movie.title,
+        movieImage: movieImage,
+        selectedTime: time,
+        selectedDate: selectedDate.format("YYYY-MM-DD"),
+        selectedTheater: selectedTheater,
+        duration: movieDuration,
+      },
+    });
   };
 
   const opts = {
@@ -561,9 +580,10 @@ const MovieDetail = () => {
                     <div>
                       <Heading>Select showtimes</Heading>
                       <Title>{selectedTheater}</Title>
-                      <div style={{display: "flex"}}>
-                      {movie.showtimes[selectedDate.format("YYYY-MM-DD")]?.map(
-                        (time, timeIndex) => (
+                      <div style={{ display: "flex" }}>
+                        {movie.showtimes[
+                          selectedDate.format("YYYY-MM-DD")
+                        ]?.map((time, timeIndex) => (
                           <Showtime key={timeIndex}>
                             <ShowtimeButton
                               key={timeIndex}
@@ -575,8 +595,7 @@ const MovieDetail = () => {
                               {time}
                             </ShowtimeButton>
                           </Showtime>
-                        )
-                      )}
+                        ))}
                       </div>
                     </div>
                   )}

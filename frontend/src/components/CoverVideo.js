@@ -33,8 +33,8 @@ const movieImages = [
 
 const CarouselContainer = styled.div`
   width: 100%;
-  max-width: 600px; /* Restrict the overall width of the container */
-  margin: 0 auto; /* Center the container */
+  max-width: 600px;
+  margin: 0 auto;
 
   .slick-slider {
     width: 100%;
@@ -42,10 +42,10 @@ const CarouselContainer = styled.div`
   }
 
   img {
-    width: 80%; /* Make the images smaller */
+    width: 80%;
     height: auto;
     border-radius: 10px;
-    margin: 0 auto; /* Center the images */
+    margin: 0 auto;
   }
 
   @media (max-width: 64em) {
