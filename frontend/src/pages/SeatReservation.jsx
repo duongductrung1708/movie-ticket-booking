@@ -15,8 +15,6 @@ import {
   Box,
   StepContent,
   FormControlLabel,
-  Radio,
-  RadioGroup,
   Checkbox,
 } from "@mui/material";
 import styled from "styled-components";
@@ -56,10 +54,10 @@ const SeatButton = styled(IconButton)`
     props.type === "empty"
       ? "#45444433 !important"
       : props.type === "VIP"
-      ? "blue !important"
-      : props.type === "selected"
-      ? "orange !important"
-      : "gray !important"};
+        ? "blue !important"
+        : props.type === "selected"
+          ? "orange !important"
+          : "gray !important"};
   border-radius: 5px;
   width: 50px;
   height: 50px;
@@ -69,13 +67,13 @@ const SeatButton = styled(IconButton)`
 
   &:hover {
     background-color: ${(props) =>
-      props.type === "empty"
-        ? "#d0d0d0 !important"
-        : props.type === "VIP"
+    props.type === "empty"
+      ? "#d0d0d0 !important"
+      : props.type === "VIP"
         ? "#ffb300 !important"
         : props.type === "selected"
-        ? "#45444433 !important"
-        : "#ff8a8a !important"};
+          ? "#45444433 !important"
+          : "#ff8a8a !important"};
   }
 `;
 
@@ -224,7 +222,7 @@ const ArcScreen = styled.svg`
   width: 100%;
   height: 100px;
   z-index: -1;
-  margin-top: 4rem;
+  margin-top: 1.5rem;
 `;
 
 const Payment = styled.div`
@@ -238,6 +236,101 @@ const Complete = styled.div`
 const Timer = styled.div`
   text-align: center;
   align-items: center;
+`;
+
+const PaymentMethod = styled.div`
+  font-family: "Sora", sans-serif;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+`;
+
+const PayCounterBtn = styled.button`
+  display: inline-block;
+  background-color: gray;
+  color: ${(props) => props.theme.body};
+  outline: none;
+  border: none;
+  margin-top: 1rem;
+  font-size: ${(props) => props.theme.fontlg};
+  padding: 0.9rem 2.3rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(0.9);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    border: 2px solid gray;
+    width: 100%;
+    height: 100%;
+    border-radius: 50px;
+    transition: all 0.2s ease;
+  }
+
+  &:hover::after {
+    transform: translate(-50%, -50%) scale(1);
+    padding: 0.3rem;
+  }
+`;
+
+const PayBankBtn = styled.button`
+  display: inline-block;
+  background-color: orange;
+  color: ${(props) => props.theme.body};
+  outline: none;
+  border: none;
+  margin-top: 1rem;
+  font-size: ${(props) => props.theme.fontlg};
+  padding: 0.9rem 2.3rem;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(0.9);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    border: 2px solid orange;
+    width: 100%;
+    height: 100%;
+    border-radius: 50px;
+    transition: all 0.2s ease;
+  }
+
+  &:hover::after {
+    transform: translate(-50%, -50%) scale(1);
+    padding: 0.3rem;
+  }
+`;
+
+const BankImg = styled.div`
+  align-items: center;
+  display: flex;
+  justify-content: center;
+`;
+
+const Bill = styled.div`
+  display: flex;
 `;
 
 const SeatReservation = () => {
@@ -269,7 +362,7 @@ const SeatReservation = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("counter");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
 
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
@@ -310,6 +403,12 @@ const SeatReservation = () => {
     const seatStatus = seats[rowIndex][colIndex];
 
     if (seatStatus === "empty") {
+      if (selectedSeats.length >= 8) {
+        setSnackbarMessage("You can select a maximum of 8 seats.");
+        setOpenSnackbar(true);
+        return;
+      }
+
       const newSeats = [...seats];
       newSeats[rowIndex][colIndex] = "selected";
       setSeats(newSeats);
@@ -343,16 +442,24 @@ const SeatReservation = () => {
     }
   };
 
-  const handlePaymentMethodChange = (event) => {
-    setPaymentMethod(event.target.value);
-    if (event.target.value === "bank") {
-      setShowQRCode(true);
-    } else {
-      setShowQRCode(false);
-    }
+  const handlePaymentMethodChange = (method) => {
+    setSelectedPaymentMethod(method);
+    setShowQRCode(method === "bank");
+
+    setSnackbarMessage(
+      `Payment method changed to ${method === "counter" ? "Pay at Counter" : "Pay with Bank Transfer"
+      }`
+    );
+    setOpenSnackbar(true);
   };
 
   const handleConfirmPayment = () => {
+    if (!selectedPaymentMethod) {
+      setSnackbarMessage("Please select a payment method.");
+      setOpenSnackbar(true);
+      return;
+    }
+
     if (!agreeTerms) {
       setSnackbarMessage("You must agree to the terms of use.");
       setOpenSnackbar(true);
@@ -451,7 +558,7 @@ const SeatReservation = () => {
                   </Typography>
                 )}
               </Timer>
-
+              <Heading>Max seat: 8</Heading>
               <ArcScreen viewBox="0 0 800 100">
                 <defs>
                   <filter
@@ -542,29 +649,84 @@ const SeatReservation = () => {
               {activeStep === 1 && (
                 <Payment>
                   <Paper style={{ padding: "2rem", marginTop: "1rem" }}>
-                    <Typography>
-                      Selected Seats: {selectedSeats.join(", ")}
-                    </Typography>
-                    <Typography>
-                      Total Price: ${selectedSeats.length * 10}
-                    </Typography>
+                    <Grid container spacing={4}>
+                      <Grid item xs={2}>
+                        <img
+                          src={movieImage}
+                          alt={movieTitle}
+                          style={{
+                            width: "100%",
+                            height: "8rem",
+                            borderRadius: "8px",
+                            marginBottom: "1rem",
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography variant="h5" fontWeight="bold">{movieTitle}</Typography>
+                        <Typography>
+                          Show date {selectedDate} | Showtime {selectedTime} |
+                          Theater {selectedTheater} | Screening Room Room1 |
+                          Selected Seats: {selectedSeats.join(", ")}
+                        </Typography>
+                        <Typography>
+                          Payment Method: {selectedPaymentMethod}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={2} style={{paddingLeft: "2rem"}}>
+                        <Typography fontWeight="bold" color="red" fontSize="2rem">
+                          {selectedSeats.length * 100000}đ
+                        </Typography>
+                      </Grid>
+                    </Grid>
                   </Paper>
-                  <Typography variant="h6">Payment Method</Typography>
-                  <RadioGroup
-                    value={paymentMethod}
+                  <PaymentMethod
+                    value={selectedPaymentMethod}
                     onChange={handlePaymentMethodChange}
                   >
-                    <FormControlLabel
-                      value="counter"
-                      control={<Radio />}
-                      label="Pay at Counter"
-                    />
-                    <FormControlLabel
-                      value="bank"
-                      control={<Radio />}
-                      label="Pay with Bank Transfer"
-                    />
-                  </RadioGroup>
+                    <PayCounterBtn
+                      variant={
+                        selectedPaymentMethod === "counter"
+                          ? "contained"
+                          : "outlined"
+                      }
+                      onClick={() => handlePaymentMethodChange("counter")}
+                    >
+                      Pay at Counter
+                    </PayCounterBtn>
+                    <PayBankBtn
+                      variant={
+                        selectedPaymentMethod === "bank"
+                          ? "contained"
+                          : "outlined"
+                      }
+                      onClick={() => handlePaymentMethodChange("bank")}
+                    >
+                      Pay with Bank Transfer
+                    </PayBankBtn>
+                    <BankImg>
+                      <img
+                        width="10%"
+                        src="https://rubicmarketing.com/wp-content/uploads/2022/11/y-nghia-logo-mb-bank-2.jpg"
+                        alt="mb"
+                      />
+                      <img
+                        width="10%"
+                        src="https://inkythuatso.com/uploads/thumbnails/800/2021/09/logo-techcombank-inkythuatso-10-15-17-50.jpg"
+                        alt="tcb"
+                      />
+                      <img
+                        width="10%"
+                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRmNuetJHXxe6e0YzM5wxQwkIlQBh2iA2VKA&s"
+                        alt="vcb"
+                      />
+                      <img
+                        width="10%"
+                        src="https://play-lh.googleusercontent.com/woYAzPCG1I8Z8HXCsdH3diL7oly0N8uth_1g6k7R_9Gu7lbxrsYeriEXLecRG2E9rP0=w600-h300-pc0xffffff-pd"
+                        alt="zalopay"
+                      />
+                    </BankImg>
+                  </PaymentMethod>
                   {showQRCode && (
                     <div>
                       <Typography variant="h6">Scan QR Code</Typography>
@@ -578,7 +740,7 @@ const SeatReservation = () => {
                         onChange={(e) => setAgreeTerms(e.target.checked)}
                       />
                     }
-                    label="I agree to the terms and conditions"
+                    label="I agree to the terms of use and tickets purchased are non-refundable."
                   />
                   <Btn onClick={handleConfirmPayment}>Confirm Payment</Btn>
                 </Payment>
@@ -654,7 +816,7 @@ const SeatReservation = () => {
                 </Content>
               </div>
               <Heading>Total Price :</Heading>
-              <Price>{selectedSeats.length * 100000} VND</Price>
+              <Price>{selectedSeats.length * 100000}đ</Price>
             </MovieInfo>
           </Grid>
         </Grid>
