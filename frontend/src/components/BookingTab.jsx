@@ -7,6 +7,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import klogo from "../assets/kcinema.png";
+import { useNavigate } from "react-router-dom";
 
 const Title = styled.h2`
   font-family: "Arial", sans-serif;
@@ -216,6 +217,9 @@ const Address = styled.div`
 const movies = [
   {
     title: "The Matrix",
+    image:
+      "https://play-lh.googleusercontent.com/zL8ya3uEa7Q-oDqc7McTIAaRvwKZNN4HMICMwHHL2eKsbE9Hms_2Dj6SWwNGI555CyauvPVjCPUzYBm2TJ8",
+    duration: "136 minutes",
     showtimes: {
       "2024-09-23": ["10:00", "12:00", "14:00"],
       "2024-09-24": ["11:00", "13:00", "15:00"],
@@ -223,6 +227,8 @@ const movies = [
   },
   {
     title: "Inception",
+    image: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg",
+    duration: "148 minutes",
     showtimes: {
       "2024-09-23": ["10:30", "12:30", "14:30"],
       "2024-09-24": ["11:30", "13:30", "15:30"],
@@ -231,6 +237,7 @@ const movies = [
 ];
 
 const BookingTab = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
   const cities = ["HCMC", "Hanoi", "Da Nang"];
   const theaters = {
     HCMC: ["K.CINEMA Star Cineplex - 3/2 HCMC", "K.CINEMA Hai Ba Trung HCMC"],
@@ -266,12 +273,30 @@ const BookingTab = ({ isOpen, onClose }) => {
     setSelectedTheaterLogo(theater.name);
   };
 
-  const handleShowtimeSelect = (movie, time) => {
-    setSelectedShowtimes((prev) => ({
-      ...prev,
-      [movie]: time,
+  const handleShowtimeSelect = (movieTitle, time) => {
+    setSelectedShowtimes((prevShowtimes) => ({
+      ...prevShowtimes,
+      [movieTitle]: time,
     }));
-  };
+  
+    const selectedMovie = movies.find(movie => movie.title === movieTitle);
+  
+    if (selectedMovie) {
+      const movieImage = selectedMovie.image;
+      const movieDuration = selectedMovie.duration;
+  
+      navigate("/seat-reservation", {
+        state: {
+          movieTitle: selectedMovie.title,
+          movieImage: movieImage,
+          selectedTime: time,
+          selectedDate: selectedDate.format("YYYY-MM-DD"),
+          selectedTheater: selectedTheater,
+          duration: movieDuration,
+        },
+      });
+    }
+  };  
 
   return (
     <>

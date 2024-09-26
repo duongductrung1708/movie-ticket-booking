@@ -329,6 +329,32 @@ const movies = [
       "2024-09-25": ["16:00", "17:00", "18:00"],
     },
   },
+  {
+    title: "Inception",
+    rating: "8.8",
+    image:
+      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg",
+    duration: "148 minutes",
+    trailer: "https://www.youtube.com/watch?v=YoHD9XEInc0",
+    synopsis:
+      "Inception! A mind-bending idea conceived by Christopher Nolan in his 2010 film. Inception is a concept where a person can enter another person's dream within a dream, creating nested layers of reality. The idea is to plant an idea in someone's mind while they're asleep, but the difficulty lies in navigating the multiple levels of consciousness without getting lost. The film features Leonardo DiCaprio, Joseph Gordon-Levitt, and Marion Cotillard, among others. It has become a cult classic for its thought-provoking storyline and visually stunning action sequences.",
+    director: "Christopher Nolan",
+    country: "USA",
+    genre: "Action/Sci-Fi",
+    releaseDate: "03/31/2024",
+    ageRating: "R",
+    cast: [
+      "Leonardo DiCaprio",
+      "Joseph Gordon-Levitt",
+      "Marion Cotillard",
+      "Elliot Page",
+      "Tom Hardy",
+    ],
+    showtimes: {
+      "2024-09-23": ["10:30", "12:30", "14:30"],
+      "2024-09-24": ["11:30", "13:30", "15:30"],
+    },
+  },
 ];
 
 const MovieDetail = () => {
@@ -365,28 +391,29 @@ const MovieDetail = () => {
     setSelectedTheaterLogo(theater.name);
   };
 
-  const handleShowtimeSelect = (time) => {
+  const handleShowtimeSelect = (movieTitle, time) => {
     setSelectedShowtimes((prevShowtimes) => ({
       ...prevShowtimes,
-      [selectedDate.format("YYYY-MM-DD")]: [
-        ...(prevShowtimes[selectedDate.format("YYYY-MM-DD")] || []),
-        time,
-      ],
+      [movieTitle]: time,
     }));
 
-    const movieImage = movie.image;
-    const movieDuration = movie.duration;
+    const selectedMovie = movies.find((movie) => movie.title === movieTitle);
 
-    navigate("/seat-reservation", {
-      state: {
-        movieTitle: movie.title,
-        movieImage: movieImage,
-        selectedTime: time,
-        selectedDate: selectedDate.format("YYYY-MM-DD"),
-        selectedTheater: selectedTheater,
-        duration: movieDuration,
-      },
-    });
+    if (selectedMovie) {
+      const movieImage = selectedMovie.image;
+      const movieDuration = selectedMovie.duration;
+
+      navigate("/seat-reservation", {
+        state: {
+          movieTitle: selectedMovie.title,
+          movieImage: movieImage,
+          selectedTime: time,
+          selectedDate: selectedDate.format("YYYY-MM-DD"),
+          selectedTheater: selectedTheater,
+          duration: movieDuration,
+        },
+      });
+    }
   };
 
   const opts = {
