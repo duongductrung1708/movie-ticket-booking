@@ -329,10 +329,6 @@ const BankImg = styled.div`
   justify-content: center;
 `;
 
-const Bill = styled.div`
-  display: flex;
-`;
-
 const SeatReservation = () => {
   const navigate = useNavigate();
   const location = useLocation();
