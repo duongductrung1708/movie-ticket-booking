@@ -21,10 +21,11 @@ import styled from "styled-components";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import ChairIcon from "@mui/icons-material/Chair";
-import Logo from "../components/Logo";
 import "@fontsource/akaya-telivigala";
 import "@fontsource/sora";
 import "../styles/StepperStyles.css";
+import Navigation from "../components/Navigation";
+import Footer from "../components/Footer";
 
 const Container = styled.div`
   width: 75%;
@@ -87,28 +88,6 @@ const Section = styled.section`
   width: 100vw;
   position: relative;
   background-color: ${(props) => props.theme.body};
-`;
-
-const NavBar = styled.nav`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 85%;
-  height: ${(props) => props.theme.navHeight};
-  margin: 0 auto;
-
-  .mobile {
-    display: none;
-  }
-
-  @media (max-width: 64em) {
-    .desktop {
-      display: none;
-    }
-    .mobile {
-      display: inline-block;
-    }
-  }
 `;
 
 const BreadcrumbContainer = styled.div`
@@ -494,12 +473,7 @@ const SeatReservation = () => {
 
   return (
     <Section>
-      <NavBar>
-        <Logo />
-        <div className="desktop">
-          <Button text="My Account" link="https://google.com" />
-        </div>
-      </NavBar>
+      <Navigation />
       <Container>
         <BreadcrumbContainer>
           <StyledBreadcrumbs aria-label="breadcrumb">
@@ -828,6 +802,7 @@ const SeatReservation = () => {
           style={{ backgroundColor: "orange" }}
         />
       </Snackbar>
+      <Footer />
     </Section>
   );
 };

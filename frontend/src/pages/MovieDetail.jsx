@@ -1,6 +1,5 @@
 import "@fontsource/akaya-telivigala";
 import "@fontsource/sora";
-
 import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -14,36 +13,13 @@ import {
   MenuItem,
 } from "@mui/material";
 import YouTube from "react-youtube";
-import Logo from "../components/Logo";
-import Button from "../components/Button";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import Footer from "../components/Footer";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import klogo from "../assets/kcinema.png";
-
-const NavBar = styled.nav`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 85%;
-  height: ${(props) => props.theme.navHeight};
-  margin: 0 auto;
-
-  .mobile {
-    display: none;
-  }
-
-  @media (max-width: 64em) {
-    .desktop {
-      display: none;
-    }
-    .mobile {
-      display: inline-block;
-    }
-  }
-`;
+import Navigation from "../components/Navigation";
 
 const Section = styled.section`
   min-height: ${(props) => `calc(100vh - ${props.theme.navHeight})`};
@@ -426,12 +402,7 @@ const MovieDetail = () => {
 
   return (
     <Section>
-      <NavBar>
-        <Logo />
-        <div className="desktop">
-          <Button text="My Account" link="https://google.com" />
-        </div>
-      </NavBar>
+      <Navigation />
       <Container>
         <BreadcrumbContainer>
           <StyledBreadcrumbs aria-label="breadcrumb">

@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import Logo from "./Logo";
-import Button from "./Button";
+// import Button from "./Button";
+import Popover from '@mui/material/Popover';
+import MenuItem from '@mui/material/MenuItem';
+import Button from '@mui/material/Button';
+import "../styles/navStyles.css"
+import { useNavigate } from "react-router-dom";
 
 const Section = styled.section`
   width: 100vw;
@@ -30,7 +35,7 @@ const NavBar = styled.nav`
   }
 `;
 
-const MenuItem = styled.li`
+const MenuItemStyled = styled.li`
   margin: 0 1rem;
   color: ${(props) => props.theme.text};
   cursor: pointer;
@@ -128,7 +133,20 @@ const HamburgerMenu = styled.span`
 `;
 
 const Navigation = () => {
+  const navigate = useNavigate();
   const [click, setClick] = useState(false);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleAccountClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? 'simple-popover' : undefined;
 
   const scrollTo = (id) => {
     let element = document.getElementById(id);
@@ -143,6 +161,14 @@ const Navigation = () => {
     }
   };
 
+  const handleUserProfile = () =>{
+    navigate("/user-profile")
+  };
+
+  const handleBookingHistory = () =>{
+    navigate("/booking-history")
+  };
+
   return (
     <Section id="navigation">
       <NavBar>
@@ -151,20 +177,29 @@ const Navigation = () => {
           &nbsp;
         </HamburgerMenu>
         <Menu clicked={click}>
-          <MenuItem onClick={() => scrollTo("home")}>Home</MenuItem>
-          <MenuItem onClick={() => scrollTo("about")}>Movies</MenuItem>
-          <MenuItem onClick={() => scrollTo("movie-list")}>Now showing</MenuItem>
-          <MenuItem onClick={() => scrollTo("showcase")}>Special offer</MenuItem>
-          <MenuItem onClick={() => scrollTo("upcoming-movies")}>Upcoming</MenuItem>
-          <MenuItem onClick={() => scrollTo("faq")}>Faq</MenuItem>
-          <MenuItem>
-            <div className="mobile">
-              <Button text="My Account" link="https://google.com" />
-            </div>
-          </MenuItem>
+          <MenuItemStyled onClick={() => scrollTo("home")}>Home</MenuItemStyled>
+          <MenuItemStyled onClick={() => scrollTo("about")}>Movies</MenuItemStyled>
+          <MenuItemStyled onClick={() => scrollTo("movie-list")}>Now showing</MenuItemStyled>
+          <MenuItemStyled onClick={() => scrollTo("showcase")}>Special offer</MenuItemStyled>
+          <MenuItemStyled onClick={() => scrollTo("upcoming-movies")}>Upcoming</MenuItemStyled>
+          <MenuItemStyled onClick={() => scrollTo("faq")}>Faq</MenuItemStyled>
         </Menu>
         <div className="desktop">
-          <Button text="My Account" link="https://google.com" />
+          <Button className="accountBtn" variant="contained" aria-describedby={id} onClick={handleAccountClick} >My Account</Button>
+          <Popover
+            id={id}
+            open={open}
+            anchorEl={anchorEl}
+            onClose={handlePopoverClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }}
+          >
+            <MenuItem onClick={handleUserProfile}>User Profile</MenuItem>
+            <MenuItem onClick={handleBookingHistory}>Booking History</MenuItem>
+            <MenuItem onClick={handlePopoverClose}>Sign Out</MenuItem>
+          </Popover>
         </div>
       </NavBar>
     </Section>
