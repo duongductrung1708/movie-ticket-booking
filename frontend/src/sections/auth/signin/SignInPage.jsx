@@ -1,5 +1,14 @@
-import React from "react";
-import { Button, TextField, Typography, Container, Box } from "@mui/material";
+import React, { useState } from "react";
+import {
+  Button,
+  TextField,
+  Typography,
+  Container,
+  Box,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 import "../../../styles/signInPage.css";
 import backgroundImage from "../../../assets/netflix-junio.jpg";
@@ -23,6 +32,11 @@ const LogoText = styled.h1`
 
 const SignInPage = () => {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
 
   return (
     <div
@@ -42,7 +56,6 @@ const SignInPage = () => {
               K. Cinema
             </Link>
           </LogoText>
-          <div></div>
           <div></div>
           <div></div>
           <div></div>
@@ -89,7 +102,7 @@ const SignInPage = () => {
               fullWidth
               id="password"
               label="Password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               variant="filled"
               className="input-field"
               margin="normal"
@@ -112,8 +125,27 @@ const SignInPage = () => {
                     },
                   },
                 },
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={handleClickShowPassword}
+                      edge="end"
+                      style={{ color: "white" }}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
               }}
             />
+            <Typography variant="body2" color="secondary" align="right">
+              <Link
+                to="/forgot-password"
+                style={{ textDecoration: "none", color: "orange" }}
+              >
+                Forgot Password?
+              </Link>
+            </Typography>
             <Button
               fullWidth
               variant="contained"
@@ -125,7 +157,7 @@ const SignInPage = () => {
           </Box>
 
           <Typography variant="body1" className="signup-link">
-            First time here?{}
+            First time here?{" "}
             <Button
               color="secondary"
               className="signup-btn"
