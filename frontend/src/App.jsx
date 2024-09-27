@@ -8,6 +8,7 @@ import SeatReservation from "./pages/SeatReservation";
 import UserProfile from "./pages/UserProfile";
 import BookHistory from "./pages/BookHistory";
 import ChangePassword from "./sections/auth/signin/ChangePassword";
+import './index.css'
 
 function App() {
   return (

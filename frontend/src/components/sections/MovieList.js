@@ -152,7 +152,7 @@ const MovieListItem = React.forwardRef(({ image, title, rating }, ref) => {
       <MovieInfo>
         <MovieTitle>{title}</MovieTitle>
         <MovieRating>Rating: {rating} / 10</MovieRating>
-        <Button onClick={handleBooking}>Book Now</Button>
+        z<Button onClick={handleBooking}>Book Now</Button>
       </MovieInfo>
     </MovieItem>
   );
