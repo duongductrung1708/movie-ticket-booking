@@ -7,6 +7,7 @@ import MovieDetail from "./pages/MovieDetail";
 import SeatReservation from "./pages/SeatReservation";
 import UserProfile from "./pages/UserProfile";
 import BookHistory from "./pages/BookHistory";
+import ChangePassword from "./sections/auth/signin/ChangePassword";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
       <Route path="/seat-reservation" element={<SeatReservation />} />
       <Route path="/user-profile" element={<UserProfile />} />
       <Route path="/booking-history" element={<BookHistory />} />
+      <Route path="/change-password" element={<ChangePassword />} />
     </Routes>
   );
 }

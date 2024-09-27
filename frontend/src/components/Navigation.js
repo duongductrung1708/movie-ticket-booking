@@ -1,12 +1,17 @@
 import React, { useState } from "react";
+import "@fontsource/sora";
 import styled from "styled-components";
 import Logo from "./Logo";
 // import Button from "./Button";
-import Popover from '@mui/material/Popover';
-import MenuItem from '@mui/material/MenuItem';
-import Button from '@mui/material/Button';
-import "../styles/navStyles.css"
+import Popover from "@mui/material/Popover";
+import MenuItem from "@mui/material/MenuItem";
+import Button from "@mui/material/Button";
+import "../styles/navStyles.css";
 import { useNavigate } from "react-router-dom";
+import PersonIcon from "@mui/icons-material/Person";
+import HistoryIcon from "@mui/icons-material/History";
+import KeyIcon from "@mui/icons-material/Key";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 const Section = styled.section`
   width: 100vw;
@@ -132,6 +137,10 @@ const HamburgerMenu = styled.span`
   }
 `;
 
+const Item = styled.div`
+  font-family: "Sora", sans-serif !important;
+  margin-left: 0.5rem;
+`;
 const Navigation = () => {
   const navigate = useNavigate();
   const [click, setClick] = useState(false);
@@ -146,7 +155,7 @@ const Navigation = () => {
   };
 
   const open = Boolean(anchorEl);
-  const id = open ? 'simple-popover' : undefined;
+  const id = open ? "simple-popover" : undefined;
 
   const scrollTo = (id) => {
     let element = document.getElementById(id);
@@ -161,12 +170,16 @@ const Navigation = () => {
     }
   };
 
-  const handleUserProfile = () =>{
-    navigate("/user-profile")
+  const handleUserProfile = () => {
+    navigate("/user-profile");
   };
 
-  const handleBookingHistory = () =>{
-    navigate("/booking-history")
+  const handleBookingHistory = () => {
+    navigate("/booking-history");
+  };
+
+  const handleChangePassword = () => {
+    navigate("/change-password");
   };
 
   return (
@@ -178,14 +191,29 @@ const Navigation = () => {
         </HamburgerMenu>
         <Menu clicked={click}>
           <MenuItemStyled onClick={() => scrollTo("home")}>Home</MenuItemStyled>
-          <MenuItemStyled onClick={() => scrollTo("about")}>Movies</MenuItemStyled>
-          <MenuItemStyled onClick={() => scrollTo("movie-list")}>Now showing</MenuItemStyled>
-          <MenuItemStyled onClick={() => scrollTo("showcase")}>Special offer</MenuItemStyled>
-          <MenuItemStyled onClick={() => scrollTo("upcoming-movies")}>Upcoming</MenuItemStyled>
+          <MenuItemStyled onClick={() => scrollTo("about")}>
+            Movies
+          </MenuItemStyled>
+          <MenuItemStyled onClick={() => scrollTo("movie-list")}>
+            Now showing
+          </MenuItemStyled>
+          <MenuItemStyled onClick={() => scrollTo("showcase")}>
+            Special offer
+          </MenuItemStyled>
+          <MenuItemStyled onClick={() => scrollTo("upcoming-movies")}>
+            Upcoming
+          </MenuItemStyled>
           <MenuItemStyled onClick={() => scrollTo("faq")}>Faq</MenuItemStyled>
         </Menu>
         <div className="desktop">
-          <Button className="accountBtn" variant="contained" aria-describedby={id} onClick={handleAccountClick} >My Account</Button>
+          <Button
+            className="accountBtn"
+            variant="contained"
+            aria-describedby={id}
+            onClick={handleAccountClick}
+          >
+            My Account
+          </Button>
           <Popover
             id={id}
             open={open}
@@ -193,12 +221,29 @@ const Navigation = () => {
             onClose={handlePopoverClose}
             anchorOrigin={{
               vertical: 'bottom',
-              horizontal: 'left',
+              horizontal: 'center',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'center',
             }}
           >
-            <MenuItem onClick={handleUserProfile}>User Profile</MenuItem>
-            <MenuItem onClick={handleBookingHistory}>Booking History</MenuItem>
-            <MenuItem onClick={handlePopoverClose}>Sign Out</MenuItem>
+            <MenuItem onClick={handleUserProfile}>
+              <PersonIcon />
+              <Item>User Profile</Item>
+            </MenuItem>
+            <MenuItem onClick={handleBookingHistory}>
+              <HistoryIcon />
+              <Item>Booking History</Item>
+            </MenuItem>
+            <MenuItem onClick={handleChangePassword}>
+              <KeyIcon />
+              <Item>Change Password</Item>
+            </MenuItem>
+            <MenuItem onClick={handlePopoverClose}>
+              <LogoutIcon />
+              <Item>Sign Out</Item>
+            </MenuItem>
           </Popover>
         </div>
       </NavBar>

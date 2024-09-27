@@ -1,3 +1,5 @@
+import "@fontsource/akaya-telivigala";
+import "@fontsource/sora";
 import React, { useState } from "react";
 import {
   Typography,
@@ -106,7 +108,7 @@ const BookHistory = () => {
       movieName: "Movie Title 1",
       showtime: "2024-09-30T19:00:00",
       theater: "Theater 1",
-      price: 150.0,
+      price: 100,
       paymentStatus: "Paid",
     },
     {
@@ -115,8 +117,8 @@ const BookHistory = () => {
       movieName: "Movie Title 2",
       showtime: "2024-10-01T20:00:00",
       theater: "Theater 2",
-      price: 200.0,
-      paymentStatus: "Pending",
+      price: 200,
+      paymentStatus: "Counter",
     },
   ]);
 
@@ -173,7 +175,7 @@ const BookHistory = () => {
                     {new Date(booking.showtime).toLocaleString()}
                   </TableCell>
                   <TableCell>{booking.theater}</TableCell>
-                  <TableCell>${booking.price.toFixed(2)}</TableCell>
+                  <TableCell>{booking.price.toFixed(3)}đ</TableCell>
                   <TableCell>{booking.paymentStatus}</TableCell>
                 </TableRow>
               ))}

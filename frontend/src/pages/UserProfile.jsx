@@ -1,3 +1,5 @@
+import "@fontsource/akaya-telivigala";
+import "@fontsource/sora";
 import React, { useState } from "react";
 import {
   TextField,
@@ -12,6 +14,8 @@ import {
   Paper,
   Box,
 } from "@mui/material";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Navigation from "../components/Navigation";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
@@ -29,7 +33,6 @@ const Container = styled.div`
   min-height: 80vh;
   margin: 0 auto;
   margin-bottom: 10rem;
-
   @media (max-width: 64em) {
     width: 85%;
   }
@@ -159,8 +162,30 @@ const UserProfile = () => {
     });
   };
 
+  const validatePhoneNumber = (phoneNumber) => {
+    const phoneRegex = /^[0-9]{10,15}$/;
+    return phoneRegex.test(phoneNumber);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!validatePhoneNumber(formData.phoneNumber)) {
+      toast.error(
+        "Invalid phone number. It should be between 10 and 15 digits."
+      );
+      return;
+    }
+
+    const currentDate = new Date();
+    const selectedDOB = new Date(formData.dob);
+
+    if (selectedDOB > currentDate) {
+      toast.error("Date of Birth cannot be in the future.");
+      return;
+    }
+
+    toast.success("Profile updated successfully!");
     console.log("Form submitted:", formData);
   };
 
@@ -175,6 +200,7 @@ const UserProfile = () => {
       district: "",
       address: "",
     });
+    toast.info("Form reset.");
   };
 
   return (
@@ -270,6 +296,7 @@ const UserProfile = () => {
                   InputLabelProps={{ shrink: true }}
                   variant="outlined"
                   margin="normal"
+                  inputProps={{ max: new Date().toISOString().split("T")[0] }}
                 />
               </Grid>
 
@@ -320,23 +347,6 @@ const UserProfile = () => {
                   variant="outlined"
                   margin="normal"
                 />
-                <TextField
-                  fullWidth
-                  select
-                  label="City"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  required
-                  variant="outlined"
-                  margin="normal"
-                >
-                  {cities.map((city) => (
-                    <MenuItem key={city} value={city}>
-                      {city}
-                    </MenuItem>
-                  ))}
-                </TextField>
               </Grid>
 
               <Grid item xs={12}>
@@ -354,6 +364,7 @@ const UserProfile = () => {
         </Paper>
       </Container>
       <Footer />
+      <ToastContainer />
     </Section>
   );
 };

@@ -645,7 +645,7 @@ const SeatReservation = () => {
                       </Grid>
                       <Grid item xs={2} style={{paddingLeft: "2rem"}}>
                         <Typography fontWeight="bold" color="red" fontSize="2rem">
-                          {selectedSeats.length * 100000}đ
+                          {(selectedSeats.length * 100).toFixed(3)}đ
                         </Typography>
                       </Grid>
                     </Grid>
@@ -786,7 +786,7 @@ const SeatReservation = () => {
                 </Content>
               </div>
               <Heading>Total Price :</Heading>
-              <Price>{selectedSeats.length * 100000}đ</Price>
+              <Price>{(selectedSeats.length * 100).toFixed(3)}đ</Price>
             </MovieInfo>
           </Grid>
         </Grid>
