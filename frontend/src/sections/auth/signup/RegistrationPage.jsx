@@ -1,8 +1,10 @@
-import React from "react";
-import { Button, TextField, Typography, Container, Box } from "@mui/material";
+import React, { useState } from "react";
+import { Button, TextField, Typography, Container, Box, InputAdornment, IconButton } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import "../../../styles/registrationPage.css";
 import styled from "styled-components";
+import { toast } from "react-toastify";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const LogoText = styled.h1`
   font-family: "Akaya Telivigala", cursive;
@@ -21,7 +23,23 @@ const LogoText = styled.h1`
 `;
 
 const RegistrationPage = () => {
+  const [passwordVisibility, setPasswordVisibility] = useState(false);
+  const [confirmPasswordVisibility, setConfirmPasswordVisibility] = useState(false);
   const navigate = useNavigate();
+
+  const togglePasswordVisibility = () => {
+    setPasswordVisibility(!passwordVisibility);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setConfirmPasswordVisibility(!confirmPasswordVisibility);
+  };
+
+  const handleSignUp = () => {
+
+    toast.success("Registration successful!");
+    navigate("/signin");
+  };
 
   return (
     <Container maxWidth="lg" className="registration-container">
@@ -36,11 +54,9 @@ const RegistrationPage = () => {
         <div></div>
         <div></div>
         <div></div>
-        <div></div>
         <Button
           variant="contained"
           color="error"
-          className="sign-in-btn"
           onClick={() => navigate("/signin")}
         >
           Sign In
@@ -61,10 +77,8 @@ const RegistrationPage = () => {
             fullWidth
             id="email"
             label="Email"
-            variant="outlined"
-            className="input-field"
+            variant="filled"
             margin="normal"
-            color="secondary"
             InputLabelProps={{
               style: { color: "violet" },
             }}
@@ -73,10 +87,8 @@ const RegistrationPage = () => {
             fullWidth
             id="name"
             label="Username"
-            variant="outlined"
-            className="input-field"
+            variant="filled"
             margin="normal"
-            color="secondary"
             InputLabelProps={{
               style: { color: "violet" },
             }}
@@ -85,33 +97,53 @@ const RegistrationPage = () => {
             fullWidth
             id="password"
             label="Password"
-            type="password"
-            variant="outlined"
-            className="input-field"
+            type={passwordVisibility ? "text" : "password"}
+            variant="filled"
             margin="normal"
-            color="secondary"
             InputLabelProps={{
               style: { color: "violet" },
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={togglePasswordVisibility}
+                    edge="end"
+                  >
+                    {passwordVisibility ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
             }}
           />
           <TextField
             fullWidth
             id="confirm-password"
             label="Confirm password"
-            type="password"
-            variant="outlined"
-            className="input-field"
+            type={confirmPasswordVisibility ? "text" : "password"}
+            variant="filled"
             margin="normal"
-            color="secondary"
             InputLabelProps={{
               style: { color: "violet" },
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={toggleConfirmPasswordVisibility}
+                    edge="end"
+                  >
+                    {confirmPasswordVisibility ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
             }}
           />
           <Button
             fullWidth
             variant="contained"
             color="error"
-            className="register-btn"
+            onClick={handleSignUp}
           >
             Sign Up
           </Button>
