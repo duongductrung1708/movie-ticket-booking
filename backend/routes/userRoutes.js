@@ -1,3 +1,4 @@
+// routes/user.js
 const express = require("express");
 const { createUser, getUser, updateUser, deleteUser } = require("../controllers/userController");
 const authMiddleware = require("../middleware/auth");
@@ -11,7 +12,7 @@ router.post("/", createUser);
 router.get("/:id", authMiddleware, getUser);
 
 // Update user information
-router.put("/:id", authMiddleware, updateUser);
+router.put("/update/:id", authMiddleware, updateUser);
 
 // Delete a user
 router.delete("/:id", authMiddleware, deleteUser);
