@@ -11,7 +11,8 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { loginUser } from "../../../services/api"; // Import your login function
+import { loginUser } from "../../../services/api";
+import { useAuth } from "../../../hooks/AuthProvider";
 import "../../../styles/signInPage.css";
 import backgroundImage from "../../../assets/netflix-junio.jpg";
 import styled from "styled-components";
@@ -34,6 +35,7 @@ const LogoText = styled.h1`
 
 const SignInPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,8 +53,9 @@ const SignInPage = () => {
     }
 
     try {
-      await loginUser({ email, password });
+      const userData = await loginUser({ email, password });
       toast.success("Login successful!");
+      login(userData);
       navigate("/home");
     } catch (error) {
       console.error("Login error:", error);
@@ -91,7 +94,12 @@ const SignInPage = () => {
             Sign In
           </Typography>
 
-          <Box component="form" noValidate className="signin-form" onSubmit={handleSubmit}>
+          <Box
+            component="form"
+            noValidate
+            className="signin-form"
+            onSubmit={handleSubmit}
+          >
             <TextField
               fullWidth
               id="email"

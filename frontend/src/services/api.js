@@ -37,4 +37,13 @@ export const verifyEmail = async (token) => {
   }
 };
 
+// Function to log out a user
+export const logoutUser = async () => {
+  try {
+    await api.post("/auth/logout");
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
 // You can add more API functions as needed

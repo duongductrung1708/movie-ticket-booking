@@ -12,6 +12,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import HistoryIcon from "@mui/icons-material/History";
 import KeyIcon from "@mui/icons-material/Key";
 import LogoutIcon from "@mui/icons-material/Logout";
+import { logoutUser } from '../services/api';
 
 const Section = styled.section`
   width: 100vw;
@@ -182,6 +183,16 @@ const Navigation = () => {
     navigate("/change-password");
   };
 
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
+  };
+
   return (
     <Section id="navigation">
       <NavBar>
@@ -220,12 +231,12 @@ const Navigation = () => {
             anchorEl={anchorEl}
             onClose={handlePopoverClose}
             anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'center',
+              vertical: "bottom",
+              horizontal: "center",
             }}
             transformOrigin={{
-              vertical: 'top',
-              horizontal: 'center',
+              vertical: "top",
+              horizontal: "center",
             }}
           >
             <MenuItem onClick={handleUserProfile}>
@@ -240,7 +251,7 @@ const Navigation = () => {
               <KeyIcon />
               <Item>Change Password</Item>
             </MenuItem>
-            <MenuItem onClick={handlePopoverClose}>
+            <MenuItem onClick={handleLogout}>
               <LogoutIcon />
               <Item>Sign Out</Item>
             </MenuItem>

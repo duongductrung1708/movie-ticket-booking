@@ -11,21 +11,24 @@ import ChangePassword from "./sections/auth/signin/ChangePassword";
 import ForgetPassword from "./sections/auth/signin/ForgetPassword";
 import "./index.css";
 import { ToastContainer } from "react-toastify";
+import { AuthProvider } from './hooks/AuthProvider';
+
+import { RedirectRoute, ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
   return (
-    <>
+    <AuthProvider>
       <Routes>
-        <Route path="/" element={<StarterPage />} />
-        <Route path="/signup" element={<RegistrationPage />} />
-        <Route path="/signin" element={<SignInPage />} />
-        <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/" element={<RedirectRoute element={<StarterPage />} />} />
+        <Route path="/signup" element={<RedirectRoute element={<RegistrationPage />} />} />
+        <Route path="/signin" element={<RedirectRoute element={<SignInPage />} />} />
+        <Route path="/change-password" element={<ProtectedRoute element={<ChangePassword />} />} />
         <Route path="/forgot-password" element={<ForgetPassword />} />
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/movie/:title" element={<MovieDetail />} />
-        <Route path="/seat-reservation" element={<SeatReservation />} />
-        <Route path="/user-profile" element={<UserProfile />} />
-        <Route path="/booking-history" element={<BookHistory />} />
+        <Route path="/home" element={<ProtectedRoute element={<HomePage />} />} />
+        <Route path="/movie/:title" element={<ProtectedRoute element={<MovieDetail />} />} />
+        <Route path="/seat-reservation" element={<ProtectedRoute element={<SeatReservation />} />} />
+        <Route path="/user-profile" element={<ProtectedRoute element={<UserProfile />} />} />
+        <Route path="/booking-history" element={<ProtectedRoute element={<BookHistory />} />} />
       </Routes>
       <ToastContainer
         position="top-right"
@@ -37,7 +40,7 @@ function App() {
         pauseDelay={300}
         theme="colored"
       />
-    </>
+    </AuthProvider>
   );
 }
 

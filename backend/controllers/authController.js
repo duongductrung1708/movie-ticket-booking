@@ -408,3 +408,9 @@ exports.loginUser = async (req, res) => {
     return res.status(500).send("Server error");
   }
 };
+
+// @desc     Logout user
+// @access   Public
+exports.logoutUser = (req, res) => {
+  res.json({ msg: "User logged out successfully" });
+};
