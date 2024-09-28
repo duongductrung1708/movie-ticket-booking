@@ -14,8 +14,9 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   const login = (userData) => {
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
+    const { id, ...otherData } = userData;
+    localStorage.setItem('user', JSON.stringify({ id, ...otherData }));
+    setUser({ id, ...otherData });
     navigate('/home');
   };
 

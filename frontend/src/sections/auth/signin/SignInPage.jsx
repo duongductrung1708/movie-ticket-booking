@@ -46,14 +46,19 @@ const SignInPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!email || !password) {
       toast.error("Please fill in all fields!");
       return;
     }
-
+  
     try {
       const userData = await loginUser({ email, password });
+      
+      if (userData?.token) {
+        localStorage.setItem('user', userData.token);
+      }
+  
       toast.success("Login successful!");
       login(userData);
       navigate("/home");

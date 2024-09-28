@@ -1,6 +1,6 @@
 import "@fontsource/akaya-telivigala";
 import "@fontsource/sora";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   TextField,
   RadioGroup,
@@ -20,6 +20,8 @@ import Navigation from "../components/Navigation";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
+import { getUser, updateUser } from "../services/api";
+import { useAuth } from "../hooks/AuthProvider";
 
 const Section = styled.section`
   min-height: ${(props) => `calc(100vh - ${props.theme.navHeight})`};
@@ -140,19 +142,35 @@ const BreadcrumbLink = styled(MuiLink)`
 `;
 
 const UserProfile = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
-    phoneNumber: "0123456789",
-    fullName: "Me may beo",
-    email: "memaybeo@gmail.com",
-    gender: "gay",
-    dob: "01/02/1002",
-    city: "Hanoi",
+    phoneNumber: "",
+    fullName: "",
+    email: "",
+    gender: "male", // Default value
+    dob: "",
+    city: "HCMC", // Default value
     district: "",
     address: "",
   });
 
   const cities = ["HCMC", "Hanoi", "Da Nang"];
   const districts = ["District A", "District B", "District C"];
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user) return;
+
+      try {
+        const userData = await getUser(user.id);
+        setFormData(userData);
+      } catch (error) {
+        toast.error("Failed to fetch user data: " + error); 
+      }
+    };
+
+    fetchUserData();
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -167,13 +185,11 @@ const UserProfile = () => {
     return phoneRegex.test(phoneNumber);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validatePhoneNumber(formData.phoneNumber)) {
-      toast.error(
-        "Invalid phone number. It should be between 10 and 15 digits."
-      );
+      toast.error("Invalid phone number. It should be between 10 and 15 digits.");
       return;
     }
 
@@ -185,7 +201,13 @@ const UserProfile = () => {
       return;
     }
 
-    toast.success("Profile updated successfully!");
+    try {
+      await updateUser(formData);
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      toast.error(error);
+    }
+    
     console.log("Form submitted:", formData);
   };
 
@@ -194,9 +216,9 @@ const UserProfile = () => {
       phoneNumber: "",
       fullName: "",
       email: "",
-      gender: "",
+      gender: "male",
       dob: "",
-      city: "",
+      city: "HCMC",
       district: "",
       address: "",
     });

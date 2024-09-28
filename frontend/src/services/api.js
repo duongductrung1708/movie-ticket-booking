@@ -1,3 +1,4 @@
+// src/services/api.js
 import axios from "axios";
 
 const API_URL = "http://localhost:8080/api";
@@ -21,6 +22,7 @@ export const registerUser = async (userData) => {
 export const loginUser = async (credentials) => {
   try {
     const response = await api.post("/auth/login", credentials);
+    localStorage.setItem('user', response.data.token);
     return response.data;
   } catch (error) {
     throw error.response ? error.response.data : error.message;
@@ -41,6 +43,41 @@ export const verifyEmail = async (token) => {
 export const logoutUser = async () => {
   try {
     await api.post("/auth/logout");
+    localStorage.removeItem('user');
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+// Function to update user information
+export const updateUser = async (userId, updatedData) => {
+  try {
+    const token = localStorage.getItem('user');
+    if (!token) throw new Error("Token not found!");
+
+    const response = await api.put(`/users/${userId}`, updatedData, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+// Function to get user details by user ID
+export const getUser = async (userId) => {
+  try {
+    const token = localStorage.getItem('user');
+    if (!token) throw new Error("Token not found!");
+
+    const response = await api.get(`/users/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return response.data;
   } catch (error) {
     throw error.response ? error.response.data : error.message;
   }
