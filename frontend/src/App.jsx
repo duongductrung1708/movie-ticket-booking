@@ -28,14 +28,14 @@ function App() {
         <Route path="/booking-history" element={<BookHistory />} />
       </Routes>
       <ToastContainer
-        position="top-right" // You can change the position
-        autoClose={5000} // Auto close after 5 seconds
+        position="top-right"
+        autoClose={5000}
         hideProgressBar={false}
         closeOnClick
         pauseOnHover
         draggable
         pauseDelay={300}
-        theme="colored" // You can set the theme here
+        theme="colored"
       />
     </>
   );

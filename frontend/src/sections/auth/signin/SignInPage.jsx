@@ -10,6 +10,8 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { loginUser } from "../../../services/api"; // Import your login function
 import "../../../styles/signInPage.css";
 import backgroundImage from "../../../assets/netflix-junio.jpg";
 import styled from "styled-components";
@@ -33,9 +35,31 @@ const LogoText = styled.h1`
 const SignInPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      toast.error("Please fill in all fields!");
+      return;
+    }
+
+    try {
+      await loginUser({ email, password });
+      toast.success("Login successful!");
+      navigate("/home");
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error(
+        error.response?.data?.message || "Login failed. Please try again."
+      );
+    }
   };
 
   return (
@@ -60,8 +84,6 @@ const SignInPage = () => {
           <div></div>
           <div></div>
           <div></div>
-          <div></div>
-          <div></div>
         </Box>
 
         <Box className="signin-content">
@@ -69,7 +91,7 @@ const SignInPage = () => {
             Sign In
           </Typography>
 
-          <Box component="form" noValidate className="signin-form">
+          <Box component="form" noValidate className="signin-form" onSubmit={handleSubmit}>
             <TextField
               fullWidth
               id="email"
@@ -96,6 +118,7 @@ const SignInPage = () => {
                     },
                   },
                 },
+                onChange: (e) => setEmail(e.target.value),
               }}
             />
             <TextField
@@ -136,6 +159,7 @@ const SignInPage = () => {
                     </IconButton>
                   </InputAdornment>
                 ),
+                onChange: (e) => setPassword(e.target.value),
               }}
             />
             <Typography variant="body2" color="secondary" align="right">
@@ -147,6 +171,7 @@ const SignInPage = () => {
               </Link>
             </Typography>
             <Button
+              type="submit"
               fullWidth
               variant="contained"
               color="error"
