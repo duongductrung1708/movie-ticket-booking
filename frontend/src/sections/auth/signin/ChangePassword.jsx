@@ -18,6 +18,8 @@ import Footer from "../../../components/Footer";
 import Navigation from "../../../components/Navigation";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useAuth } from "../../../hooks/AuthProvider";
+import { changePassword } from "../../../services/api";
 
 const Section = styled.section`
   min-height: ${(props) => `calc(100vh - ${props.theme.navHeight})`};

@@ -64,15 +64,14 @@ const RegistrationPage = () => {
   };
 
   const validatePhoneNumber = (phoneNumber) => {
-    const phoneRegex = /^[0-9]{10}$/; // Example: 10-digit phone number
+    const phoneRegex = /^[0-9]{10}$/;
     return phoneRegex.test(phoneNumber);
   };
 
   const validatePassword = (password) => {
-    // Example: At least 8 characters, 1 uppercase, 1 number
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
     return passwordRegex.test(password);
-  };
+  };  
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -97,7 +96,7 @@ const RegistrationPage = () => {
 
     if (!validatePassword(password)) {
       toast.error(
-        "Password must be at least 8 characters long, contain 1 uppercase letter and 1 number!"
+        "Password must be at least 8 characters long, contain at least 1 uppercase letter, 1 number, and 1 special character!"
       );
       return;
     }

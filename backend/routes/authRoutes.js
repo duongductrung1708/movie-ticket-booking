@@ -22,10 +22,10 @@ router.post(
       .isNumeric(),
     check(
       "password",
-      "Password must be at least 8 characters long, contain at least 1 uppercase letter and 1 number"
+      "Password must be at least 8 characters long, contain at least 1 uppercase letter, 1 number, and 1 special character"
     )
       .isLength({ min: 8 })
-      .matches(/(?=.*[A-Z])(?=.*[0-9])/), // Password regex to check for uppercase letter and number
+      .matches(/(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])/),
   ],
   registerUser
 );
