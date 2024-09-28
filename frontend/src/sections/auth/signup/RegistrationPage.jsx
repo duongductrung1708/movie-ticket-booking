@@ -1,10 +1,19 @@
 import React, { useState } from "react";
-import { Button, TextField, Typography, Container, Box, InputAdornment, IconButton } from "@mui/material";
+import {
+  Button,
+  TextField,
+  Typography,
+  Container,
+  Box,
+  InputAdornment,
+  IconButton,
+} from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import "../../../styles/registrationPage.css";
 import styled from "styled-components";
 import { toast } from "react-toastify";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { registerUser } from "../../../services/api";
 
 const LogoText = styled.h1`
   font-family: "Akaya Telivigala", cursive;
@@ -23,8 +32,17 @@ const LogoText = styled.h1`
 `;
 
 const RegistrationPage = () => {
+  const [userData, setUserData] = useState({
+    username: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
+  });
+
   const [passwordVisibility, setPasswordVisibility] = useState(false);
-  const [confirmPasswordVisibility, setConfirmPasswordVisibility] = useState(false);
+  const [confirmPasswordVisibility, setConfirmPasswordVisibility] =
+    useState(false);
   const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
@@ -35,10 +53,79 @@ const RegistrationPage = () => {
     setConfirmPasswordVisibility(!confirmPasswordVisibility);
   };
 
-  const handleSignUp = () => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUserData({ ...userData, [name]: value });
+  };
 
-    toast.success("Registration successful!");
-    navigate("/signin");
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhoneNumber = (phoneNumber) => {
+    const phoneRegex = /^[0-9]{10}$/; // Example: 10-digit phone number
+    return phoneRegex.test(phoneNumber);
+  };
+
+  const validatePassword = (password) => {
+    // Example: At least 8 characters, 1 uppercase, 1 number
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    return passwordRegex.test(password);
+  };
+
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+
+    const { username, email, phoneNumber, password, confirmPassword } =
+      userData;
+
+    if (!username || !email || !phoneNumber || !password || !confirmPassword) {
+      toast.error("Please fill in all fields!");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      toast.error("Invalid email format!");
+      return;
+    }
+
+    if (!validatePhoneNumber(phoneNumber)) {
+      toast.error("Phone number must be 10 digits!");
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      toast.error(
+        "Password must be at least 8 characters long, contain 1 uppercase letter and 1 number!"
+      );
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match!");
+      return;
+    }
+
+    try {
+      const dataToSend = {
+        username,
+        email,
+        phoneNumber,
+        password,
+        confirmPassword,
+      };
+      console.log("User data being sent:", dataToSend);
+      await registerUser(dataToSend);
+      toast.success("Registration successful! Please verify your email.");
+      navigate("/signin");
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Registration failed. Please try again."
+      );
+    }
   };
 
   return (
@@ -72,30 +159,52 @@ const RegistrationPage = () => {
           Please fill in the information below
         </Typography>
 
-        <Box component="form" noValidate className="form">
+        <Box
+          component="form"
+          noValidate
+          className="form"
+          onSubmit={handleSignUp}
+        >
+          <TextField
+            fullWidth
+            id="phoneNumber"
+            name="phoneNumber"
+            label="Phone Number"
+            variant="filled"
+            margin="normal"
+            InputLabelProps={{
+              style: { color: "violet" },
+            }}
+            onChange={handleChange}
+          />
           <TextField
             fullWidth
             id="email"
+            name="email"
             label="Email"
             variant="filled"
             margin="normal"
             InputLabelProps={{
               style: { color: "violet" },
             }}
+            onChange={handleChange}
           />
           <TextField
             fullWidth
             id="name"
+            name="username"
             label="Username"
             variant="filled"
             margin="normal"
             InputLabelProps={{
               style: { color: "violet" },
             }}
+            onChange={handleChange}
           />
           <TextField
             fullWidth
             id="password"
+            name="password"
             label="Password"
             type={passwordVisibility ? "text" : "password"}
             variant="filled"
@@ -106,20 +215,19 @@ const RegistrationPage = () => {
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton
-                    onClick={togglePasswordVisibility}
-                    edge="end"
-                  >
+                  <IconButton onClick={togglePasswordVisibility} edge="end">
                     {passwordVisibility ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               ),
             }}
+            onChange={handleChange}
           />
           <TextField
             fullWidth
             id="confirm-password"
-            label="Confirm password"
+            name="confirmPassword"
+            label="Confirm Password"
             type={confirmPasswordVisibility ? "text" : "password"}
             variant="filled"
             margin="normal"
@@ -133,18 +241,18 @@ const RegistrationPage = () => {
                     onClick={toggleConfirmPasswordVisibility}
                     edge="end"
                   >
-                    {confirmPasswordVisibility ? <VisibilityOff /> : <Visibility />}
+                    {confirmPasswordVisibility ? (
+                      <VisibilityOff />
+                    ) : (
+                      <Visibility />
+                    )}
                   </IconButton>
                 </InputAdornment>
               ),
             }}
+            onChange={handleChange}
           />
-          <Button
-            fullWidth
-            variant="contained"
-            color="error"
-            onClick={handleSignUp}
-          >
+          <Button fullWidth variant="contained" color="error" type="submit">
             Sign Up
           </Button>
         </Box>

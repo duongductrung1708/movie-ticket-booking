@@ -233,6 +233,7 @@ const UserProfile = () => {
                   inputProps={{ maxLength: 15 }}
                   variant="outlined"
                   margin="normal"
+                  disabled
                 />
                 <TextField
                   fullWidth
@@ -297,6 +298,7 @@ const UserProfile = () => {
                   variant="outlined"
                   margin="normal"
                   inputProps={{ max: new Date().toISOString().split("T")[0] }}
+                  disabled
                 />
               </Grid>
 
