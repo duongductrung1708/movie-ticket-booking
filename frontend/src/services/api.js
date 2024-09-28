@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api"; // Replace with your actual API URL
+const API_URL = "http://localhost:8080/api";
 
 // Create an axios instance
 const api = axios.create({
@@ -32,6 +32,15 @@ export const verifyEmail = async (token) => {
   try {
     const response = await api.get(`/auth/verify-email?token=${token}`);
     return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+// Function to log out a user
+export const logoutUser = async () => {
+  try {
+    await api.post("/auth/logout");
   } catch (error) {
     throw error.response ? error.response.data : error.message;
   }

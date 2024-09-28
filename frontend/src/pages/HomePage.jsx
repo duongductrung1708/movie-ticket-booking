@@ -20,13 +20,13 @@ const BookTicketButton = styled.button`
   position: fixed;
   top: 0;
   z-index: 100;
-  width: 80px;
-  height: 80px;
-  padding: 0.5rem 1rem;
+  width: 60px; /* Smaller default size */
+  height: 60px; /* Smaller default size */
+  padding: 0.5rem;
   background-color: black;
   color: white;
   border: none;
-  font-size: 1.2rem;
+  font-size: 1rem; /* Adjusted for better responsiveness */
   cursor: pointer;
   display: ${(props) => (props.show ? "block" : "none")};
   justify-content: center;
@@ -36,13 +36,33 @@ const BookTicketButton = styled.button`
   clip-path: polygon(0 0, 100% 0, 0% 200%);
 
   &:hover {
-    width: 180px;
-    height: 80px;
+    width: 150px; /* Adjusted size for hover */
+    height: 60px; /* Adjusted size for hover */
   }
 
   &:hover .text {
     opacity: 1;
     transition: opacity 0.4s ease;
+  }
+
+  @media (max-width: 768px) {
+    width: 50px; /* Responsive adjustments */
+    height: 50px;
+    font-size: 0.8rem; /* Smaller text */
+    
+    &:hover {
+      width: 120px; /* Responsive hover size */
+    }
+  }
+
+  @media (max-width: 480px) {
+    width: 40px; /* Smaller for mobile */
+    height: 40px;
+    font-size: 0.7rem;
+    
+    &:hover {
+      width: 100px; /* Adjusted size for mobile hover */
+    }
   }
 `;
 
@@ -51,15 +71,23 @@ const Icon = styled.div`
   color: white;
   padding: 0;
   position: absolute;
-  top: 2rem;
+  top: 1rem; /* Adjusted for responsiveness */
 `;
 
 const Text = styled.div`
   color: white;
-  font-size: 1.25rem;
+  font-size: 1rem; /* Adjusted for better responsiveness */
   opacity: 0;
   transition: opacity 0.4s ease;
   font-weight: bold;
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem; /* Responsive text size */
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.6rem; /* Smaller text for mobile */
+  }
 `;
 
 const HomePage = () => {

@@ -4,6 +4,7 @@ const {
   registerUser,
   loginUser,
   verifyEmail,
+  logoutUser,
 } = require("../controllers/authController");
 
 const router = express.Router();
@@ -32,18 +33,23 @@ router.post(
 // @route    POST api/auth/login
 // @desc     Login user & get token
 // @access   Public
-// router.post(
-//   '/login',
-//   [
-//     check('email', 'Please include a valid email').isEmail(),
-//     check('password', 'Password is required').exists(),
-//   ],
-//   loginUser
-// );
+router.post(
+  "/login",
+  [
+    check("email", "Please include a valid email").isEmail(),
+    check("password", "Password is required").exists(),
+  ],
+  loginUser
+);
 
 // @route    GET api/auth/verify-email
 // @desc     Verify user email
 // @access   Public
 router.get("/verify-email", verifyEmail);
+
+// @route   POST api/auth/logout
+// @desc    Logout user
+// @access  Public
+router.post('/logout', logoutUser);
 
 module.exports = router;

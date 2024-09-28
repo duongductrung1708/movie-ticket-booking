@@ -17,7 +17,6 @@ exports.registerUser = async (req, res) => {
   const { username, email, phoneNumber, password } = req.body;
 
   try {
-    // Check if user already exists
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ msg: "User already exists" });
@@ -28,20 +27,18 @@ exports.registerUser = async (req, res) => {
       username,
       email,
       phoneNumber,
-      password, // Hash this before saving in the User model pre-save hook
+      password,
       role: "customer",
       isVerified: false,
     });
 
     await user.save();
 
-    // Generate verification token
     const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
     const verificationUrl = `http://localhost:8080/api/auth/verify-email?token=${verificationToken}`;
 
-    // Configure Nodemailer transporter
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -50,7 +47,6 @@ exports.registerUser = async (req, res) => {
       },
     });
 
-    // Set up email options
     // Set up email options
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -332,11 +328,9 @@ exports.verifyEmail = async (req, res) => {
       return res.status(400).json({ msg: "Invalid token" });
     }
 
-    // Update email verification status
     user.isVerified = true;
     await user.save();
 
-    // Styled HTML response
     return res.send(`
       <html>
 
@@ -374,4 +368,49 @@ exports.verifyEmail = async (req, res) => {
     console.error("Email verification error:", error);
     return res.status(500).send("Server error");
   }
+};
+
+// @desc     Login user & get token
+// @access   Public
+exports.loginUser = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ msg: "Invalid credentials" });
+    }
+
+    if (!user.isVerified) {
+      return res.status(400).json({ msg: "Please verify your email first" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ msg: "Invalid credentials" });
+    }
+
+    const payload = {
+      user: {
+        id: user.id,
+      },
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+    res.json({ token });
+  } catch (err) {
+    console.error("Login error:", err.message);
+    return res.status(500).send("Server error");
+  }
+};
+
+// @desc     Logout user
+// @access   Public
+exports.logoutUser = (req, res) => {
+  res.json({ msg: "User logged out successfully" });
 };
