@@ -145,11 +145,11 @@ const UserProfile = () => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     phoneNumber: "",
-    fullName: "",
+    username: "",
     email: "",
-    gender: "male", // Default value
+    gender: "male",
     dob: "",
-    city: "HCMC", // Default value
+    city: "HCMC",
     district: "",
     address: "",
   });
@@ -160,17 +160,18 @@ const UserProfile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (!user) return;
-
+  
       try {
         const userData = await getUser(user.id);
-        setFormData(userData);
+        const formattedDOB = new Date(userData.dob).toISOString().split('T')[0];
+        setFormData({ ...userData, dob: formattedDOB });
       } catch (error) {
-        toast.error("Failed to fetch user data: " + error); 
+        toast.error("Failed to fetch user data: " + error);
       }
     };
-
+  
     fetchUserData();
-  }, [user]);
+  }, [user]);  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -187,34 +188,34 @@ const UserProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!validatePhoneNumber(formData.phoneNumber)) {
       toast.error("Invalid phone number. It should be between 10 and 15 digits.");
       return;
     }
-
+  
     const currentDate = new Date();
     const selectedDOB = new Date(formData.dob);
-
+  
     if (selectedDOB > currentDate) {
       toast.error("Date of Birth cannot be in the future.");
       return;
     }
-
+  
     try {
-      await updateUser(formData);
+      await updateUser({ ...formData });
       toast.success("Profile updated successfully!");
     } catch (error) {
       toast.error(error);
     }
-    
+  
     console.log("Form submitted:", formData);
-  };
+  };  
 
   const handleCancel = () => {
     setFormData({
       phoneNumber: "",
-      fullName: "",
+      username: "",
       email: "",
       gender: "male",
       dob: "",
@@ -260,9 +261,9 @@ const UserProfile = () => {
                 <TextField
                   fullWidth
                   label="Full Name"
-                  name="fullName"
+                  name="username"
                   type="text"
-                  value={formData.fullName}
+                  value={formData.username}
                   onChange={handleChange}
                   required
                   inputProps={{ maxLength: 50 }}
@@ -320,7 +321,6 @@ const UserProfile = () => {
                   variant="outlined"
                   margin="normal"
                   inputProps={{ max: new Date().toISOString().split("T")[0] }}
-                  disabled
                 />
               </Grid>
 

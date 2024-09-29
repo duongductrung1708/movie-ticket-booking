@@ -36,10 +36,10 @@ const getUser = async (req, res) => {
 // Update user information
 const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { username, email, phoneNumber, password } = req.body;
+  const { username, email, phoneNumber, password, dob, address, city, district, gender, role } = req.body;
 
   try {
-    const updatedData = { username, email, phoneNumber };
+    const updatedData = { username, email, phoneNumber, dob, address, city, district, gender, role };
 
     if (password) {
       updatedData.password = await bcrypt.hash(password, 10);
@@ -70,9 +70,49 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// controllers/userController.js
+const changePassword = async (req, res) => {
+  const { id } = req.params;
+  const { oldPassword, newPassword } = req.body;
+
+  try {
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ msg: "Old password is incorrect" });
+    }
+
+    if (oldPassword === newPassword) {
+      return res.status(400).json({ msg: "New password cannot be the same as the old password" });
+    }
+
+    const isValidPassword = (password) => password.length >= 6;
+    if (!isValidPassword(newPassword)) {
+      return res.status(400).json({ msg: "New password does not meet complexity requirements" });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    const updatedUser = await User.findByIdAndUpdate(id, { password: hashedNewPassword }, { new: true });
+
+    if (!updatedUser) {
+      return res.status(404).json({ msg: "Error updating password" });
+    }
+
+    res.status(200).json({ msg: "Password updated successfully" });
+  } catch (err) {
+    console.error("Error changing password for user ID:", id, "Error:", err.message);
+    res.status(500).json({ msg: "Error changing password", error: err.message });
+  }
+};
+
 module.exports = {
   createUser,
   getUser,
   updateUser,
   deleteUser,
+  changePassword,
 };

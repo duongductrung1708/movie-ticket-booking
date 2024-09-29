@@ -18,7 +18,6 @@ import Footer from "../../../components/Footer";
 import Navigation from "../../../components/Navigation";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useAuth } from "../../../hooks/AuthProvider";
 import { changePassword } from "../../../services/api";
 
 const Section = styled.section`
@@ -111,7 +110,7 @@ const ChangePassword = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = async (e) => {
     e.preventDefault();
 
     const passwordRegex =
@@ -129,10 +128,16 @@ const ChangePassword = () => {
       return;
     }
 
-    toast.success("Password changed successfully!");
-    setOldPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+    try {
+      await changePassword(oldPassword, newPassword);
+      toast.success("Password changed successfully!");
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      toast.error("Failed to change password. Please try again.");
+      console.error("Error changing password:", error);
+    }
   };
 
   return (
