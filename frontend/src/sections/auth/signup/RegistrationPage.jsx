@@ -38,6 +38,7 @@ const RegistrationPage = () => {
     phoneNumber: "",
     password: "",
     confirmPassword: "",
+    dob: "",
   });
 
   const [passwordVisibility, setPasswordVisibility] = useState(false);
@@ -69,17 +70,25 @@ const RegistrationPage = () => {
   };
 
   const validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
     return passwordRegex.test(password);
-  };  
+  };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
 
-    const { username, email, phoneNumber, password, confirmPassword } =
+    const { username, email, phoneNumber, password, confirmPassword, dob } =
       userData;
 
-    if (!username || !email || !phoneNumber || !password || !confirmPassword) {
+    if (
+      !username ||
+      !email ||
+      !phoneNumber ||
+      !password ||
+      !confirmPassword ||
+      !dob
+    ) {
       toast.error("Please fill in all fields!");
       return;
     }
@@ -113,6 +122,7 @@ const RegistrationPage = () => {
         phoneNumber,
         password,
         confirmPassword,
+        dob,
       };
       console.log("User data being sent:", dataToSend);
       await registerUser(dataToSend);
@@ -199,6 +209,25 @@ const RegistrationPage = () => {
               style: { color: "violet" },
             }}
             onChange={handleChange}
+          />
+          <TextField
+            fullWidth
+            id="dob"
+            name="dob"
+            label="Date of Birth"
+            type="date"
+            variant="filled"
+            margin="normal"
+            focused
+            InputLabelProps={{
+              style: { color: "violet" },
+            }}
+            onChange={handleChange}
+            InputProps={{
+              inputProps: {
+                max: new Date().toISOString().split("T")[0],
+              },
+            }}
           />
           <TextField
             fullWidth

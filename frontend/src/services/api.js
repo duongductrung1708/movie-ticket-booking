@@ -22,7 +22,7 @@ export const registerUser = async (userData) => {
 export const loginUser = async (credentials) => {
   try {
     const response = await api.post("/auth/login", credentials);
-    localStorage.setItem('user', response.data.token);
+    localStorage.setItem('user', JSON.stringify(response.data));
     return response.data;
   } catch (error) {
     throw error.response ? error.response.data : error.message;
@@ -50,16 +50,18 @@ export const logoutUser = async () => {
 };
 
 // Function to update user information
-export const updateUser = async (userId, updatedData) => {
+export const updateUser = async (updatedData) => {
   try {
-    const token = localStorage.getItem('user'); // Kiểm tra nếu token tồn tại
-    if (!token) {
-      throw new Error("Token not found in localStorage");
+    const userData = JSON.parse(localStorage.getItem('user'));
+    const userId = userData?._id;
+    const token = userData?.accessToken;
+    if (!userId || !token) {
+      throw new Error("UserId or Token not found in localStorage");
     }
-    
+
     const response = await api.put(`/users/${userId}`, updatedData, {
       headers: {
-        'Authorization': `Bearer ${token}`, // Gửi token trong header
+        'Authorization': `Bearer ${token}`,
       },
     });
     return response.data;
@@ -72,8 +74,9 @@ export const updateUser = async (userId, updatedData) => {
 // Function to get user details by user ID
 export const getUser = async () => {
   try {
-    const userId = localStorage.getItem('userId');
-    const token = localStorage.getItem('user');
+    const userData = JSON.parse(localStorage.getItem('user'));
+    const userId = userData?._id;
+    const token = userData?.accessToken;
     if (!userId || !token) {
       throw new Error("UserId or Token not found in localStorage");
     }
@@ -91,4 +94,29 @@ export const getUser = async () => {
   }
 };
 
-// You can add more API functions as needed
+// Function to change the user's password
+export const changePassword = async (oldPassword, newPassword) => {
+  try {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    const userId = userData?._id;
+    const token = userData?.accessToken;
+
+    if (!userId || !token) {
+      throw new Error("UserId or Token not found in localStorage");
+    }
+
+    const response = await api.post(`/users/change-password/${userId}`, {
+      oldPassword,
+      newPassword,
+    }, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Change password error:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};

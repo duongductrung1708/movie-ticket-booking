@@ -14,7 +14,7 @@ exports.registerUser = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { username, email, phoneNumber, password } = req.body;
+  const { username, email, phoneNumber, password, dob } = req.body;
 
   try {
     let user = await User.findOne({ email });
@@ -28,6 +28,7 @@ exports.registerUser = async (req, res) => {
       email,
       phoneNumber,
       password,
+      dob,
       role: "customer",
       isVerified: false,
     });
