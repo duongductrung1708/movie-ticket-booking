@@ -1,4 +1,3 @@
-// src/AuthProvider.js
 import React, { createContext, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logoutUser } from '../services/api';
