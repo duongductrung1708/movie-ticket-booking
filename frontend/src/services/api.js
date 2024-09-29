@@ -52,33 +52,41 @@ export const logoutUser = async () => {
 // Function to update user information
 export const updateUser = async (userId, updatedData) => {
   try {
-    const token = localStorage.getItem('user');
-    if (!token) throw new Error("Token not found!");
-
+    const token = localStorage.getItem('user'); // Kiểm tra nếu token tồn tại
+    if (!token) {
+      throw new Error("Token not found in localStorage");
+    }
+    
     const response = await api.put(`/users/${userId}`, updatedData, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${token}`, // Gửi token trong header
       },
     });
     return response.data;
   } catch (error) {
+    console.error("Update user error:", error);
     throw error.response ? error.response.data : error.message;
   }
 };
 
 // Function to get user details by user ID
-export const getUser = async (userId) => {
+export const getUser = async () => {
   try {
+    const userId = localStorage.getItem('userId');
     const token = localStorage.getItem('user');
-    if (!token) throw new Error("Token not found!");
+    if (!userId || !token) {
+      throw new Error("UserId or Token not found in localStorage");
+    }
 
     const response = await api.get(`/users/${userId}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
     });
+
     return response.data;
   } catch (error) {
+    console.error("Get user error:", error);
     throw error.response ? error.response.data : error.message;
   }
 };
