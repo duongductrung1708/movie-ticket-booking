@@ -54,6 +54,8 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  resetPasswordOTP: { type: Number },
+  resetPasswordExpiry: { type: Date },
 });
 
 // Encrypt password before saving user
@@ -62,9 +64,9 @@ UserSchema.pre("save", async function (next) {
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    next(); // Call next() to proceed
+    next();
   } catch (error) {
-    next(error); // Pass any error to next()
+    next(error);
   }
 });
 

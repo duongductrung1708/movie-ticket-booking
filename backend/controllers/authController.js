@@ -415,7 +415,6 @@ exports.loginUser = async (req, res) => {
 
     const { password: userPassword, ...userData } = user._doc;
     res.status(200).json({ ...userData, accessToken });
-
   } catch (err) {
     console.error("Login error:", err.message);
     return res.status(500).send("Server error");
@@ -426,4 +425,101 @@ exports.loginUser = async (req, res) => {
 // @access   Public
 exports.logoutUser = (req, res) => {
   res.json({ msg: "User logged out successfully" });
+};
+
+// @desc     Forgot password - send OTP
+// @access   Public
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ msg: "User with this email does not exist" });
+    }
+
+    // Generate a random OTP (6 digits)
+    const otp = Math.floor(100000 + Math.random() * 900000);
+
+    // Store OTP and expiry time in the user record (5 minutes expiry)
+    user.resetPasswordOTP = otp;
+    user.resetPasswordExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
+    await user.save();
+
+    // Set up Nodemailer to send the OTP to the user's email
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Your Password Reset OTP",
+      html: `<h1>Password Reset Request</h1>
+             <p>Your OTP for password reset is: <b>${otp}</b></p>
+             <p>This OTP is valid for 5 minutes.</p>`,
+    };
+
+    // Send email
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending OTP:", error);
+        return res.status(500).json({ msg: "Failed to send OTP" });
+      }
+      console.log("OTP email sent: " + info.response);
+      return res.status(200).json({ msg: "OTP sent to your email" });
+    });
+  } catch (err) {
+    console.error("Forgot Password error:", err.message);
+    return res.status(500).send("Server error");
+  }
+};
+
+// @desc     Reset password after OTP verification
+// @access   Public
+exports.resetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  try {
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ msg: "User not found" });
+    }
+
+    if (
+      user.resetPasswordOTP !== Number(otp) ||
+      user.resetPasswordExpiry < Date.now()
+    ) {
+      return res.status(400).json({ msg: "Invalid or expired OTP" });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      { password: hashedNewPassword },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ msg: "Error updating password" });
+    }
+
+    user.resetPasswordOTP = undefined;
+    user.resetPasswordExpiry = undefined;
+    await user.save();
+
+    return res.status(200).json({ msg: "Password reset successful" });
+  } catch (err) {
+    console.error("Reset Password error:", err.message);
+    return res.status(500).send("Server error");
+  }
 };

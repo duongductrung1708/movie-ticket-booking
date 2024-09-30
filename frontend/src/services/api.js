@@ -120,3 +120,25 @@ export const changePassword = async (oldPassword, newPassword) => {
     throw error.response ? error.response.data : error.message;
   }
 };
+
+// Function to send forgot password OTP
+export const sendForgotPasswordOTP = async (email) => {
+  try {
+    const response = await api.post("/auth/forgot-password", { email });
+    return response.data;
+  } catch (error) {
+    console.error("Send OTP error:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+// Function to reset password with OTP
+export const resetPasswordWithOTP = async (email, otp, newPassword) => {
+  try {
+    const response = await api.post("/auth/reset-password", { email, otp, newPassword });
+    return response.data;
+  } catch (error) {
+    console.error("Reset password error:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};

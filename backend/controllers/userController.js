@@ -9,10 +9,17 @@ const createUser = async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, email, phoneNumber, password: hashedPassword });
+    const newUser = new User({
+      username,
+      email,
+      phoneNumber,
+      password: hashedPassword,
+    });
 
     await newUser.save();
-    res.status(201).json({ msg: "User created successfully", userId: newUser._id });
+    res
+      .status(201)
+      .json({ msg: "User created successfully", userId: newUser._id });
   } catch (err) {
     res.status(500).json({ msg: "Error creating user", error: err.message });
   }
@@ -36,10 +43,31 @@ const getUser = async (req, res) => {
 // Update user information
 const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { username, email, phoneNumber, password, dob, address, city, district, gender, role } = req.body;
+  const {
+    username,
+    email,
+    phoneNumber,
+    password,
+    dob,
+    address,
+    city,
+    district,
+    gender,
+    role,
+  } = req.body;
 
   try {
-    const updatedData = { username, email, phoneNumber, dob, address, city, district, gender, role };
+    const updatedData = {
+      username,
+      email,
+      phoneNumber,
+      dob,
+      address,
+      city,
+      district,
+      gender,
+      role,
+    };
 
     if (password) {
       updatedData.password = await bcrypt.hash(password, 10);
@@ -87,16 +115,24 @@ const changePassword = async (req, res) => {
     }
 
     if (oldPassword === newPassword) {
-      return res.status(400).json({ msg: "New password cannot be the same as the old password" });
+      return res
+        .status(400)
+        .json({ msg: "New password cannot be the same as the old password" });
     }
 
     const isValidPassword = (password) => password.length >= 6;
     if (!isValidPassword(newPassword)) {
-      return res.status(400).json({ msg: "New password does not meet complexity requirements" });
+      return res
+        .status(400)
+        .json({ msg: "New password does not meet complexity requirements" });
     }
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-    const updatedUser = await User.findByIdAndUpdate(id, { password: hashedNewPassword }, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { password: hashedNewPassword },
+      { new: true }
+    );
 
     if (!updatedUser) {
       return res.status(404).json({ msg: "Error updating password" });
@@ -104,8 +140,15 @@ const changePassword = async (req, res) => {
 
     res.status(200).json({ msg: "Password updated successfully" });
   } catch (err) {
-    console.error("Error changing password for user ID:", id, "Error:", err.message);
-    res.status(500).json({ msg: "Error changing password", error: err.message });
+    console.error(
+      "Error changing password for user ID:",
+      id,
+      "Error:",
+      err.message
+    );
+    res
+      .status(500)
+      .json({ msg: "Error changing password", error: err.message });
   }
 };
 
