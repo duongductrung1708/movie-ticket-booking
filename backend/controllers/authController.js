@@ -441,15 +441,12 @@ exports.forgotPassword = async (req, res) => {
         .json({ msg: "User with this email does not exist" });
     }
 
-    // Generate a random OTP (6 digits)
     const otp = Math.floor(100000 + Math.random() * 900000);
 
-    // Store OTP and expiry time in the user record (5 minutes expiry)
     user.resetPasswordOTP = otp;
     user.resetPasswordExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
     await user.save();
 
-    // Set up Nodemailer to send the OTP to the user's email
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
