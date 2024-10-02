@@ -2,17 +2,16 @@ import React, { useState } from "react";
 import "@fontsource/sora";
 import styled from "styled-components";
 import Logo from "./Logo";
-// import Button from "./Button";
 import Popover from "@mui/material/Popover";
 import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import "../styles/navStyles.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import HistoryIcon from "@mui/icons-material/History";
 import KeyIcon from "@mui/icons-material/Key";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { logoutUser } from '../services/api';
+import { logoutUser } from "../services/api";
 
 const Section = styled.section`
   width: 100vw;
@@ -142,8 +141,10 @@ const Item = styled.div`
   font-family: "Sora", sans-serif !important;
   margin-left: 0.5rem;
 `;
+
 const Navigation = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [click, setClick] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -186,10 +187,10 @@ const Navigation = () => {
   const handleLogout = async () => {
     try {
       await logoutUser();
-      localStorage.removeItem('user');
-      window.location.href = '/';
+      localStorage.removeItem("user");
+      window.location.href = "/";
     } catch (error) {
-      console.error('Logout failed', error);
+      console.error("Logout failed", error);
     }
   };
 
@@ -197,25 +198,33 @@ const Navigation = () => {
     <Section id="navigation">
       <NavBar>
         <Logo />
-        <HamburgerMenu clicked={click} onClick={() => setClick(!click)}>
-          &nbsp;
-        </HamburgerMenu>
-        <Menu clicked={click}>
-          <MenuItemStyled onClick={() => scrollTo("home")}>Home</MenuItemStyled>
-          <MenuItemStyled onClick={() => scrollTo("about")}>
-            Movies
-          </MenuItemStyled>
-          <MenuItemStyled onClick={() => scrollTo("movie-list")}>
-            Now showing
-          </MenuItemStyled>
-          <MenuItemStyled onClick={() => scrollTo("showcase")}>
-            Special offer
-          </MenuItemStyled>
-          <MenuItemStyled onClick={() => scrollTo("upcoming-movies")}>
-            Upcoming
-          </MenuItemStyled>
-          <MenuItemStyled onClick={() => scrollTo("faq")}>Faq</MenuItemStyled>
-        </Menu>
+        {location.pathname === "/home" && (
+          <>
+            <HamburgerMenu clicked={click} onClick={() => setClick(!click)}>
+              &nbsp;
+            </HamburgerMenu>
+            <Menu clicked={click}>
+              <MenuItemStyled onClick={() => scrollTo("home")}>
+                Home
+              </MenuItemStyled>
+              <MenuItemStyled onClick={() => scrollTo("about")}>
+                Movies
+              </MenuItemStyled>
+              <MenuItemStyled onClick={() => scrollTo("movie-list")}>
+                Now showing
+              </MenuItemStyled>
+              <MenuItemStyled onClick={() => scrollTo("showcase")}>
+                Special offer
+              </MenuItemStyled>
+              <MenuItemStyled onClick={() => scrollTo("upcoming-movies")}>
+                Upcoming
+              </MenuItemStyled>
+              <MenuItemStyled onClick={() => scrollTo("faq")}>
+                Faq
+              </MenuItemStyled>
+            </Menu>
+          </>
+        )}
         <div className="desktop">
           <Button
             className="accountBtn"
