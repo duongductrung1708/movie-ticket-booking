@@ -55,6 +55,7 @@ const Container = styled.div`
 
   @media (max-width: 64em) {
     width: 80%;
+    grid-template-columns: repeat(4, 1fr);
   }
   @media (max-width: 48em) {
     width: 90%;
