@@ -3,7 +3,7 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 20px; /* Added padding for better spacing on smaller screens */
+  padding: 20px;
 }
 
 .signin-bg::before {
@@ -87,10 +87,11 @@
 .signup-link {
   margin-top: 1rem !important;
   color: #fff;
+  font-weight: 600 !important;
 }
 
 .signup-btn {
-  color: #e50914;
+  color: #fff !important;
   font-weight: 600 !important;
 }
 

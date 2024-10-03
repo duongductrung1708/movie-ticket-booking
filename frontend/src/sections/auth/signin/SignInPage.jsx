@@ -46,19 +46,19 @@ const SignInPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!email || !password) {
       toast.error("Please fill in all fields!");
       return;
     }
-  
+
     try {
       const userData = await loginUser({ email, password });
-      
+
       if (userData?.token) {
-        localStorage.setItem('user', userData.token);
+        localStorage.setItem("user", userData.token);
       }
-  
+
       toast.success("Login successful!");
       login(userData);
       navigate("/home");
@@ -88,6 +88,8 @@ const SignInPage = () => {
               K. Cinema
             </Link>
           </LogoText>
+          <div></div>
+          <div></div>
           <div></div>
           <div></div>
           <div></div>
@@ -195,13 +197,12 @@ const SignInPage = () => {
           </Box>
 
           <Typography variant="body1" className="signup-link">
-            First time here?{" "}
+            Don't have an account?{" "}
             <Button
-              color="secondary"
               className="signup-btn"
               onClick={() => navigate("/signup")}
             >
-              Sign up now!
+              Sign up
             </Button>
           </Typography>
         </Box>
