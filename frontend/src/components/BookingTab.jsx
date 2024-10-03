@@ -19,14 +19,19 @@ const Title = styled.h2`
   text-transform: uppercase;
   border-left: 5px solid #fff;
 
-  @media (max-width: 768px) {
-    font-size: 2rem;
+  @media (max-width: 1024px) {
+    font-size: 1.3rem;
     margin-bottom: 1rem;
   }
 
-  @media (max-width: 480px) {
-    font-size: 1.8rem;
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
     margin-bottom: 0.8rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
   }
 `;
 
@@ -36,12 +41,16 @@ const Subtitle = styled.p`
   color: #fff;
   margin-bottom: 1rem;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     font-size: 1.4rem;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 768px) {
     font-size: 1.2rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
   }
 `;
 
@@ -63,14 +72,22 @@ const ShowtimeButton = styled.button`
     color: white;
   }
 
-  @media (max-width: 768px) {
-    font-size: 1.2rem;
+  @media (max-width: 1024px) {
+    font-size: 1rem;
     padding: 0.7rem 1.2rem;
+    margin: 0.5rem 1rem 1rem;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0.8rem 1rem;
   }
 
   @media (max-width: 480px) {
     font-size: 1rem;
     padding: 0.5rem 1rem;
+    margin: 0.5rem 1rem 1rem;
   }
 `;
 
@@ -88,6 +105,10 @@ const Overlay = styled.div`
   background: rgba(0, 0, 0, 0.5);
   display: ${(props) => (props.isOpen ? "block" : "none")};
   z-index: 998;
+
+  @media (max-width: 1024px) {
+    height: 100%;
+  }
 `;
 
 const BookingWrapper = styled.div`
@@ -111,10 +132,18 @@ const BookingWrapper = styled.div`
 
   @media (max-width: 1024px) {
     width: 80%;
+    height: 100%;
+    clip-path: polygon(0 0, 88% 0, 0% 400%);
   }
 
   @media (max-width: 768px) {
     width: 100%;
+    clip-path: polygon(0 0, 80% 0, 0% 400%);
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+    clip-path: polygon(-1% -1%, 80% 0%, -1% 400%);
   }
 `;
 
@@ -125,12 +154,12 @@ const ScrollableContent = styled.div`
   padding-right: 1.5rem;
 
   @media (max-width: 768px) {
-    max-height: 50vh;
+    max-height: 100vh;
     padding-right: 1rem;
   }
 
   @media (max-width: 480px) {
-    max-height: 40vh;
+    max-height: 100vh;
     padding-right: 0.5rem;
   }
 `;
@@ -144,6 +173,18 @@ const CloseButton = styled.button`
   position: absolute;
   top: 10px;
   right: 10px;
+
+  @media (max-width: 1024px) {
+    right: 100px;
+  }
+
+  @media (max-width: 768px) {
+    right: 130px;
+  }
+
+  @media (max-width: 480px) {
+    right: 180px;
+  }
 `;
 
 const SelectWrapper = styled.div`
@@ -188,14 +229,19 @@ const TheaterLogo = styled.img`
     filter: brightness(1);
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     width: 60px;
     height: 60px;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 768px) {
     width: 50px;
     height: 50px;
+  }
+
+  @media (max-width: 480px) {
+    width: 40px;
+    height: 40px;
   }
 `;
 
@@ -205,12 +251,18 @@ const Address = styled.div`
   display: flex;
   align-items: center;
 
+  @media (max-width: 1024px) {
+    font-size: 1rem;
+    margin-left: 5rem;
+  }
+
   @media (max-width: 768px) {
-    margin-left: 10rem;
+    font-size: 0.9rem;
+    margin-left: 0;
   }
 
   @media (max-width: 480px) {
-    margin-left: 5rem;
+    font-size: 0.8rem;
   }
 `;
 

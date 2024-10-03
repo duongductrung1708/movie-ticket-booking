@@ -45,9 +45,20 @@ const BookTicketButton = styled.button`
     transition: opacity 0.4s ease;
   }
 
+  @media (max-width: 1024px) {
+    width: 60px;
+    height: 70px;
+    font-size: 1rem;
+    clip-path: polygon(0 0, 100% 0, 0% 200%);
+    
+    &:hover {
+      width: 170px;
+    }
+  }
+
   @media (max-width: 768px) {
     width: 50px;
-    height: 50px;
+    height: 70px;
     font-size: 0.8rem;
     
     &:hover {
@@ -57,7 +68,7 @@ const BookTicketButton = styled.button`
 
   @media (max-width: 480px) {
     width: 40px;
-    height: 40px;
+    height: 70px;
     font-size: 0.7rem;
     
     &:hover {
