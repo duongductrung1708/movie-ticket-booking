@@ -182,7 +182,7 @@ const RegistrationPage = () => {
             variant="filled"
             margin="normal"
             InputLabelProps={{
-              style: { color: "violet" },
+              style: { color: "red" },
             }}
             onChange={handleChange}
           />
@@ -194,7 +194,7 @@ const RegistrationPage = () => {
             variant="filled"
             margin="normal"
             InputLabelProps={{
-              style: { color: "violet" },
+              style: { color: "red" },
             }}
             onChange={handleChange}
           />
@@ -206,7 +206,7 @@ const RegistrationPage = () => {
             variant="filled"
             margin="normal"
             InputLabelProps={{
-              style: { color: "violet" },
+              style: { color: "red" },
             }}
             onChange={handleChange}
           />
@@ -220,7 +220,7 @@ const RegistrationPage = () => {
             margin="normal"
             focused
             InputLabelProps={{
-              style: { color: "violet" },
+              style: { color: "red" },
             }}
             onChange={handleChange}
             InputProps={{
@@ -238,7 +238,7 @@ const RegistrationPage = () => {
             variant="filled"
             margin="normal"
             InputLabelProps={{
-              style: { color: "violet" },
+              style: { color: "red" },
             }}
             InputProps={{
               endAdornment: (
@@ -260,7 +260,7 @@ const RegistrationPage = () => {
             variant="filled"
             margin="normal"
             InputLabelProps={{
-              style: { color: "violet" },
+              style: { color: "red" },
             }}
             InputProps={{
               endAdornment: (

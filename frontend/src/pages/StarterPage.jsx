@@ -118,11 +118,11 @@ const StarterPage = () => {
             variant="outlined"
             label="Your email"
             className="email-input"
-            color="secondary"
+            color="error"
             fullWidth
             focused
             InputLabelProps={{
-              style: { color: "#fff", fontSize: "1.3rem" },
+              style: { color: "red", fontSize: "1.3rem" },
             }}
             InputProps={{
               style: { color: "#fff", fontSize: "1.5rem" },
