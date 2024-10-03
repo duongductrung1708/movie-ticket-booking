@@ -199,7 +199,7 @@ const ForgotPasswordPage = () => {
               variant="filled"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              InputLabelProps={{ style: { color: "violet" } }}
+              InputLabelProps={{ style: { color: "red" } }}
               InputProps={{
                 sx: {
                   "& .MuiFilledInput-root": {

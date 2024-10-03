@@ -77,7 +77,7 @@ const SignInPage = () => {
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        minHeight: "100vh",
+        minHeight: "96vh",
       }}
     >
       <Container maxWidth="lg" className="signin-container">
@@ -98,7 +98,7 @@ const SignInPage = () => {
 
         <Box className="signin-content">
           <Typography variant="h3" className="signin-title" gutterBottom>
-            Sign In
+            Sign in
           </Typography>
 
           <Box
@@ -114,9 +114,9 @@ const SignInPage = () => {
               variant="filled"
               className="input-field"
               margin="normal"
-              color="secondary"
+              color="error"
               InputLabelProps={{
-                style: { color: "violet" },
+                style: { color: "red" },
               }}
               InputProps={{
                 style: { color: "#fff" },
@@ -144,9 +144,9 @@ const SignInPage = () => {
               variant="filled"
               className="input-field"
               margin="normal"
-              color="secondary"
+              color="red"
               InputLabelProps={{
-                style: { color: "violet" },
+                style: { color: "red" },
               }}
               InputProps={{
                 style: { color: "#fff" },
