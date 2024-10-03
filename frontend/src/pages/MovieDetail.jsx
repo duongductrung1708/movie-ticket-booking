@@ -1,6 +1,6 @@
 import "@fontsource/akaya-telivigala";
 import "@fontsource/sora";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import {
@@ -90,6 +90,19 @@ const MovieSynopsis = styled.p`
   font-size: 1.2rem;
   margin-top: 1rem;
   line-height: 1.6;
+
+  @media (max-width: 64em) {
+    font-size: 1rem;
+  }
+
+  @media (max-width: 48em) {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+  }
+
+  @media (max-width: 30em) {
+    font-size: 0.6rem;
+  }
 `;
 
 const AdditionalInfoGrid = styled.div`
@@ -105,22 +118,59 @@ const AdditionalInfoGrid = styled.div`
   }
 `;
 
+const Details = styled.div`
+    @media (max-width: 48em) {
+    padding: 0.5rem;
+  }
+`;
+
 const DetailItem = styled.div`
   margin-bottom: 0.5rem;
   font-family: "Sora", sans-serif;
   justify-content: space-between;
   display: flex;
   line-height: 2;
+
+    @media (max-width: 64em) {
+    font-size: 1rem;
+  }
+
+  @media (max-width: 48em) {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+  }
+
+  @media (max-width: 30em) {
+    font-size: 0.6rem;
+  }
 `;
 
 const CastList = styled.div`
   margin-top: 2rem;
+
+    @media (max-width: 48em) {
+    display: flex;
+    padding: 0.5rem;
+  }
 `;
 
 const CastMember = styled.div`
   font-family: "Sora", sans-serif;
   font-size: 1.2rem;
   margin-bottom: 0.5rem;
+
+  @media (max-width: 64em) {
+    font-size: 1rem;
+  }
+
+  @media (max-width: 48em) {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+  }
+
+  @media (max-width: 30em) {
+    font-size: 0.6rem;
+  }
 `;
 
 const Heading = styled.div`
@@ -131,6 +181,10 @@ const Heading = styled.div`
   padding-left: 0.5rem;
   margin-bottom: 0.5rem;
   margin-top: 2.5rem;
+
+  @media (max-width: 48em) {
+    margin-top: 0;
+  }
 `;
 
 const VideoWrapper = styled.div`
@@ -191,14 +245,19 @@ const TheaterLogo = styled.img`
     filter: brightness(1);
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     width: 60px;
     height: 60px;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 768px) {
     width: 50px;
     height: 50px;
+  }
+
+  @media (max-width: 480px) {
+    width: 40px;
+    height: 40px;
   }
 `;
 
@@ -208,12 +267,18 @@ const Address = styled.div`
   display: flex;
   align-items: center;
 
+  @media (max-width: 1024px) {
+    font-size: 1rem;
+    margin-left: 5rem;
+  }
+
   @media (max-width: 768px) {
-    margin-left: 10rem;
+    font-size: 0.9rem;
+    margin-left: 0;
   }
 
   @media (max-width: 480px) {
-    margin-left: 5rem;
+    font-size: 0.8rem;
   }
 `;
 
@@ -221,6 +286,15 @@ const BookingOptions = styled.div`
   display: flex;
   flex-direction: column;
   margin-top: 5rem;
+
+    @media (max-width: 48em) {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+  }
+
+  @media (max-width: 30em) {
+    font-size: 0.6rem;
+  }
 `;
 
 const Showtime = styled.div`
@@ -238,12 +312,12 @@ const Title = styled.h2`
   border-left: 5px solid #fff;
 
   @media (max-width: 768px) {
-    font-size: 2rem;
+    font-size: 1.6rem;
     margin-bottom: 1rem;
   }
 
   @media (max-width: 480px) {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     margin-bottom: 0.8rem;
   }
 `;
@@ -266,14 +340,22 @@ const ShowtimeButton = styled.button`
     color: white;
   }
 
-  @media (max-width: 768px) {
-    font-size: 1.2rem;
+    @media (max-width: 1024px) {
+    font-size: 1rem;
     padding: 0.7rem 1.2rem;
+    margin: 0.5rem 1rem 1rem;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0.8rem 1rem;
   }
 
   @media (max-width: 480px) {
     font-size: 1rem;
     padding: 0.5rem 1rem;
+    margin: 0.5rem 1rem 1rem;
   }
 `;
 
@@ -400,6 +482,10 @@ const MovieDetail = () => {
     },
   };
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <Section>
       <Navigation />
@@ -439,7 +525,7 @@ const MovieDetail = () => {
                 </CastList>
               </div>
               <div></div>
-              <div>
+              <Details>
                 <Heading>Details</Heading>
                 <DetailItem variant="body1">
                   <strong>Director:</strong> {movie.director}
@@ -462,7 +548,7 @@ const MovieDetail = () => {
                 <DetailItem variant="body1">
                   <strong>Rating:</strong> {movie.rating} / 10
                 </DetailItem>
-              </div>
+              </Details>
             </AdditionalInfoGrid>
             <BookingOptions>
               <Heading>Booking</Heading>
