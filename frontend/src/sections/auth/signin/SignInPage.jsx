@@ -46,19 +46,19 @@ const SignInPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!email || !password) {
       toast.error("Please fill in all fields!");
       return;
     }
-  
+
     try {
       const userData = await loginUser({ email, password });
-      
+
       if (userData?.token) {
-        localStorage.setItem('user', userData.token);
+        localStorage.setItem("user", userData.token);
       }
-  
+
       toast.success("Login successful!");
       login(userData);
       navigate("/home");
@@ -77,7 +77,7 @@ const SignInPage = () => {
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        minHeight: "100vh",
+        minHeight: "96vh",
       }}
     >
       <Container maxWidth="lg" className="signin-container">
@@ -92,11 +92,13 @@ const SignInPage = () => {
           <div></div>
           <div></div>
           <div></div>
+          <div></div>
+          <div></div>
         </Box>
 
         <Box className="signin-content">
           <Typography variant="h3" className="signin-title" gutterBottom>
-            Sign In
+            Sign in
           </Typography>
 
           <Box
@@ -112,9 +114,9 @@ const SignInPage = () => {
               variant="filled"
               className="input-field"
               margin="normal"
-              color="secondary"
+              color="error"
               InputLabelProps={{
-                style: { color: "violet" },
+                style: { color: "red" },
               }}
               InputProps={{
                 style: { color: "#fff" },
@@ -142,9 +144,9 @@ const SignInPage = () => {
               variant="filled"
               className="input-field"
               margin="normal"
-              color="secondary"
+              color="red"
               InputLabelProps={{
-                style: { color: "violet" },
+                style: { color: "red" },
               }}
               InputProps={{
                 style: { color: "#fff" },
@@ -195,13 +197,12 @@ const SignInPage = () => {
           </Box>
 
           <Typography variant="body1" className="signup-link">
-            First time here?{" "}
+            Don't have an account?{" "}
             <Button
-              color="secondary"
               className="signup-btn"
               onClick={() => navigate("/signup")}
             >
-              Sign up now!
+              Sign up
             </Button>
           </Typography>
         </Box>

@@ -20,13 +20,13 @@ const BookTicketButton = styled.button`
   position: fixed;
   top: 0;
   z-index: 100;
-  width: 60px; /* Smaller default size */
-  height: 60px; /* Smaller default size */
+  width: 90px;
+  height: 70px;
   padding: 0.5rem;
-  background-color: black;
+  background-color: red;
   color: white;
   border: none;
-  font-size: 1rem; /* Adjusted for better responsiveness */
+  font-size: 1rem;
   cursor: pointer;
   display: ${(props) => (props.show ? "block" : "none")};
   justify-content: center;
@@ -36,8 +36,8 @@ const BookTicketButton = styled.button`
   clip-path: polygon(0 0, 100% 0, 0% 200%);
 
   &:hover {
-    width: 150px; /* Adjusted size for hover */
-    height: 60px; /* Adjusted size for hover */
+    width: 190px;
+    height: 70px;
   }
 
   &:hover .text {
@@ -45,23 +45,34 @@ const BookTicketButton = styled.button`
     transition: opacity 0.4s ease;
   }
 
-  @media (max-width: 768px) {
-    width: 50px; /* Responsive adjustments */
-    height: 50px;
-    font-size: 0.8rem; /* Smaller text */
+  @media (max-width: 1024px) {
+    width: 60px;
+    height: 70px;
+    font-size: 1rem;
+    clip-path: polygon(0 0, 100% 0, 0% 200%);
     
     &:hover {
-      width: 120px; /* Responsive hover size */
+      width: 170px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    width: 50px;
+    height: 70px;
+    font-size: 0.8rem;
+    
+    &:hover {
+      width: 120px;
     }
   }
 
   @media (max-width: 480px) {
-    width: 40px; /* Smaller for mobile */
-    height: 40px;
+    width: 40px;
+    height: 70px;
     font-size: 0.7rem;
     
     &:hover {
-      width: 100px; /* Adjusted size for mobile hover */
+      width: 100px;
     }
   }
 `;
@@ -71,22 +82,22 @@ const Icon = styled.div`
   color: white;
   padding: 0;
   position: absolute;
-  top: 1rem; /* Adjusted for responsiveness */
+  top: 1rem;
 `;
 
 const Text = styled.div`
   color: white;
-  font-size: 1rem; /* Adjusted for better responsiveness */
+  font-size: 1.1rem;
   opacity: 0;
   transition: opacity 0.4s ease;
   font-weight: bold;
 
   @media (max-width: 768px) {
-    font-size: 0.8rem; /* Responsive text size */
+    font-size: 0.8rem;
   }
 
   @media (max-width: 480px) {
-    font-size: 0.6rem; /* Smaller text for mobile */
+    font-size: 0.6rem;
   }
 `;
 
@@ -139,7 +150,7 @@ const HomePage = () => {
           show={showButton && !isBookingTabOpen}
           onClick={() => setIsBookingTabOpen(true)}
         >
-          <Text className="text">Cinema</Text>
+          <Text className="text">Book Here</Text>
           <Icon>
             <TouchAppIcon />
           </Icon>

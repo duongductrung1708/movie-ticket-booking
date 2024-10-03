@@ -160,11 +160,16 @@ const ForgotPasswordPage = () => {
   return (
     <Container>
       <Box className="app-nav">
+        <div></div>
         <LogoText>
           <Link style={{ textDecoration: "none", color: "black" }} to="/">
             K. Cinema
           </Link>
         </LogoText>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
         <Button
           variant="contained"
           color="error"
@@ -173,6 +178,7 @@ const ForgotPasswordPage = () => {
         >
           Sign In
         </Button>
+        <div></div>
       </Box>
       <FormWrapper>
         <StyledTypography variant="h4" gutterBottom>
@@ -193,7 +199,7 @@ const ForgotPasswordPage = () => {
               variant="filled"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              InputLabelProps={{ style: { color: "violet" } }}
+              InputLabelProps={{ style: { color: "red" } }}
               InputProps={{
                 sx: {
                   "& .MuiFilledInput-root": {

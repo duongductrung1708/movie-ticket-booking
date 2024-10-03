@@ -28,6 +28,19 @@ const GlobalStyles = createGlobalStyle`
     color: inherit;
     text-decoration: none;
   }
+
+//   input:-webkit-autofill {
+//   -webkit-box-shadow: 0 0 0 100px transparent inset !important; /* Change to your desired background */
+//   -webkit-text-fill-color: #fff !important; /* Text color */
+// }
+
+// input:-webkit-autofill:hover, 
+// input:-webkit-autofill:focus, 
+// input:-webkit-autofill:active {
+//   -webkit-box-shadow: 0 0 0 100px transparent inset !important; /* Same color for consistency */
+//   -webkit-text-fill-color: #fff !important;
+// }
+
 `;
 
 export default GlobalStyles;

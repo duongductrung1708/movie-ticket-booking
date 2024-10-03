@@ -57,29 +57,72 @@ const StarterPage = () => {
       </header>
 
       <div className="app-content">
-        <Typography variant="h1" gutterBottom className="main-title">
+        <Typography
+          variant="h1"
+          gutterBottom
+          className="main-title"
+          sx={{
+            fontSize: {
+              xs: "2rem",
+              sm: "3rem",
+              md: "4rem",
+              lg: "5rem",
+            },
+            fontWeight: "bold",
+            textAlign: "center",
+            color: "white",
+          }}
+        >
           Movie ticket booking website
         </Typography>
-        <Typography variant="h4" gutterBottom className="sub-title">
+
+        <Typography
+          variant="h4"
+          gutterBottom
+          className="sub-title"
+          sx={{
+            fontSize: {
+              xs: "1.2rem",
+              sm: "1.5rem",
+              md: "2rem",
+              lg: "2.5rem",
+            },
+            textAlign: "center",
+            color: "white",
+          }}
+        >
           Get the most complete and fastest updates on movies, ticket prices,
           theaters and promotions for you
         </Typography>
 
-        <Typography variant="h6" className="email-prompt">
+        <Typography
+          variant="h6"
+          className="email-prompt"
+          sx={{
+            fontSize: {
+              xs: "1rem",
+              sm: "1.2rem",
+              md: "1.5rem",
+            },
+            textAlign: "center",
+            color: "white",
+            marginBottom: "1rem",
+          }}
+        >
           Follow us for daily deals.
         </Typography>
 
-        <Container className="email-form">
+        <Container className="email-form" sx={{ textAlign: "center" }}>
           <TextField
             id="filled-basic"
             variant="outlined"
             label="Your email"
             className="email-input"
-            color="secondary"
+            color="error"
             fullWidth
             focused
             InputLabelProps={{
-              style: { color: "#fff", fontSize: "1.3rem" },
+              style: { color: "red", fontSize: "1.3rem" },
             }}
             InputProps={{
               style: { color: "#fff", fontSize: "1.5rem" },
@@ -102,7 +145,13 @@ const StarterPage = () => {
             variant="contained"
             color="error"
             className="try-now-btn"
-            style={{ fontSize: "1rem" }}
+            sx={{
+              fontSize: {
+                xs: "0.5rem",
+                sm: "0.7rem",
+                md: "1rem",
+              },
+            }}
             onClick={() => navigate("/signup")}
           >
             Get Started ⮞

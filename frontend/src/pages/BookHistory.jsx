@@ -13,6 +13,8 @@ import {
   Grid,
   Breadcrumbs,
   Link as MuiLink,
+  TablePagination,
+  TextField,
 } from "@mui/material";
 import styled from "styled-components";
 import Navigation from "../components/Navigation";
@@ -58,24 +60,6 @@ const Btn = styled.button`
   &:hover {
     transform: scale(0.9);
   }
-
-  &::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    border: 2px solid ${(props) => props.theme.text};
-    width: 100%;
-    height: 100%;
-    border-radius: 50px;
-    transition: all 0.2s ease;
-  }
-
-  &:hover::after {
-    transform: translate(-50%, -50%) scale(1);
-    padding: 0.3rem;
-  }
 `;
 
 const BreadcrumbContainer = styled.div`
@@ -105,7 +89,7 @@ const BookHistory = () => {
     {
       serialNumber: 1,
       ticketCode: "ABC1234567",
-      movieName: "Movie Title 1",
+      movieName: "The Matrix",
       showtime: "2024-09-30T19:00:00",
       theater: "Theater 1",
       price: 100,
@@ -114,13 +98,21 @@ const BookHistory = () => {
     {
       serialNumber: 2,
       ticketCode: "XYZ9876543",
-      movieName: "Movie Title 2",
+      movieName: "Inception",
       showtime: "2024-10-01T20:00:00",
       theater: "Theater 2",
       price: 200,
       paymentStatus: "Counter",
     },
   ]);
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (event) => {
+    setSearchQuery(event.target.value);
+  };
 
   const handleRefresh = () => {
     setBookings((prevBookings) => [
@@ -137,6 +129,20 @@ const BookHistory = () => {
     ]);
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  // Filtered bookings based on search query
+  const filteredBookings = bookings.filter((booking) =>
+    booking.movieName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <Section>
       <Navigation />
@@ -152,6 +158,17 @@ const BookHistory = () => {
         <Typography variant="h4" align="center" gutterBottom>
           Booking History
         </Typography>
+
+        {/* Search Field */}
+        <TextField
+          label="Search by Movie Name"
+          variant="outlined"
+          fullWidth
+          value={searchQuery}
+          onChange={handleSearch}
+          margin="normal"
+        />
+
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
@@ -166,22 +183,35 @@ const BookHistory = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {bookings.map((booking) => (
-                <TableRow key={booking.serialNumber}>
-                  <TableCell>{booking.serialNumber}</TableCell>
-                  <TableCell>{booking.ticketCode}</TableCell>
-                  <TableCell>{booking.movieName}</TableCell>
-                  <TableCell>
-                    {new Date(booking.showtime).toLocaleString()}
-                  </TableCell>
-                  <TableCell>{booking.theater}</TableCell>
-                  <TableCell>{booking.price.toFixed(3)}đ</TableCell>
-                  <TableCell>{booking.paymentStatus}</TableCell>
-                </TableRow>
-              ))}
+              {filteredBookings
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((booking) => (
+                  <TableRow key={booking.serialNumber}>
+                    <TableCell>{booking.serialNumber}</TableCell>
+                    <TableCell>{booking.ticketCode}</TableCell>
+                    <TableCell>{booking.movieName}</TableCell>
+                    <TableCell>
+                      {new Date(booking.showtime).toLocaleString()}
+                    </TableCell>
+                    <TableCell>{booking.theater}</TableCell>
+                    <TableCell>{booking.price.toFixed(3)}đ</TableCell>
+                    <TableCell>{booking.paymentStatus}</TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* Pagination */}
+        <TablePagination
+          component="div"
+          count={filteredBookings.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
+
         <Grid container justifyContent="flex-end" marginTop={2}>
           <Btn variant="outlined" color="primary" onClick={handleRefresh}>
             Refresh

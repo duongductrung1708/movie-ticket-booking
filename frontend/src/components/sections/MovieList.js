@@ -55,13 +55,14 @@ const Container = styled.div`
 
   @media (max-width: 64em) {
     width: 80%;
+    grid-template-columns: repeat(3, 1fr);
   }
   @media (max-width: 48em) {
     width: 90%;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
   @media (max-width: 30em) {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(1, 1fr);
   }
 `;
 
@@ -140,7 +141,7 @@ const ShowMoreButton = styled.button`
   font-size: ${(props) => props.theme.fontmd};
 `;
 
-const MovieListItem = React.forwardRef(({ image, title, rating }, ref) => {
+const MovieListItem = React.forwardRef(({ image, title, rating, duration, releaseDate }, ref) => {
   const navigate = useNavigate();
 
   const handleBooking = () => {
@@ -152,7 +153,8 @@ const MovieListItem = React.forwardRef(({ image, title, rating }, ref) => {
       <MovieInfo>
         <MovieTitle>{title}</MovieTitle>
         <MovieRating>Rating: {rating} / 10</MovieRating>
-        z<Button onClick={handleBooking}>Book Now</Button>
+        <MovieRating>{duration} | {releaseDate}</MovieRating>
+        <Button onClick={handleBooking}>Book Now</Button>
       </MovieInfo>
     </MovieItem>
   );
@@ -171,110 +173,150 @@ const MovieList = () => {
       rating: "8.7",
       image:
         "https://play-lh.googleusercontent.com/zL8ya3uEa7Q-oDqc7McTIAaRvwKZNN4HMICMwHHL2eKsbE9Hms_2Dj6SWwNGI555CyauvPVjCPUzYBm2TJ8",
+      duration: "136 minutes",
+      releaseDate: "03/31/2024",
     },
     {
       title: "Inception",
       rating: "8.8",
       image:
         "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg",
+      duration: "148 minutes",
+      releaseDate: "03/31/2024",
     },
     {
       title: "Interstellar",
       rating: "8.6",
       image:
         "https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg",
+      duration: "169 minutes",
+      releaseDate: "07/29/2014",
     },
     {
       title: "Avatar",
       rating: "7.8",
       image:
         "https://play-lh.googleusercontent.com/jA5PwYqtmoFS7StajBe2EawN4C8WDdltO68JcsrvYKSuhjcTap5QMETkloXSq5soqRBqFjuTAhh28AYrA6A",
+      duration: "121 minutes",
+      releaseDate: "07/01/2009",
     },
     {
       title: "The Dark Knight",
       rating: "9.0",
       image:
         "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_.jpg",
+      duration: "179 minutes",
+      releaseDate: "04/15/2008",
     },
     {
       title: "Joker",
       rating: "8.5",
       image:
         "https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_.jpg",
+      duration: "195 minutes",
+      releaseDate: "1994",
     },
     {
       title: "Titanic",
       rating: "7.8",
       image:
         "https://m.media-amazon.com/images/M/MV5BMDdmZGU3NDQtY2E5My00ZTliLWIzOTUtMTY4ZGI1YjdiNjk3XkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_FMjpg_UX1000_.jpg",
+      duration: "194 minutes",
+      releaseDate: "1997",
     },
     {
       title: "Gladiator",
       rating: "8.5",
       image:
         "https://m.media-amazon.com/images/M/MV5BODVlNzZmOWUtNTNhNC00YzczLTg5NzAtOThlZjViZDkwYTIzXkEyXkFqcGc@._V1_.jpg",
+      duration: "195 minutes",
+      releaseDate: "1994",
     },
     {
       title: "The Godfather",
       rating: "9.2",
       image:
         "https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_FMjpg_UX1000_.jpg",
+      duration: "194 minutes",
+      releaseDate: "04/15/1972",
     },
     {
       title: "Schindler's List",
       rating: "9.0",
       image:
         "https://m.media-amazon.com/images/M/MV5BNDE4OTMxMTctNmRhYy00NWE2LTg3YzItYTk3M2UwOTU5Njg4XkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg",
+      duration: "195 minutes",
+      releaseDate: "09/15/1994",
     },
     {
       title: "The Avengers",
       rating: "8.0",
       image: "https://via.placeholder.com/150x225",
+      duration: "195 minutes",
+      releaseDate: "04/15/2008",
     },
     {
       title: "Pulp Fiction",
       rating: "8.9",
       image: "https://via.placeholder.com/150x225",
+      duration: "199 minutes",
+      releaseDate: "09/10/1994",
     },
     {
       title: "Forrest Gump",
       rating: "8.8",
       image: "https://via.placeholder.com/150x225",
+      duration: "199 minutes",
+      releaseDate: "09/06/1994",
     },
     {
       title: "Fight Club",
       rating: "8.8",
       image: "https://via.placeholder.com/150x225",
+      duration: "199 minutes",
+      releaseDate: "09/10/1994",
     },
     {
       title: "The Shawshank Redemption",
       rating: "9.3",
       image: "https://via.placeholder.com/150x225",
+      duration: "199 minutes",
+      releaseDate: "09/10/1994",
     },
     {
       title: "Parasite",
       rating: "8.6",
       image: "https://via.placeholder.com/150x225",
+      duration: "199 minutes",
+      releaseDate: "09/15/1994",
     },
     {
       title: "The Lion King",
       rating: "8.5",
       image: "https://via.placeholder.com/150x225",
+      duration: "199 minutes",
+      releaseDate: "09/12/1994",
     },
     {
       title: "The Lord of the Rings",
       rating: "8.9",
       image: "https://via.placeholder.com/150x225",
+      duration: "199 minutes",
+      releaseDate: "09/12/2001",
     },
     {
       title: "Harry Potter",
       rating: "7.6",
       image: "https://via.placeholder.com/150x225",
+      duration: "199 minutes",
+      releaseDate: "09/15/2008",
     },
     {
       title: "Star Wars",
       rating: "8.6",
       image: "https://via.placeholder.com/150x225",
+      duration: "199 minutes",
+      releaseDate: "09/12/1977",
     },
   ];
 
@@ -306,6 +348,8 @@ const MovieList = () => {
             image={movie.image}
             title={movie.title}
             rating={movie.rating}
+            duration={movie.duration}
+            releaseDate={movie.releaseDate}
           />
         ))}
       </Container>
