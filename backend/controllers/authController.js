@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const nodemailer = require("nodemailer");
 const User = require("../models/User");
+const Role = require("../models/Role");
 
 // @desc     Register user
 // @access   Public
@@ -22,14 +23,18 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ msg: "User already exists" });
     }
 
-    // Create new user
+    const customerRole = await Role.findOne({ name: "customer" });
+      if (!customerRole) {
+          return res.status(500).json({ msg: "Customer role not found" });
+      }
+
     user = new User({
       username,
       email,
       phoneNumber,
-      password,
       dob,
-      role: "customer",
+      password,
+      role: customerRole._id,
       isVerified: false,
     });
 
@@ -396,6 +401,11 @@ exports.loginUser = async (req, res) => {
       return res.status(400).json({ msg: "Invalid credentials" });
     }
 
+    const customerRole = await Role.findOne({ name: "customer" });
+      if (!customerRole) {
+          return res.status(500).json({ msg: "Customer role not found" });
+      }
+
     const accessToken = jwt.sign(
       {
         id: user.id,
@@ -407,7 +417,7 @@ exports.loginUser = async (req, res) => {
         phone: user.phoneNumber,
         address: user.address,
         gender: user.gender,
-        role: user.role,
+        role: customerRole._id,
       },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
