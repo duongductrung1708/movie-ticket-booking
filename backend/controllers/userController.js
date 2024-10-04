@@ -2,26 +2,72 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const Role = require("../models/Role");
+const nodemailer = require("nodemailer");
 
 // Create a new user
 const createUser = async (req, res) => {
-  const { username, email, phoneNumber, password } = req.body;
+  const { username, email, phoneNumber, dob, password } = req.body;
 
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({
-      username,
-      email,
-      phoneNumber,
-      password: hashedPassword,
-    });
+      const customerRole = await Role.findOne({ name: "customer" });
+      console.log("Customer Role:", customerRole);
+      if (!customerRole) {
+          return res.status(500).json({ msg: "Customer role not found" });
+      }
 
-    await newUser.save();
-    res
-      .status(201)
-      .json({ msg: "User created successfully", userId: newUser._id });
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = new User({
+          username,
+          email,
+          phoneNumber,
+          dob,
+          password: hashedPassword,
+          role: customerRole._id,
+          isVerified: false,
+      });
+
+      console.log("New User Data:", newUser);
+
+      await newUser.save();
+
+      // Generate JWT for verification
+      const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, {
+          expiresIn: "1h",
+      });
+
+      const verificationLink = `http://localhost:8080/api/auth/verify-email?token=${verificationToken}`;
+
+      // Configure nodemailer
+      const transporter = nodemailer.createTransport({
+          service: "gmail",
+          auth: {
+              user: process.env.EMAIL_USER,
+              pass: process.env.EMAIL_PASS,
+          },
+      });
+
+      const mailOptions = {
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: "Verify Your Email",
+          text: `Please verify your email by clicking the link: ${verificationLink}`,
+      };
+
+      // Send email
+      transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+              console.error("Error sending email:", error);
+              return res.status(500).json({ msg: "Failed to send verification email" });
+          }
+          console.log("Email sent: " + info.response);
+          return res.json({
+              msg: "Create user successful! Please check your email to verify your account.",
+          });
+      });
   } catch (err) {
-    res.status(500).json({ msg: "Error creating user", error: err.message });
+      console.error("Registration error:", err.message);
+      return res.status(500).send("Server error");
   }
 };
 
