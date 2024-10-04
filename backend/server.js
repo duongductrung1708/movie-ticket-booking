@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const logger = require("morgan");
 const cors = require("cors");
 require('dotenv').config();
+const createDefaultRoles = require('./controllers/roleController');
 
 const app = express();
 
@@ -26,7 +27,10 @@ app.use(
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
+  .then(() => {
+    console.log('MongoDB connected');
+    createDefaultRoles();
+  })
   .catch(err => console.error('MongoDB connection error:', err));
 
 // Define routes
