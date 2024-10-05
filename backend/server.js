@@ -3,8 +3,10 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const movieRoutes = require('./routes/movieRoutes');
 const genreRoutes = require('./routes/genreRoutes');
+const theaterRoutes = require('./routes/theaterRoutes');
+const roomRoutes = require('./routes/roomRoutes');
+const seatRoutes = require('./routes/seatRoutes');
 const logger = require("morgan");
-const cors = require("cors");
 const { paymentRouter, showtimeRouter } = require('./routes');
 require('dotenv').config();
 const createDefaultRoles = require('./controllers/roleController');
@@ -34,6 +36,9 @@ app.use('/api/payments', paymentRouter);
 app.use('/api/showtimes',showtimeRouter)
 app.use('/api/movies', movieRoutes);
 app.use('/api/genres', genreRoutes);
+app.use('/api/theaters', theaterRoutes);
+app.use('/api/rooms', roomRoutes);
+app.use('/api/seats', seatRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;
