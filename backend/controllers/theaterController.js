@@ -28,7 +28,7 @@ const TheaterController = {
         res.status(404).json({ message: 'Theater not found' });
       }
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error.message, message: 'Theater not found' });
     }
   },
 
@@ -44,7 +44,7 @@ const TheaterController = {
   delete: async (req, res) => {
     try {
       await TheaterService.delete(req.params.id);
-      res.status(204).end();
+      res.status(204).json({message: "delete theater success"});
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

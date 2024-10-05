@@ -1,4 +1,5 @@
 const Room = require('../models/Room');
+const Seat = require('../models/Seat');
 
 const RoomService = {
   create: async (roomData) => {
@@ -19,6 +20,8 @@ const RoomService = {
   },
 
   delete: async (roomId) => {
+    await Seat.deleteMany({ roomId: roomId });
+
     return await Room.findByIdAndDelete(roomId);
   }
 };
