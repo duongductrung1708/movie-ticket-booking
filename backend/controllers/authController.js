@@ -1,10 +1,11 @@
-// controllers/authController.js
-
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const nodemailer = require("nodemailer");
 const User = require("../models/User");
+const Role = require("../models/Role");
+const sendEmail = require("../utils/sendEmail");
+const generateToken = require("../utils/generateToken");
 
 // @desc     Register user
 // @access   Public
@@ -22,38 +23,31 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ msg: "User already exists" });
     }
 
-    // Create new user
+    const customerRole = await Role.findOne({ name: "customer" });
+    if (!customerRole) {
+      return res.status(500).json({ msg: "Customer role not found" });
+    }
+
     user = new User({
       username,
       email,
       phoneNumber,
-      password,
       dob,
-      role: "customer",
+      password,
+      role: customerRole._id,
       isVerified: false,
     });
 
     await user.save();
 
-    const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const verificationToken = generateToken(
+      { email },
+      process.env.JWT_SECRET,
+      "1h"
+    );
     const verificationUrl = `http://localhost:8080/api/auth/verify-email?token=${verificationToken}`;
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    // Set up email options
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Email Verification",
-      html: `
+    const emailContent = `
       <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -294,21 +288,20 @@ exports.registerUser = async (req, res) => {
     </tr>
   </table>
 </body>
-  `,
-    };
+  `;
 
-    // Send email
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Error sending email:", error);
-        return res
-          .status(500)
-          .json({ msg: "Failed to send verification email" });
-      }
-      console.log("Email sent: " + info.response);
-      return res.json({
-        msg: "Registration successful! Please check your email to verify your account.",
-      });
+    const emailResponse = await sendEmail(
+      email,
+      "Verify Your Email",
+      emailContent
+    );
+
+    if (!emailResponse.success) {
+      return res.status(500).json({ msg: "Failed to send verification email" });
+    }
+
+    return res.json({
+      msg: "Registration successfully! Please verify your email.",
     });
   } catch (err) {
     console.error("Registration error:", err.message);
@@ -396,6 +389,11 @@ exports.loginUser = async (req, res) => {
       return res.status(400).json({ msg: "Invalid credentials" });
     }
 
+    const customerRole = await Role.findOne({ name: "customer" });
+    if (!customerRole) {
+      return res.status(500).json({ msg: "Customer role not found" });
+    }
+
     const accessToken = jwt.sign(
       {
         id: user.id,
@@ -407,7 +405,7 @@ exports.loginUser = async (req, res) => {
         phone: user.phoneNumber,
         address: user.address,
         gender: user.gender,
-        role: user.role,
+        role: customerRole._id,
       },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
