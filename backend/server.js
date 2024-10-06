@@ -4,6 +4,8 @@ const userRoutes = require('./routes/userRoutes');
 const movieRoutes = require('./routes/movieRoutes');
 const genreRoutes = require('./routes/genreRoutes');
 const logger = require("morgan");
+const cors = require("cors");
+const { paymentRouter } = require('./routes');
 require('dotenv').config();
 const createDefaultRoles = require('./controllers/roleController');
 const connectDB = require('./config/db');
@@ -23,8 +25,7 @@ connectDB().then(() => {
 });
 
 // Define routes
-app.use('/api/auth', authRoutes);
-app.use("/api/users", userRoutes);
+app.use('/api/payment', paymentRouter);
 app.use('/api/movies', movieRoutes);
 app.use('/api/genres', genreRoutes);
 
