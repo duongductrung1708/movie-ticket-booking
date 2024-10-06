@@ -1,51 +1,39 @@
-// controllers/userController.js
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const Role = require("../models/Role");
-const nodemailer = require("nodemailer");
+const sendEmail = require("../utils/sendEmail");
+const generateToken = require("../utils/generateToken");
 
 // Create a new user
 const createUser = async (req, res) => {
   const { username, email, phoneNumber, dob, password } = req.body;
 
   try {
-      const customerRole = await Role.findOne({ name: "customer" });
-      if (!customerRole) {
-          return res.status(500).json({ msg: "Customer role not found" });
-      }
+    const customerRole = await Role.findOne({ name: "customer" });
+    if (!customerRole) {
+      return res.status(500).json({ msg: "Customer role not found" });
+    }
 
-      const newUser = new User({
-          username,
-          email,
-          phoneNumber,
-          dob,
-          password,
-          role: customerRole._id,
-          isVerified: false,
-      });
+    const newUser = new User({
+      username,
+      email,
+      phoneNumber,
+      dob,
+      password,
+      role: customerRole._id,
+      isVerified: false,
+    });
 
-      await newUser.save();
+    await newUser.save();
 
-      const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, {
-          expiresIn: "1h",
-      });
+    const verificationToken = generateToken(
+      { email },
+      process.env.JWT_SECRET,
+      "1h"
+    );
+    const verificationLink = `http://localhost:8080/api/auth/verify-email?token=${verificationToken}`;
 
-      const verificationLink = `http://localhost:8080/api/auth/verify-email?token=${verificationToken}`;
-
-      const transporter = nodemailer.createTransport({
-          service: "gmail",
-          auth: {
-              user: process.env.EMAIL_USER,
-              pass: process.env.EMAIL_PASS,
-          },
-      });
-
-      const mailOptions = {
-          from: process.env.EMAIL_USER,
-          to: email,
-          subject: "Verify Your Email",
-          html: `
+    const emailContent = `
       <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -241,12 +229,12 @@ const createUser = async (req, res) => {
                       <tr>
                         <td align="center">
                           <div>
-                            <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${verificationUrl}" style="height:45px;v-text-anchor:middle;width:200px;" arcsize="7%" stroke="f" fill="t">
+                            <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${verificationLink}" style="height:45px;v-text-anchor:middle;width:200px;" arcsize="7%" stroke="f" fill="t">
                             <v:fill type="tile" color="#414EF9" />
                             <w:anchorlock/>
                             <center style="color:#ffffff;font-family:sans-serif;font-size:15px;">Verify Email</center>
                           </v:roundrect><![endif]-->
-                            <a href="${verificationUrl}" class="button button--red" style="text-decoration: none">Verify Email</a>
+                            <a href="${verificationLink}" class="button button--red" style="text-decoration: none">Verify Email</a>
                           </div>
                         </td>
                       </tr>
@@ -258,7 +246,7 @@ const createUser = async (req, res) => {
                         <td>
                           <p class="sub">If you’re having trouble clicking the button, copy and paste the URL below into your web browser.
                           </p>
-                          <p class="sub"><a href="${verificationUrl}">${verificationUrl}</a></p>
+                          <p class="sub"><a href="${verificationLink}">${verificationLink}</a></p>
                         </td>
                       </tr>
                     </table>
@@ -286,23 +274,23 @@ const createUser = async (req, res) => {
     </tr>
   </table>
 </body>
-  `,
-    };
+  `;
+    const emailResponse = await sendEmail(
+      email,
+      "Verify Your Email",
+      emailContent
+    );
 
-      // Send email
-      transporter.sendMail(mailOptions, (error, info) => {
-          if (error) {
-              console.error("Error sending email:", error);
-              return res.status(500).json({ msg: "Failed to send verification email" });
-          }
-          console.log("Email sent: " + info.response);
-          return res.json({
-              msg: "Create user successful! Please check your email to verify your account.",
-          });
-      });
+    if (!emailResponse.success) {
+      return res.status(500).json({ msg: "Failed to send verification email" });
+    }
+
+    return res.json({
+      msg: "User created successfully! Please verify your email.",
+    });
   } catch (err) {
-      console.error("Registration error:", err.message);
-      return res.status(500).send("Server error");
+    console.error("Registration error:", err.message);
+    return res.status(500).send("Server error");
   }
 };
 
@@ -358,6 +346,7 @@ const updateUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
+
     res.status(200).json({ msg: "User updated successfully", user });
   } catch (err) {
     res.status(500).json({ msg: "Error updating user", error: err.message });
@@ -373,13 +362,14 @@ const deleteUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
+
     res.status(200).json({ msg: "User deleted successfully" });
   } catch (err) {
     res.status(500).json({ msg: "Error deleting user", error: err.message });
   }
 };
 
-// controllers/userController.js
+// Change user password
 const changePassword = async (req, res) => {
   const { id } = req.params;
   const { oldPassword, newPassword } = req.body;
@@ -408,25 +398,12 @@ const changePassword = async (req, res) => {
         .json({ msg: "New password does not meet complexity requirements" });
     }
 
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      { password: hashedNewPassword },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      return res.status(404).json({ msg: "Error updating password" });
-    }
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
 
     res.status(200).json({ msg: "Password updated successfully" });
   } catch (err) {
-    console.error(
-      "Error changing password for user ID:",
-      id,
-      "Error:",
-      err.message
-    );
+    console.error("Error changing password:", err.message);
     res
       .status(500)
       .json({ msg: "Error changing password", error: err.message });
