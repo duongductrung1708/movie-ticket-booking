@@ -1,18 +1,20 @@
 import Home from "./pages/home/Home";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
-import Users from "./pages/users/Users";
-import Products from "./pages/products/Products";
+import Products from "./pages/services/Services";
 import Navbar from "./components/navbar/Navbar";
 import Footer from "./components/footer/Footer";
 import Menu from "./components/menu/Menu";
 import Login from "./pages/login/Login";
 import "./styles/global.scss";
-import User from "./pages/user/User";
-import Product from "./pages/product/Product";
 import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
+import Bookings from "./pages/bookings/Bookings";
+import Movies from "./pages/movies/Movies";
+import Theaters from "./pages/theaters/Theaters";
+import Users from "./pages/users/Users";
+import Payments from "./pages/payments/Payments";
 
 
 const queryClient = new QueryClient();
@@ -51,16 +53,24 @@ function App() {
           element: <Users />,
         },
         {
-          path: "/products",
+          path: "/services",
           element: <Products />,
         },
         {
-          path: "/users/:id",
-          element: <User />,
+          path: "/theaters",
+          element: <Theaters />,
         },
         {
-          path: "/products/:id",
-          element: <Product />,
+          path: "/movies",
+          element: <Movies />,
+        },
+        {
+          path: "/bookings",
+          element: <Bookings />,
+        },
+        {
+          path: "/payments",
+          element: <Payments />,
         },
       ],
     },
