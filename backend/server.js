@@ -8,6 +8,9 @@ require('dotenv').config();
 const createDefaultRoles = require('./controllers/roleController');
 const connectDB = require('./config/db');
 const corsOptions = require('./config/corsOptions');
+const serviceRoutes = require('./routes/serviceRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
+const bookingDetailRoutes = require('./routes/bookingDetailRoutes');
 
 const app = express();
 
@@ -31,3 +34,7 @@ app.use('/api/genres', genreRoutes);
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+
+app.use('/services', serviceRoutes);
+app.use('/bookings', bookingRoutes);
+app.use('/booking-details', bookingDetailRoutes);
