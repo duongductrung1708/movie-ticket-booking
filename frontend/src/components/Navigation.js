@@ -12,6 +12,7 @@ import HistoryIcon from "@mui/icons-material/History";
 import KeyIcon from "@mui/icons-material/Key";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { logoutUser } from "../services/api";
+import { useAuth } from "../hooks/AuthProvider";
 
 const Section = styled.section`
   width: 100vw;
@@ -143,6 +144,7 @@ const Item = styled.div`
 `;
 
 const Navigation = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [click, setClick] = useState(false);
@@ -182,6 +184,10 @@ const Navigation = () => {
 
   const handleChangePassword = () => {
     navigate("/change-password");
+  };
+
+  const handleSignIn = () => {
+    navigate("/signin");
   };
 
   const handleLogout = async () => {
@@ -226,45 +232,58 @@ const Navigation = () => {
           </>
         )}
         <div className="desktop">
-          <Button
-            className="accountBtn"
-            variant="contained"
-            aria-describedby={id}
-            onClick={handleAccountClick}
-          >
-            My Account
-          </Button>
-          <Popover
-            id={id}
-            open={open}
-            anchorEl={anchorEl}
-            onClose={handlePopoverClose}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "center",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "center",
-            }}
-          >
-            <MenuItem onClick={handleUserProfile}>
-              <PersonIcon />
-              <Item>User Profile</Item>
-            </MenuItem>
-            <MenuItem onClick={handleBookingHistory}>
-              <HistoryIcon />
-              <Item>Booking History</Item>
-            </MenuItem>
-            <MenuItem onClick={handleChangePassword}>
-              <KeyIcon />
-              <Item>Change Password</Item>
-            </MenuItem>
-            <MenuItem onClick={handleLogout}>
-              <LogoutIcon />
-              <Item>Sign Out</Item>
-            </MenuItem>
-          </Popover>
+          {user ? (
+            <>
+              <Button
+                className="accountBtn"
+                variant="contained"
+                aria-describedby={id}
+                onClick={handleAccountClick}
+              >
+                My Account
+              </Button>
+              <Popover
+                id={id}
+                open={open}
+                anchorEl={anchorEl}
+                onClose={handlePopoverClose}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "center",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "center",
+                }}
+              >
+                <MenuItem onClick={handleUserProfile}>
+                  <PersonIcon />
+                  <Item>User Profile</Item>
+                </MenuItem>
+                <MenuItem onClick={handleBookingHistory}>
+                  <HistoryIcon />
+                  <Item>Booking History</Item>
+                </MenuItem>
+                <MenuItem onClick={handleChangePassword}>
+                  <KeyIcon />
+                  <Item>Change Password</Item>
+                </MenuItem>
+                <MenuItem onClick={handleLogout}>
+                  <LogoutIcon />
+                  <Item>Sign Out</Item>
+                </MenuItem>
+              </Popover>
+            </>
+          ) : (
+            <Button
+              className="accountBtn"
+              variant="contained"
+              aria-describedby={id}
+              onClick={handleSignIn}
+            >
+              Sign in
+            </Button>
+          )}
         </div>
       </NavBar>
     </Section>
