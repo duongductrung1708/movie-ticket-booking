@@ -14,3 +14,5 @@ paymentRouter.post('/', createPayment)
 
 //update payment
 paymentRouter.put('/:id', updatePayment)
+
+module.exports = paymentRouter
