@@ -45,6 +45,11 @@ const movieSchema = new Schema({
     type: String,
   },
   cast: [String],
+  status :{
+    type: String,
+    default: "Available",
+    enum:["Available", "Unavailable"],
+  },
   createdAt: {
     type: Date,
     default: Date.now,
