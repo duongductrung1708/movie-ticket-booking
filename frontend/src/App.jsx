@@ -25,12 +25,11 @@ function App() {
         <Route path="/signin" element={<RedirectRoute element={<SignInPage />} />} />
         <Route path="/change-password" element={<ProtectedRoute element={<ChangePassword />} />} />
         <Route path="/forgot-password" element={<ForgetPassword />} />
-        <Route path="/home" element={<ProtectedRoute element={<HomePage />} />} />
-        <Route path="/movie/:title" element={<ProtectedRoute element={<MovieDetail />} />} />
+        <Route path="/home" element={<RedirectRoute element={<HomePage />} />} />
+        <Route path="/movie/:title" element={<RedirectRoute element={<MovieDetail />} />} />
         <Route path="/seat-reservation" element={<ProtectedRoute element={<SeatReservation />} />} />
         <Route path="/user-profile" element={<ProtectedRoute element={<UserProfile />} />} />
         <Route path="/booking-history" element={<ProtectedRoute element={<BookHistory />} />} />
-        {/** give it to last */}
         <Route path="*" element={<NotFound/>} />
       </Routes>
       <ToastContainer
