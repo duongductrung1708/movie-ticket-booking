@@ -30,7 +30,6 @@ function App() {
         <Route path="/seat-reservation" element={<ProtectedRoute element={<SeatReservation />} />} />
         <Route path="/user-profile" element={<ProtectedRoute element={<UserProfile />} />} />
         <Route path="/booking-history" element={<ProtectedRoute element={<BookHistory />} />} />
-        {/** give it to last */}
         <Route path="*" element={<NotFound/>} />
       </Routes>
       <ToastContainer
