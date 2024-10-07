@@ -24,6 +24,7 @@ export default function NotFound() {
                     <img
                         src="https://picsum.photos/200"
                         className="w-full"
+                        alt=""
                     />
                 </div>
             </div>
