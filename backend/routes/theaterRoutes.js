@@ -7,6 +7,5 @@ router.get('/', TheaterController.getAll);
 router.get('/:id', TheaterController.getById);
 router.put('/:id', TheaterController.update);
 router.delete('/:id', TheaterController.delete);
-router.get('/by-city', TheaterController.getByCity);
 
 module.exports = router;
