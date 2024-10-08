@@ -15,7 +15,7 @@ const GlobalStyles = createGlobalStyle`
   }
 
   body {
-    font-family: 'sora', sans-serif;
+    font-family: 'sora', sans-serif !important;
     overflow-x: hidden;
   }
 

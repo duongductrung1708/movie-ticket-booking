@@ -142,3 +142,25 @@ export const resetPasswordWithOTP = async (email, otp, newPassword) => {
     throw error.response ? error.response.data : error.message;
   }
 };
+
+// Function to get all movies
+export const getMovies = async () => {
+  try {
+    const response = await api.get("/movies");
+    return response.data;
+  } catch (error) {
+    console.error("Get movies error:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+// Function to get a single movie by ID
+export const getMovieById = async (id) => {
+  try {
+    const response = await api.get(`/movies/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Get movie by ID error:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};
