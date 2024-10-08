@@ -78,7 +78,7 @@ const Item = styled.div`
   border-radius: 20px;
   overflow: hidden;
   text-align: center;
-  height: 90%;
+  height: 100%;
 
   @media (max-width: 30em) {
     width: 70vw;

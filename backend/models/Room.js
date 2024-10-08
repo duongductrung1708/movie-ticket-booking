@@ -17,7 +17,7 @@ const roomSchema = new Schema({
   },
   type: {
     type: String,
-    enum: ['2D', '3D', 'IMAX'],  // Example of room types
+    enum: ['2D', '3D', 'IMAX'],
     required: true,
   },
   theater_id: {

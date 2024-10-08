@@ -1,11 +1,20 @@
 const Movie = require("../models/Movie");
 const Genre = require("../models/Genre");
+const { format } = require("date-fns");
 
 // Get all movies
 exports.getMovies = async (req, res) => {
   try {
     const movies = await Movie.find().populate("genre", "name");
-    res.status(200).json(movies);
+
+    const formattedMovies = movies.map((movie) => {
+      return {
+        ...movie._doc,
+        releaseDate: format(new Date(movie.releaseDate), "MMMM dd, yyyy"),
+      };
+    });
+
+    res.status(200).json(formattedMovies);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch movies" });
   }
@@ -16,7 +25,13 @@ exports.getMovieById = async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id).populate("genre", "name");
     if (!movie) return res.status(404).json({ msg: "Movie not found" });
-    res.status(200).json(movie);
+
+    const formattedMovie = {
+      ...movie._doc,
+      releaseDate: format(new Date(movie.releaseDate), "MMMM dd, yyyy"),
+    };
+
+    res.status(200).json(formattedMovie);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch movie" });
   }
@@ -40,6 +55,11 @@ exports.createMovie = async (req, res) => {
       ageRating,
       cast,
     } = req.body;
+
+    const genreExists = await Genre.findById(genre);
+    if (!genreExists) {
+      return res.status(404).json({ error: "Genre not found" });
+    }
 
     const newMovie = new Movie({
       title,
@@ -84,6 +104,7 @@ exports.updateMovie = async (req, res) => {
     } = req.body;
 
     const updateFields = {};
+
     if (title) updateFields.title = title;
     if (rating) updateFields.rating = rating;
     if (image) updateFields.image = image;
@@ -92,7 +113,13 @@ exports.updateMovie = async (req, res) => {
     if (language) updateFields.language = language;
     if (director) updateFields.director = director;
     if (country) updateFields.country = country;
-    if (genre) updateFields.genre = genre;
+    if (genre) {
+      const genreExists = await Genre.findById(genre);
+      if (!genreExists) {
+        return res.status(404).json({ error: "Genre not found" });
+      }
+      updateFields.genre = genre;
+    }
     if (releaseDate) updateFields.releaseDate = releaseDate;
     if (duration) updateFields.duration = duration;
     if (ageRating) updateFields.ageRating = ageRating;
@@ -104,12 +131,9 @@ exports.updateMovie = async (req, res) => {
         .json({ error: "At least one field is required to update" });
     }
 
-    const updatedMovie = await Movie.findByIdAndUpdate(
-      req.params.id,
-      updateFields,
-      { new: true }
-    );
+    const updatedMovie = await Movie.findByIdAndUpdate(req.params.id, updateFields, { new: true });
     if (!updatedMovie) return res.status(404).json({ msg: "Movie not found" });
+
     res.status(200).json(updatedMovie);
   } catch (error) {
     res.status(500).json({ error: "Failed to update movie" });
