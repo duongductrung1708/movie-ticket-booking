@@ -4,6 +4,7 @@ const TheaterController = require('../controllers/theaterController');
 
 router.post('/', TheaterController.create);
 router.get('/', TheaterController.getAll);
+router.post('/test',TheaterController.createTheater)
 router.get('/:id', TheaterController.getById);
 router.put('/:id', TheaterController.update);
 router.delete('/:id', TheaterController.delete);

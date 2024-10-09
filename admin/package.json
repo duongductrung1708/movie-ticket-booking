@@ -12,15 +12,17 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^6.1.2",
     "@mui/material": "^5.13.7",
     "@mui/x-data-grid": "^6.9.2",
     "@tanstack/react-query": "^4.29.19",
+    "axios": "^1.7.7",
     "blip-chat-widget": "^1.11.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.14.1",
     "recharts": "^2.7.2",
-    "sass": "^1.63.6",
+    "sass": "^1.79.4",
     "starter": "file:"
   },
   "devDependencies": {
