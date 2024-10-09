@@ -175,3 +175,14 @@ export const getAllTheater = async () => {
     throw error.response ? error.response.data : error.message;
   }
 };
+
+// Function to get showtimes by theater ID
+export const getShowtimesByTheater = async (theaterId) => {
+  try {
+    const response = await api.get(`/theaters/${theaterId}/showtimes`);
+    return response.data;
+  } catch (error) {
+    console.error("Get showtimes by theater error:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};

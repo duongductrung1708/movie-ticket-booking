@@ -7,7 +7,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { useNavigate } from "react-router-dom";
-import { getAllTheater } from "../services/api";
+import { getAllTheater, getShowtimesByTheater } from "../services/api";
 
 const Title = styled.h2`
   font-family: "Arial", sans-serif;
@@ -224,29 +224,6 @@ const Address = styled.div`
   }
 `;
 
-const movies = [
-  {
-    title: "The Matrix",
-    image:
-      "https://play-lh.googleusercontent.com/zL8ya3uEa7Q-oDqc7McTIAaRvwKZNN4HMICMwHHL2eKsbE9Hms_2Dj6SWwNGI555CyauvPVjCPUzYBm2TJ8",
-    duration: "136 minutes",
-    showtimes: {
-      "2024-09-23": ["10:00", "12:00", "14:00"],
-      "2024-09-24": ["11:00", "13:00", "15:00"],
-    },
-  },
-  {
-    title: "Inception",
-    image:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg",
-    duration: "148 minutes",
-    showtimes: {
-      "2024-09-23": ["10:30", "12:30", "14:30"],
-      "2024-09-24": ["11:30", "13:30", "15:30"],
-    },
-  },
-];
-
 const BookingTab = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const cities = ["HCMC", "Hanoi", "Da Nang"];
@@ -254,8 +231,9 @@ const BookingTab = ({ isOpen, onClose }) => {
   const [filteredTheaters, setFilteredTheaters] = useState([]);
   const [selectedTheater, setSelectedTheater] = useState("");
   const [selectedShowtimes, setSelectedShowtimes] = useState({});
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [movies, setMovies] = useState([]);
 
+  // Fetch theaters based on selected city
   useEffect(() => {
     const fetchTheaters = async () => {
       if (selectedCity) {
@@ -275,6 +253,40 @@ const BookingTab = ({ isOpen, onClose }) => {
 
     fetchTheaters();
   }, [selectedCity]);
+
+  useEffect(() => {
+    const fetchShowtimes = async () => {
+      if (selectedTheater) {
+        const selectedTheaterDetails = filteredTheaters.find(
+          (theater) => theater.name === selectedTheater
+        );
+
+        if (selectedTheaterDetails) {
+          const theaterId = selectedTheaterDetails._id;
+
+          try {
+            const showtimesData = await getShowtimesByTheater(theaterId);
+
+            const formattedMovies = showtimesData.map((showtime) => ({
+              title: showtime.movie_id.title,
+              showtimes: [showtime.start_time],
+              date: showtime.date,
+              movieId: showtime.movie_id._id,
+              showtimeId: showtime._id,
+            }));
+
+            setMovies(formattedMovies);
+          } catch (error) {
+            console.error("Error fetching showtimes:", error);
+          }
+        } else {
+          console.error("Theater not found in filtered theaters");
+        }
+      }
+    };
+
+    fetchShowtimes();
+  }, [selectedTheater, filteredTheaters]);
 
   const handleOutsideClick = (e) => {
     if (e.target.id === "overlay") {
@@ -301,7 +313,7 @@ const BookingTab = ({ isOpen, onClose }) => {
           movieTitle: selectedMovie.title,
           movieImage: selectedMovie.image,
           selectedTime: time,
-          selectedDate: selectedDate.format("YYYY-MM-DD"),
+          selectedDate: new Date().toISOString().split("T")[0],
           selectedTheater: selectedTheater,
           duration: selectedMovie.duration,
         },
@@ -386,7 +398,7 @@ const BookingTab = ({ isOpen, onClose }) => {
               </Select>
             </FormControl>
             <Address>
-              <LocationOnIcon />{" "}
+              <LocationOnIcon />
               {
                 filteredTheaters.find((t) => t.name === selectedTheater)
                   ?.address
@@ -398,50 +410,32 @@ const BookingTab = ({ isOpen, onClose }) => {
         {selectedTheater && (
           <ScrollableContent>
             <Title>{selectedTheater}</Title>
-            <Subtitle>R12 Horror - English - 0h 37m</Subtitle>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="Select a date"
-                value={selectedDate}
-                onChange={(newValue) => setSelectedDate(newValue)}
-                sx={{
-                  width: "40%",
-                  ".MuiInputBase-input": { color: "white" },
-                  svg: { color: "white" },
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#ffcc00",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#ffcc00",
-                  },
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                }}
-              />
-            </LocalizationProvider>
-            {selectedDate && (
-              <>
-                {movies.map((movie, movieIndex) => (
-                  <div key={movieIndex}>
-                    <Title>{movie.title}</Title>
-                    <div style={{ display: "flex" }}>
-                      {movie.showtimes[selectedDate.format("YYYY-MM-DD")]?.map(
-                        (time, timeIndex) => (
-                          <Showtime key={timeIndex}>
-                            <ShowtimeButton
-                              selected={selectedShowtimes[movie.title] === time}
-                              onClick={() =>
-                                handleShowtimeSelect(movie.title, time)
-                              }
-                            >
-                              {time}
-                            </ShowtimeButton>
-                          </Showtime>
-                        )
-                      )}
-                    </div>
+            {Array.isArray(movies) && movies.length > 0 ? (
+              movies.map((movie, movieIndex) => (
+                <div key={movie.movieId}>
+                  <Title>{movie.title}</Title>
+                  <Subtitle>
+                    {new Date(movie.date).toLocaleDateString()}
+                  </Subtitle>{" "}
+                  {/* Display the date */}
+                  <div style={{ display: "flex", flexWrap: "wrap" }}>
+                    {movie.showtimes.map((time, timeIndex) => (
+                      <Showtime key={timeIndex}>
+                        <ShowtimeButton
+                          selected={selectedShowtimes[movie.title] === time}
+                          onClick={() =>
+                            handleShowtimeSelect(movie.title, time)
+                          }
+                        >
+                          {time}
+                        </ShowtimeButton>
+                      </Showtime>
+                    ))}
                   </div>
-                ))}
-              </>
+                </div>
+              ))
+            ) : (
+              <Subtitle>No showtimes available for this theater.</Subtitle>
             )}
           </ScrollableContent>
         )}

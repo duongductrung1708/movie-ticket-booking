@@ -48,6 +48,19 @@ const TheaterController = {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
+  },
+
+  getShowtimesByTheater: async (req, res) => {
+    try {
+      const showtimes = await TheaterService.getShowtimesByTheater(req.params.id);
+      if (showtimes.length > 0) {
+        res.status(200).json(showtimes);
+      } else {
+        res.status(404).json({ message: 'No showtimes found for this theater' });
+      }
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   }
 };
 
