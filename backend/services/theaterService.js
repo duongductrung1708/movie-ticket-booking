@@ -1,6 +1,7 @@
 const Theater = require('../models/Theater');
 const Room = require('../models/Room');
 const Seat = require('../models/Seat');
+const Showtime = require('../models/Showtime');
 
 const TheaterService = {
   create: async (theaterData) => {
@@ -30,6 +31,22 @@ const TheaterService = {
     await Room.deleteMany({ theater_id: theaterId });
 
     return await Theater.findByIdAndDelete(theaterId);
+  },
+
+  getShowtimesByTheater: async (theaterId) => {
+    try {
+      const rooms = await Room.find({ theater_id: theaterId }).select('_id');
+
+      const roomIds = rooms.map(room => room._id);
+
+      const showtimes = await Showtime.find({ room_id: { $in: roomIds } })
+        .populate('movie_id', 'title')
+        .select('movie_id date start_time');
+
+      return showtimes;
+    } catch (error) {
+      throw new Error('Error fetching showtimes by theater');
+    }
   }
 };
 
