@@ -1,7 +1,7 @@
-const Theater = require('../models/Theater');
-const Room = require('../models/Room');
-const Seat = require('../models/Seat');
-const Showtime = require('../models/Showtime');
+const Theater = require("../models/Theater");
+const Room = require("../models/Room");
+const Seat = require("../models/Seat");
+const Showtime = require("../models/Showtime");
 
 const TheaterService = {
   create: async (theaterData) => {
@@ -18,12 +18,14 @@ const TheaterService = {
   },
 
   update: async (theaterId, theaterData) => {
-    return await Theater.findByIdAndUpdate(theaterId, theaterData, { new: true });
+    return await Theater.findByIdAndUpdate(theaterId, theaterData, {
+      new: true,
+    });
   },
 
   delete: async (theaterId) => {
     const rooms = await Room.find({ theater_id: theaterId });
-    
+
     for (let room of rooms) {
       await Seat.deleteMany({ roomId: room._id });
     }
@@ -35,19 +37,26 @@ const TheaterService = {
 
   getShowtimesByTheater: async (theaterId) => {
     try {
-      const rooms = await Room.find({ theater_id: theaterId }).select('_id');
+      const rooms = await Room.find({ theater_id: theaterId }).select("_id");
 
-      const roomIds = rooms.map(room => room._id);
+      const roomIds = rooms.map((room) => room._id);
 
       const showtimes = await Showtime.find({ room_id: { $in: roomIds } })
-        .populate('movie_id', 'title')
-        .select('movie_id date start_time');
+        .populate({
+          path: "movie_id",
+          select: "title language duration genre",
+          populate: {
+            path: "genre",
+            select: "name",
+          },
+        })
+        .select("movie_id date start_time");
 
       return showtimes;
     } catch (error) {
-      throw new Error('Error fetching showtimes by theater');
+      throw new Error("Error fetching showtimes by theater");
     }
-  }
+  },
 };
 
 module.exports = TheaterService;

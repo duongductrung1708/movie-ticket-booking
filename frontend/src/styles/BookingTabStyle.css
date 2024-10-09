@@ -1,0 +1,11 @@
+.css-1q964xs-MuiFormLabel-root-MuiInputLabel-root {
+    color: white !important;
+}
+
+.css-18pjc51-MuiFormLabel-root-MuiInputLabel-root {
+    color: orange !important;
+}
+
+.css-lxfshk-MuiInputBase-root-MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: orange !important;
+}

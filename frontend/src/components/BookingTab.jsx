@@ -8,6 +8,8 @@ import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { useNavigate } from "react-router-dom";
 import { getAllTheater, getShowtimesByTheater } from "../services/api";
+import dayjs from "dayjs";
+import "../styles/BookingTabStyle.css";
 
 const Title = styled.h2`
   font-family: "Arial", sans-serif;
@@ -232,8 +234,8 @@ const BookingTab = ({ isOpen, onClose }) => {
   const [selectedTheater, setSelectedTheater] = useState("");
   const [selectedShowtimes, setSelectedShowtimes] = useState({});
   const [movies, setMovies] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
 
-  // Fetch theaters based on selected city
   useEffect(() => {
     const fetchTheaters = async () => {
       if (selectedCity) {
@@ -267,14 +269,37 @@ const BookingTab = ({ isOpen, onClose }) => {
           try {
             const showtimesData = await getShowtimesByTheater(theaterId);
 
-            const formattedMovies = showtimesData.map((showtime) => ({
-              title: showtime.movie_id.title,
-              showtimes: [showtime.start_time],
-              date: showtime.date,
-              movieId: showtime.movie_id._id,
-              showtimeId: showtime._id,
-            }));
+            const groupedMovies = {};
 
+            showtimesData.forEach((showtime) => {
+              const movieId = showtime.movie_id._id;
+              const movieTitle = showtime.movie_id.title;
+              const movieLanguage = showtime.movie_id.language;
+              const movieDuration = showtime.movie_id.duration;
+
+              const movieGenres = showtime.movie_id.genre
+                .map((genre) => genre.name)
+                .join(", ");
+              const showtimeDate = dayjs(showtime.date).format("MM/DD/YYYY");
+
+              const uniqueKey = `${movieId}-${showtimeDate}`;
+
+              if (!groupedMovies[uniqueKey]) {
+                groupedMovies[uniqueKey] = {
+                  title: movieTitle,
+                  showtimes: [],
+                  date: showtimeDate,
+                  movieId: movieId,
+                  language: movieLanguage,
+                  duration: movieDuration,
+                  genres: movieGenres,
+                };
+              }
+
+              groupedMovies[uniqueKey].showtimes.push(showtime.start_time);
+            });
+
+            const formattedMovies = Object.values(groupedMovies);
             setMovies(formattedMovies);
           } catch (error) {
             console.error("Error fetching showtimes:", error);
@@ -313,13 +338,19 @@ const BookingTab = ({ isOpen, onClose }) => {
           movieTitle: selectedMovie.title,
           movieImage: selectedMovie.image,
           selectedTime: time,
-          selectedDate: new Date().toISOString().split("T")[0],
+          selectedDate: selectedDate
+            ? selectedDate.format("MM/DD/YYYY")
+            : dayjs().format("MM/DD/YYYY"),
           selectedTheater: selectedTheater,
           duration: selectedMovie.duration,
         },
       });
     }
   };
+
+  const filteredMovies = selectedDate
+    ? movies.filter((movie) => movie.date === selectedDate.format("MM/DD/YYYY"))
+    : movies;
 
   return (
     <>
@@ -408,36 +439,76 @@ const BookingTab = ({ isOpen, onClose }) => {
         )}
 
         {selectedTheater && (
-          <ScrollableContent>
-            <Title>{selectedTheater}</Title>
-            {Array.isArray(movies) && movies.length > 0 ? (
-              movies.map((movie, movieIndex) => (
-                <div key={movie.movieId}>
-                  <Title>{movie.title}</Title>
-                  <Subtitle>
-                    {new Date(movie.date).toLocaleDateString()}
-                  </Subtitle>{" "}
-                  {/* Display the date */}
-                  <div style={{ display: "flex", flexWrap: "wrap" }}>
-                    {movie.showtimes.map((time, timeIndex) => (
-                      <Showtime key={timeIndex}>
-                        <ShowtimeButton
-                          selected={selectedShowtimes[movie.title] === time}
-                          onClick={() =>
-                            handleShowtimeSelect(movie.title, time)
-                          }
-                        >
-                          {time}
-                        </ShowtimeButton>
-                      </Showtime>
-                    ))}
+          <>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                label="Select a date"
+                value={selectedDate}
+                onChange={(newValue) => setSelectedDate(newValue)}
+                format="MM/DD/YYYY"
+                sx={{
+                  width: "40%",
+                  ".MuiInputBase-input": { color: "white" },
+                  svg: { color: "white" },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#ffcc00",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#ffcc00",
+                  },
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                }}
+                renderInput={(params) => (
+                  <FormControl>
+                    <InputLabel
+                      sx={{
+                        color: "orange",
+                        "&.Mui-focused": { color: "#ffcc00" },
+                      }}
+                    >
+                      {params.label}
+                    </InputLabel>
+                    <input {...params.inputProps} />
+                  </FormControl>
+                )}
+              />
+            </LocalizationProvider>
+
+            <ScrollableContent>
+              <Title>{selectedTheater}</Title>
+              {Array.isArray(filteredMovies) && filteredMovies.length > 0 ? (
+                filteredMovies.map((movie, movieIndex) => (
+                  <div key={movie.movieId}>
+                    <Title>{movie.title}</Title>
+                    <Subtitle>
+                      {movie.genres || "No genres available"} -{" "}
+                      {movie.language || "Language not specified"} -{" "}
+                      {movie.duration || "Duration not specified"}
+                    </Subtitle>
+                    <Subtitle>
+                      {dayjs(movie.date).format("MM/DD/YYYY")}
+                    </Subtitle>
+                    <div style={{ display: "flex", flexWrap: "wrap" }}>
+                      {movie.showtimes.map((time, timeIndex) => (
+                        <Showtime key={timeIndex}>
+                          <ShowtimeButton
+                            selected={selectedShowtimes[movie.title] === time}
+                            onClick={() =>
+                              handleShowtimeSelect(movie.title, time)
+                            }
+                          >
+                            {time}
+                          </ShowtimeButton>
+                        </Showtime>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))
-            ) : (
-              <Subtitle>No showtimes available for this theater.</Subtitle>
-            )}
-          </ScrollableContent>
+                ))
+              ) : (
+                <Subtitle>No movies found for the selected date.</Subtitle>
+              )}
+            </ScrollableContent>
+          </>
         )}
       </BookingWrapper>
     </>
