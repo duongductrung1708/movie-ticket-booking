@@ -8,11 +8,11 @@ const RoomService = {
   },
 
   getAll: async () => {
-    return await Room.find().populate('theater_id');
+    return await Room.find();
   },
 
   getById: async (roomId) => {
-    return await Room.findById(roomId).populate('theater_id');
+    return await Room.findById(roomId);
   },
 
   update: async (roomId, roomData) => {
