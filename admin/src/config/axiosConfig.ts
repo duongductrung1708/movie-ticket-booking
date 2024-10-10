@@ -6,7 +6,6 @@ const axiosInstance: AxiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
-    // Thêm các headers khác nếu cần thiết
   },
 });
 
@@ -14,4 +13,3 @@ axiosInstance.interceptors.request.use();
 axiosInstance.interceptors.request.use();
 
 export default axiosInstance;
-

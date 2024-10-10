@@ -9,3 +9,7 @@
 .css-lxfshk-MuiInputBase-root-MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
     border-color: orange !important;
 }
+
+.css-16r7pes-MuiFormControl-root-MuiTextField-root svg {
+    color: orange !important;
+}
