@@ -87,7 +87,7 @@ const AdjustSeatLayout: React.FC<AdjustSeatLayoutProps> = ({
     const newLayout = seatLayout.map((row, rIndex) =>
       row.map((seat, cIndex) => {
         if (rIndex === rowIndex && cIndex === colIndex) {
-          return seat === 0 ? 3 : 0; // Toggle between unbooked (0) and blocked (3)
+          return seat === 0 ? -1 : 0; // Toggle between unbooked (0) and blocked (3)
         }
         return seat;
       })

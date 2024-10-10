@@ -15,6 +15,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
 import "./theaters.scss";
 import AddTheaterDialog from "../../components/add/AddTheaterDialog";
+import axiosInstance from "../../config/axiosConfig";
 
 function createTheaterData(
   id: string,
@@ -22,14 +23,16 @@ function createTheaterData(
   address: string,
   city: string,
   image: string,
-  rooms: {
-    id: string;
-    name: string;
-    image?: string;
-    rows: number;
-    columns: number;
-    type: "2D" | "3D" | "IMAX";
-  }[]
+  rooms?:
+    | {
+        id: string;
+        name: string;
+        image?: string;
+        rows: number;
+        columns: number;
+        type?: "2D" | "3D" | "IMAX";
+      }[]
+    | null
 ) {
   return {
     id,
@@ -37,7 +40,7 @@ function createTheaterData(
     address,
     city,
     image,
-    rooms,
+    rooms: rooms || null,
   };
 }
 
@@ -57,14 +60,13 @@ function Row(props: { row: ReturnType<typeof createTheaterData> }) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell component="th" scope="row">
-          {row.id}
-        </TableCell>
         {/* <TableCell align="right">{row.id}</TableCell> */}
-        <TableCell align="right">{row.name}</TableCell>
-        <TableCell align="right">{row.image}</TableCell>
-        <TableCell align="right">{row.address}</TableCell>
-        <TableCell align="right">{row.city}</TableCell>
+        <TableCell align="left">{row.name}</TableCell>
+        <TableCell align="left">
+          <img src={row.image} alt="" className="table-image" />
+        </TableCell>
+        <TableCell align="left">{row.address}</TableCell>
+        <TableCell align="left">{row.city}</TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -81,7 +83,7 @@ function Row(props: { row: ReturnType<typeof createTheaterData> }) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.rooms.map((room) => (
+                  {row?.rooms?.map((room) => (
                     <TableRow key={room.id}>
                       <TableCell component="th" scope="row">
                         {room.id}
@@ -124,7 +126,21 @@ const rows = [
 ];
 export default function Theaters() {
   const [open, setOpen] = React.useState(false);
-
+  const [rows, setRows] = React.useState([]);
+  React.useEffect(() => {
+    axiosInstance.get("/theaters").then(({ data }) => {
+      const newRows = data.map((theater) =>
+        createTheaterData(
+          theater._id,
+          theater.name,
+          theater.address,
+          theater.city,
+          theater.image
+        )
+      );
+      setRows(newRows);
+    });
+  }, []);
   return (
     <>
       <div className="info">
@@ -143,16 +159,15 @@ export default function Theaters() {
           <TableHead>
             <TableRow>
               <TableCell />
-              <TableCell>Id</TableCell>
-              <TableCell align="right">Name</TableCell>
-              <TableCell align="right">Image</TableCell>
-              <TableCell align="right">Address</TableCell>
-              <TableCell align="right">City</TableCell>
+              <TableCell align="left">Name</TableCell>
+              <TableCell align="left">Image</TableCell>
+              <TableCell align="left">Address</TableCell>
+              <TableCell align="left">City</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {rows.map((row) => (
-              <Row key={row.name} row={row} />
+              <Row key={row?.id} row={row} />
             ))}
           </TableBody>
         </Table>
@@ -160,7 +175,7 @@ export default function Theaters() {
           <div className="empty-row">No theater is created</div>
         )}
       </TableContainer>
-      <AddTheaterDialog open={open} setOpen={setOpen}/>
+      <AddTheaterDialog open={open} setOpen={setOpen} />
     </>
   );
 }
