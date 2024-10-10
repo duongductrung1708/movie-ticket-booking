@@ -16,6 +16,7 @@ const getShowtime = async (req, res) => {
             date: format(new Date(st.date), "yyyy-MM-dd"),
             start_time: st.start_time,
             end_time: st.end_time,
+            seat_layout: st.seat_layout
         }));
 
         res.json(formattedShowtimes);
@@ -41,6 +42,7 @@ const getShowtimeOfTheater = async (req, res) => {
             date: format(new Date(st.date), "yyyy-MM-dd"),
             start_time: st.start_time,
             end_time: st.end_time,
+            seat_layout: st.seat_layout
         }));
 
         res.json(formattedShowtimes);
@@ -52,9 +54,18 @@ const getShowtimeOfTheater = async (req, res) => {
 // Create showtime
 const createShowtime = async (req, res) => {
     try {
-        const showtime = new Showtime(req.body);
-        await showtime.save();
+        const { movie_id, room_id, date, start_time, end_time, seat_layout } = req.body;
 
+        const showtime = new Showtime({
+            movie_id,
+            room_id,
+            date,
+            start_time,
+            end_time,
+            seat_layout
+        });
+
+        await showtime.save();
         await showtime.populate('movie_id', 'title');
         await showtime.populate('room_id', 'name');
 
@@ -66,6 +77,7 @@ const createShowtime = async (req, res) => {
             date: format(new Date(showtime.date), "yyyy-MM-dd"),
             start_time: showtime.start_time,
             end_time: showtime.end_time,
+            seat_layout: showtime.seat_layout
         };
 
         res.json(formattedShowtime);
@@ -90,6 +102,7 @@ const updateShowtime = async (req, res) => {
             date: format(new Date(showtime.date), "yyyy-MM-dd"),
             start_time: showtime.start_time,
             end_time: showtime.end_time,
+            seat_layout: showtime.seat_layout
         };
 
         res.json(formattedShowtime);
