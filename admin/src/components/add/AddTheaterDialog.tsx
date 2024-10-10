@@ -28,6 +28,7 @@ interface Room {
   name: string;
   roomType: "2D" | "3D" | "IMAX";
   seatLayout: number[][];
+  image?: File | null; // Add image property
 }
 
 // interface Theater {
@@ -53,6 +54,11 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
   const [adjustOpen, setAdjustOpen] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
 
+  const [theaterImage, setTheaterImage] = useState<File | null>(null);
+  const [roomImages, setRoomImages] = useState<{ [key: string]: File | null }>(
+    {}
+  );
+
   const handleClose = () => {
     setName("");
     setAddress("");
@@ -62,11 +68,16 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
   };
 
   const handleSave = async () => {
-    console.log(name);
-    console.log(address);
-    console.log(city);
-    console.log(rooms);
-    const response = await axiosInstance.get('/theaters');
+    const theater = {
+      name,
+      address,
+      city,
+      image: theaterImage,
+      rooms,
+    };
+    console.log(theater);
+    
+    const response = await axiosInstance.get("/theaters");
     console.log(response.data);
 
     // if (name && address && city && rooms.length > 0) {
@@ -108,6 +119,20 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
     setRooms((prevRooms) =>
       prevRooms.map((room) =>
         room.id === roomId ? { ...room, seatLayout: newLayout } : room
+      )
+    );
+  };
+
+  const handleTheaterImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setTheaterImage(e.target.files[0]);
+    }
+  };
+
+  const handleRoomImageChange = (roomId: string, file: File) => {
+    setRooms((prevRooms) =>
+      prevRooms.map((room) =>
+        room.id === roomId ? { ...room, image: file } : room
       )
     );
   };
@@ -175,6 +200,29 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
             <MenuItem value="HCMC">HCMC</MenuItem>
             <MenuItem value="Da Nang">Da Nang</MenuItem>
           </TextField>
+          <Typography gutterBottom style={{ marginTop: "20px" }}>
+            Upload Theater Image
+          </Typography>
+          <div className="image_theater">
+            <input
+              accept="image/*"
+              type="file"
+              onChange={handleTheaterImageChange}
+              style={{ marginBottom: "20px" }}
+            />
+            {theaterImage && (
+              <img
+                src={URL.createObjectURL(theaterImage)}
+                alt="Theater Preview"
+                style={{
+                  maxWidth: "50%",
+                  height: "auto",
+                  borderRadius: "8px", // Optional for rounded corners
+                  boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
+                }}
+              />
+            )}
+          </div>
 
           <Typography variant="h6" gutterBottom style={{ marginTop: "20px" }}>
             Rooms
@@ -187,6 +235,7 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
                 marginBottom: "10px",
                 border: "1px solid #ccc",
                 padding: "10px",
+                borderRadius: "8px", // Optional for rounded corners
               }}
             >
               <TextField
@@ -218,6 +267,36 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
                 <MenuItem value="3D">3D</MenuItem>
                 <MenuItem value="IMAX">IMAX</MenuItem>
               </TextField>
+              <Typography gutterBottom style={{ marginTop: "10px" }}>
+                Upload Room Image
+              </Typography>
+              <div>
+                <input
+                  accept="image/*"
+                  type="file"
+                  onChange={(e) =>
+                    e.target.files &&
+                    handleRoomImageChange(room.id, e.target.files[0])
+                  }
+                  style={{ marginBottom: "10px" }}
+                />
+                {room.image && (
+                  <div style={{ textAlign: "center", marginBottom: "10px" }}>
+                    <img
+                      src={URL.createObjectURL(room.image)}
+                      alt={`Room ${room.name} Preview`}
+                      style={{
+                        maxWidth: "100%", // Fit within the container
+                        maxHeight: "200px", // Set a max height for room image
+                        width: "auto", // Maintain aspect ratio
+                        height: "auto", // Maintain aspect ratio
+                        borderRadius: "8px", // Optional for rounded corners
+                        boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)", // Optional shadow for better appearance
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
               <div className="button_field">
                 <Button
                   variant="outlined"

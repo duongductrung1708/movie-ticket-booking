@@ -13,6 +13,10 @@ const theaterSchema = new Schema({
     enum: ['Hanoi', 'HCMC', 'Da Nang'],
     required: true,
   },
+  rooms: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Room', // Reference to the Room model
+  }],
 });
 
 const Theater = mongoose.model('Theater', theaterSchema);

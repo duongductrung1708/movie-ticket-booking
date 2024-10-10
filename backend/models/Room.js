@@ -20,11 +20,7 @@ const roomSchema = new Schema({
     enum: ['2D', '3D', 'IMAX'],
     required: true,
   },
-  theater_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Theater',
-    required: true,
-  },
+  seatLayout:[[Number]],
 });
 
 const Room = mongoose.model('Room', roomSchema);
