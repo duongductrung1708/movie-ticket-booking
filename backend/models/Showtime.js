@@ -1,5 +1,21 @@
 const mongoose = require("mongoose");
 
+const seatSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    required: true,
+  },
+  status: {
+    type: String,
+    enum: ['available', 'reserved', 'occupied'], // Example statuses
+    required: true,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+});
+
 const showtimeSchema = new mongoose.Schema({
   movie_id: { type: mongoose.Schema.Types.ObjectId, ref: "Movie" },
   room_id: { type: mongoose.Schema.Types.ObjectId, ref: "Room" },
@@ -7,27 +23,10 @@ const showtimeSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  seat_layout: [
-    {
-      seat_number: String,
-      row: String,
-      column: Number,
-      type: {
-        type: String,
-        enum: ["regular", "VIP"],
-        required: true, 
-      },
-      status: {
-        type: String,
-        enum: ["available", "booked", "reserved"],
-        default: "available",
-      },
-      price: {
-        type: Number,
-        required: true,
-      },
-    }
-  ],  
+  seatLayout: {
+    type: [[seatSchema]], // 2D array of seat objects
+    required: true,
+  },
   start_time: {
     type: String,
     required: true,

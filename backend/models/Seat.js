@@ -2,16 +2,16 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const seatSchema = new Schema({
-  roomId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Room',
-    required: true,
-  },
-  seat_row: {
+  type: {
     type: String,
     required: true,
   },
-  seat_column: {
+  status: {
+    type: String,
+    enum: ['available', 'reserved', 'occupied'], // Example statuses
+    required: true,
+  },
+  price: {
     type: Number,
     required: true,
   },
