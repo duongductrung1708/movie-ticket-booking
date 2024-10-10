@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const theaterSchema = new Schema({
@@ -10,10 +10,17 @@ const theaterSchema = new Schema({
   address: String,
   city: {
     type: String,
-    enum: ['Hanoi', 'HCMC', 'Da Nang'],
+    enum: ["Hanoi", "HCMC", "Da Nang"],
     required: true,
   },
+  room_id: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Room",
+      required: true,
+    },
+  ],
 });
 
-const Theater = mongoose.model('Theater', theaterSchema);
+const Theater = mongoose.model("Theater", theaterSchema);
 module.exports = Theater;

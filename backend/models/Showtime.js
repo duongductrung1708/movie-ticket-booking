@@ -7,6 +7,27 @@ const showtimeSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  seat_layout: [
+    {
+      seat_number: String,
+      row: String,
+      column: Number,
+      type: {
+        type: String,
+        enum: ["regular", "VIP"],
+        required: true, 
+      },
+      status: {
+        type: String,
+        enum: ["available", "booked", "reserved"],
+        default: "available",
+      },
+      price: {
+        type: Number,
+        required: true,
+      },
+    }
+  ],  
   start_time: {
     type: String,
     required: true,

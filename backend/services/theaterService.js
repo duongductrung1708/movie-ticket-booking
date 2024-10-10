@@ -35,12 +35,39 @@ const TheaterService = {
     return await Theater.findByIdAndDelete(theaterId);
   },
 
+  // getShowtimesByTheater: async (theaterId) => {
+  //   try {
+  //     const rooms = await Room.find({ theater_id: theaterId }).select("_id");
+
+  //     const roomIds = rooms.map((room) => room._id);
+
+  //     const showtimes = await Showtime.find({ room_id: { $in: roomIds } })
+  //       .populate({
+  //         path: "movie_id",
+  //         select: "title language duration genre",
+  //         populate: {
+  //           path: "genre",
+  //           select: "name",
+  //         },
+  //       })
+  //       .select("movie_id date start_time");
+
+  //     return showtimes;
+  //   } catch (error) {
+  //     throw new Error("Error fetching showtimes by theater");
+  //   }
+  // },
+
   getShowtimesByTheater: async (theaterId) => {
     try {
-      const rooms = await Room.find({ theater_id: theaterId }).select("_id");
-
-      const roomIds = rooms.map((room) => room._id);
-
+      const theater = await Theater.findById(theaterId).select("room_id");
+  
+      if (!theater) {
+        throw new Error("Theater not found");
+      }
+  
+      const roomIds = theater.room_id;
+  
       const showtimes = await Showtime.find({ room_id: { $in: roomIds } })
         .populate({
           path: "movie_id",
@@ -51,12 +78,12 @@ const TheaterService = {
           },
         })
         .select("movie_id date start_time");
-
+  
       return showtimes;
     } catch (error) {
-      throw new Error("Error fetching showtimes by theater");
+      throw new Error("Error fetching showtimes by theater: " + error.message);
     }
-  },
+  }  
 };
 
 module.exports = TheaterService;
