@@ -26,7 +26,7 @@ function App() {
         <Route path="/change-password" element={<ProtectedRoute element={<ChangePassword />} />} />
         <Route path="/forgot-password" element={<ForgetPassword />} />
         <Route path="/home" element={<HomePage />} />
-        <Route path="/movie/:title" element={<MovieDetail />} />
+        <Route path="/movie/:id" element={<MovieDetail />} />
         <Route path="/seat-reservation" element={<ProtectedRoute element={<SeatReservation />} />} />
         <Route path="/user-profile" element={<ProtectedRoute element={<UserProfile />} />} />
         <Route path="/booking-history" element={<ProtectedRoute element={<BookHistory />} />} />
