@@ -15,6 +15,7 @@ const corsOptions = require('./config/corsOptions');
 const serviceRoutes = require('./routes/serviceRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const bookingDetailRoutes = require('./routes/bookingDetailRoutes');
+const path = require('path');
 
 const app = express();
 
@@ -28,6 +29,9 @@ app.use(corsOptions);
 connectDB().then(() => {
   createDefaultRoles();
 });
+
+//Get image route
+app.use('/api/images', express.static(path.join(__dirname, 'assets')));
 
 // Define routes
 app.use('/api/auth', authRoutes);

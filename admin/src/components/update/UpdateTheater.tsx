@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import Dialog from "@mui/material/Dialog";
@@ -13,6 +13,8 @@ import Typography from "@mui/material/Typography";
 import MenuItem from "@mui/material/MenuItem";
 import AdjustSeatLayout from "../update/AdjustSeatLayout";
 import axiosInstance from "../../config/axiosConfig";
+import EditIcon from "@mui/icons-material/Edit";
+import constants from "../../constants/constants";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -24,91 +26,77 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 interface Room {
-  id: string; // Unique identifier
+  id: string;
   name: string;
   roomType: "2D" | "3D" | "IMAX";
   seatLayout: number[][];
-  image?: File | null; // Add image property
+  image?: File | null | string; // File or existing image URL
 }
 
-// interface Theater {
-//   name: string;
-//   address: string;
-//   city: string;
-//   rooms: Room[];
-// }
-
-interface AddTheaterDialogProps {
-  open: boolean;
-  setOpen: (open: boolean) => void;
+interface UpdateTheaterDialogProps {
+  theaterData: {
+    _id: string;
+    name: string;
+    address: string;
+    city: string;
+    rooms: {
+      _id: string;
+      name: string;
+      type: "2D" | "3D" | "IMAX";
+      seatLayout: number[][];
+      image?: string;
+    }[];
+    image?: string;
+  } | null;
   setTheaters: React.Dispatch<React.SetStateAction<[]>>;
 }
 
-const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
-  open,
-  setOpen,
+const UpdateTheaterDialog: React.FC<UpdateTheaterDialogProps> = ({
+  theaterData,
   setTheaters,
 }) => {
+  const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [rooms, setRooms] = useState<Room[]>([]);
   const [adjustOpen, setAdjustOpen] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
-
   const [theaterImage, setTheaterImage] = useState<File | null>(null);
+  const [theaterImageUrl, setTheaterImageUrl] = useState<string | null>(null);
+  
+  useEffect(() => {
+    if (theaterData) {
+      setName(theaterData.name);
+      setAddress(theaterData.address);
+      setCity(theaterData.city);
+      setRooms(
+        theaterData?.rooms?.map((room) => ({
+          id: room._id,
+          name: room.name,
+          roomType: room.type,
+          seatLayout: room.seatLayout,
+          image: room.image,
+        }))
+      );
+      setTheaterImageUrl(theaterData.image || null);
+    }
+  }, [theaterData]);
 
-  const handleClose = () => {
-    setName("");
-    setAddress("");
-    setCity("");
-    setRooms([]);
-    setOpen(false);
+  const handleSeatLayoutChange = (roomId: string, newLayout: number[][]) => {
+    setRooms((prevRooms) =>
+      prevRooms?.map((room) =>
+        room.id === roomId ? { ...room, seatLayout: newLayout } : room
+      )
+    );
   };
 
-  const handleSave = async () => {
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("address", address);
-    formData.append("city", city);
-
-    // Add the theater image
-    if (theaterImage) {
-      formData.append("theaterImage", theaterImage);
-    }
-
-    // Add room data and their images if available
-    const roomsData = rooms.map((room) => {
-      const { id, name, roomType, seatLayout } = room;
-      return { id, name, roomType, seatLayout };
-    });
-
-    formData.append("rooms", JSON.stringify(roomsData));
-
-    // Add room images
-    rooms.forEach((room) => {
-      if (room.image) {
-        formData.append("roomImages", room.image);
-      }
-    });
-
-    try {
-      const response = await axiosInstance.post("/theaters/rooms", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      // Get the updated theater from the response
-      const updatedTheater = response.data; // This is the updated theater
-      console.log(updatedTheater);
-
-      // Add or replace the updated theater in the list of theaters
-      setTheaters(updatedTheater);
-
-      setOpen(false); // Close the dialog on success
-    } catch (error) {
-      console.error("Error saving theater:", error);
-    }
+  const handleRoomChange = (roomId: string, field: keyof Room, value: any) => {
+    setRooms((prevRooms) =>
+      prevRooms.map((room) =>
+        room.id === roomId ? { ...room, [field]: value } : room
+      )
+    );
   };
 
   const handleAddRoom = () => {
@@ -120,31 +108,72 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
     };
     setRooms([...rooms, newRoom]);
   };
+  const [removedRooms, setRemovedRooms] = useState<string[]>([]);
 
   const handleRemoveRoom = (roomId: string) => {
+
+    setRemovedRooms((prevRemovedRooms) => [...prevRemovedRooms, roomId]);
+
     const updatedRooms = rooms.filter((room) => room.id !== roomId);
     setRooms(updatedRooms);
   };
 
-  const handleRoomChange = (roomId: string, field: keyof Room, value: any) => {
-    setRooms((prevRooms) =>
-      prevRooms.map((room) =>
-        room.id === roomId ? { ...room, [field]: value } : room
-      )
-    );
+  const handleClose = () => {
+    setOpen(false);
   };
 
-  const handleSeatLayoutChange = (roomId: string, newLayout: number[][]) => {
-    setRooms((prevRooms) =>
-      prevRooms.map((room) =>
-        room.id === roomId ? { ...room, seatLayout: newLayout } : room
-      )
-    );
+  const handleSave = async () => {
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("address", address);
+    formData.append("city", city);
+
+    if (theaterImage) {
+      formData.append("theaterImage", theaterImage);
+    }
+
+    const roomsData = rooms.map((room) => {
+      const { id, name, roomType, seatLayout } = room;
+      return { id, name, roomType, seatLayout };
+    });
+
+    formData.append("rooms", JSON.stringify(roomsData));
+
+    // Add room images
+    rooms.forEach((room) => {
+      if (room.image && room.image instanceof File) {
+        formData.append(`roomImage_${room.id}`, room.image);
+      }
+    });
+
+    // Add removed rooms
+    formData.append("removedRooms", JSON.stringify(removedRooms));
+
+    console.log(theaterData);
+    
+    try {
+      const response = await axiosInstance.put(
+        `/theaters/${theaterData?._id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log(response.data);
+      setTheaters(response.data);
+      
+      setOpen(false);
+    } catch (error) {
+      console.error("Error updating theater:", error);
+    }
   };
 
   const handleTheaterImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setTheaterImage(e.target.files[0]);
+      setTheaterImageUrl(null); // Clear the old image URL when a new file is selected
     }
   };
 
@@ -163,6 +192,9 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
 
   return (
     <React.Fragment>
+      <Button onClick={() => setOpen(true)}>
+        <EditIcon />
+      </Button>
       <BootstrapDialog
         onClose={handleClose}
         aria-labelledby="customized-dialog-title"
@@ -171,7 +203,7 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
         fullWidth
       >
         <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-          Add New Theater
+          Update Theater
           <IconButton
             aria-label="close"
             onClick={handleClose}
@@ -188,7 +220,7 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
 
         <DialogContent dividers>
           <Typography gutterBottom>
-            Enter the details of the new theater.
+            Update the details of the theater.
           </Typography>
           <TextField
             margin="dense"
@@ -229,14 +261,18 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
               onChange={handleTheaterImageChange}
               style={{ marginBottom: "20px" }}
             />
-            {theaterImage && (
+            {(theaterImage || theaterImageUrl) && (
               <img
-                src={URL.createObjectURL(theaterImage)}
+                src={
+                  theaterImage
+                    ? URL.createObjectURL(theaterImage)
+                    : `${constants.url}images/${theaterImageUrl} `
+                }
                 alt="Theater Preview"
                 style={{
                   maxWidth: "50%",
                   height: "auto",
-                  borderRadius: "8px", // Optional for rounded corners
+                  borderRadius: "8px",
                   boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
                 }}
               />
@@ -247,14 +283,14 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
             Rooms
           </Typography>
 
-          {rooms.map((room) => (
+          {rooms?.map((room) => (
             <div
               key={room.id}
               style={{
                 marginBottom: "10px",
                 border: "1px solid #ccc",
                 padding: "10px",
-                borderRadius: "8px", // Optional for rounded corners
+                borderRadius: "8px",
               }}
             >
               <TextField
@@ -302,15 +338,19 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
                 {room.image && (
                   <div style={{ textAlign: "center", marginBottom: "10px" }}>
                     <img
-                      src={URL.createObjectURL(room.image)}
+                      src={
+                        typeof room.image === "string"
+                          ? `${constants.url}images/${room.image} `
+                          : URL.createObjectURL(room.image)
+                      }
                       alt={`Room ${room.name} Preview`}
                       style={{
-                        maxWidth: "100%", // Fit within the container
-                        maxHeight: "200px", // Set a max height for room image
-                        width: "auto", // Maintain aspect ratio
-                        height: "auto", // Maintain aspect ratio
-                        borderRadius: "8px", // Optional for rounded corners
-                        boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)", // Optional shadow for better appearance
+                        maxWidth: "100%",
+                        maxHeight: "200px",
+                        width: "auto",
+                        height: "auto",
+                        borderRadius: "8px",
+                        boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
                       }}
                     />
                   </div>
@@ -348,7 +388,7 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
           <Button onClick={handleSave} autoFocus>
-            Add Theater
+            Update Theater
           </Button>
         </DialogActions>
       </BootstrapDialog>
@@ -368,4 +408,4 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
   );
 };
 
-export default AddTheaterDialog;
+export default UpdateTheaterDialog;
