@@ -8,34 +8,37 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import EditIcon from "@mui/icons-material/Edit";
 
 import "./theaters.scss";
 import AddTheaterDialog from "../../components/add/AddTheaterDialog";
 import axiosInstance from "../../config/axiosConfig";
+import constants from "../../constants/constants";
+import DisplayRoomDetail from "../../components/display/DisplayRoomDetail";
+import { Backdrop, Button, CircularProgress } from "@mui/material";
+import UpdateTheaterDialog from "../../components/update/UpdateTheater";
 
 function createTheaterData(
-  id: string,
+  _id: string,
   name: string,
   address: string,
   city: string,
   image: string,
   rooms?:
     | {
-        id: string;
+        _id: string;
         name: string;
         image?: string;
-        rows: number;
-        columns: number;
+        seatLayout: [][];
         type?: "2D" | "3D" | "IMAX";
       }[]
     | null
 ) {
   return {
-    id,
+    _id,
     name,
     address,
     city,
@@ -44,8 +47,11 @@ function createTheaterData(
   };
 }
 
-function Row(props: { row: ReturnType<typeof createTheaterData> }) {
-  const { row } = props;
+function Row(props: {
+  row: ReturnType<typeof createTheaterData>;
+  handleUpdateTheater: (theater: any) => void;
+}) {
+  const { row, handleUpdateTheater } = props;
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -63,37 +69,50 @@ function Row(props: { row: ReturnType<typeof createTheaterData> }) {
         {/* <TableCell align="right">{row.id}</TableCell> */}
         <TableCell align="left">{row.name}</TableCell>
         <TableCell align="left">
-          <img src={row.image} alt="" className="table-image" />
+          <img
+            src={constants.url + "images/" + row.image}
+            alt=""
+            className="table-image"
+          />
         </TableCell>
         <TableCell align="left">{row.address}</TableCell>
         <TableCell align="left">{row.city}</TableCell>
+        <TableCell align="left">{row.rooms?.length}</TableCell>
+        <TableCell align="left">
+          <UpdateTheaterDialog theaterData={row} setTheaters={handleUpdateTheater}/>
+        </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <Table size="small" aria-label="purchases">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Room Id</TableCell>
                     <TableCell>Name</TableCell>
                     <TableCell>Image</TableCell>
-                    <TableCell align="right">Dimension (Row x Col)</TableCell>
                     <TableCell align="right">Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {row?.rooms?.map((room) => (
-                    <TableRow key={room.id}>
-                      <TableCell component="th" scope="row">
-                        {room.id}
-                      </TableCell>
+                    <TableRow key={room._id}>
                       <TableCell>{room.name}</TableCell>
-                      <TableCell>{room.image}</TableCell>
-                      <TableCell align="right">
-                        {room.rows} x {room.columns}
+                      <TableCell>
+                        <img
+                          src={`${constants.url}images/${room.image}`}
+                          alt=""
+                          style={{
+                            width: "100px", // Set the desired width
+                            height: "100px", // Set the desired height
+                            objectFit: "cover", // Maintain aspect ratio and cover the area
+                            borderRadius: "5px", // Optional: add rounded corners
+                          }}
+                        />
                       </TableCell>
-                      <TableCell align="right">Hi</TableCell>
+                      <TableCell align="right">
+                        <DisplayRoomDetail seatLayout={room.seatLayout} />
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -105,42 +124,44 @@ function Row(props: { row: ReturnType<typeof createTheaterData> }) {
     </React.Fragment>
   );
 }
-const rows = [
-  createTheaterData("1", "Theater 1", "123 Street", "City 1", "image1.png", [
-    {
-      id: "1",
-      name: "Room 1",
-      image: "room1.png",
-      rows: 10,
-      columns: 15,
-      type: "IMAX",
-    },
-    {
-      id: "1",
-      name: "Room 2",
-      rows: 8,
-      columns: 12,
-      type: "2D",
-    },
-  ]),
-];
 export default function Theaters() {
   const [open, setOpen] = React.useState(false);
   const [rows, setRows] = React.useState([]);
+  const [loading, setLoading] = React.useState(false); // Manage loading state
+
   React.useEffect(() => {
-    axiosInstance.get("/theaters").then(({ data }) => {
+    axiosInstance.get("/theaters/rooms").then(({ data }) => {
+      console.log(data);
+
       const newRows = data.map((theater) =>
         createTheaterData(
           theater._id,
           theater.name,
           theater.address,
           theater.city,
-          theater.image
+          theater.image,
+          theater.rooms
         )
       );
       setRows(newRows);
     });
   }, []);
+
+  // Function to append a new theater to the existing list of theaters
+  const handleAddTheater = (newTheater: any) => {
+    setRows((prevRows) => [...prevRows, newTheater]);
+  };
+
+  // Function to update an existing theater in the list
+  const handleUpdateTheater = (updatedTheater: any) => {
+    console.log(updatedTheater);
+    
+    setRows((prevRows) =>
+      prevRows.map((theater) =>
+        theater._id === updatedTheater._id ? updatedTheater : theater
+      )
+    ); // Replace the existing theater with the updated one
+  };
   return (
     <>
       <div className="info">
@@ -163,11 +184,13 @@ export default function Theaters() {
               <TableCell align="left">Image</TableCell>
               <TableCell align="left">Address</TableCell>
               <TableCell align="left">City</TableCell>
+              <TableCell align="left">Rooms</TableCell>
+              <TableCell align="left"></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
-              <Row key={row?.id} row={row} />
+            {rows.map((row, index) => (
+              <Row key={index} row={row} handleUpdateTheater={handleUpdateTheater}/>
             ))}
           </TableBody>
         </Table>
@@ -175,7 +198,18 @@ export default function Theaters() {
           <div className="empty-row">No theater is created</div>
         )}
       </TableContainer>
-      <AddTheaterDialog open={open} setOpen={setOpen} />
+      <AddTheaterDialog
+        open={open}
+        setOpen={setOpen}
+        setTheaters={handleAddTheater}
+      />
+      {/* Loading overlay to prevent user interaction */}
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </>
   );
 }
