@@ -119,6 +119,7 @@ const Button = styled.button`
   border-radius: 10px;
   cursor: pointer;
   margin-top: 0.5rem;
+  transition: background-color 0.3s ease;
 
   &:hover {
     background-color: gray;
@@ -142,20 +143,22 @@ const ShowMoreButton = styled.button`
   font-size: ${(props) => props.theme.fontmd};
 `;
 
-const MovieListItem = React.forwardRef(({ image, title, rating, duration, releaseDate }, ref) => {
+const MovieListItem = React.forwardRef(({ movie }, ref) => {
   const navigate = useNavigate();
 
   const handleBooking = () => {
-    navigate(`/movie/${encodeURIComponent(title)}`);
+    navigate(`/movie/${movie._id}`);
   };
 
   return (
     <MovieItem ref={ref}>
-      <MovieImage src={image} alt={title} />
+      <MovieImage src={movie.image} alt={movie.title} />
       <MovieInfo>
-        <MovieTitle>{title}</MovieTitle>
-        <MovieRating>Rating: {rating} / 10</MovieRating>
-        <MovieRating>{duration} | {releaseDate}</MovieRating>
+        <MovieTitle>{movie.title}</MovieTitle>
+        <MovieRating>Rating: {movie.rating} / 10</MovieRating>
+        <MovieRating>
+          {movie.duration} | {movie.releaseDate}
+        </MovieRating>
         <Button onClick={handleBooking}>Book Now</Button>
       </MovieInfo>
     </MovieItem>
@@ -205,16 +208,18 @@ const MovieList = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
       />
       <Container>
-        {filteredMovies.slice(0, visibleMovies).map((movie, index) => (
-          <MovieListItem
-            key={index}
-            image={movie.image}
-            title={movie.title}
-            rating={movie.rating}
-            duration={movie.duration}
-            releaseDate={movie.releaseDate}
-          />
-        ))}
+        {filteredMovies.length === 0 ? (
+          <p>No movies found.</p>
+        ) : (
+          filteredMovies
+            .slice(0, visibleMovies)
+            .map((movie, index) => (
+              <MovieListItem
+                key={index}
+                movie={movie}
+              />
+            ))
+        )}
       </Container>
       <ButtonWrapper>
         <ShowMoreButton onClick={toggleMovies}>

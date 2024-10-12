@@ -131,7 +131,11 @@ exports.updateMovie = async (req, res) => {
         .json({ error: "At least one field is required to update" });
     }
 
-    const updatedMovie = await Movie.findByIdAndUpdate(req.params.id, updateFields, { new: true });
+    const updatedMovie = await Movie.findByIdAndUpdate(
+      req.params.id,
+      updateFields,
+      { new: true }
+    );
     if (!updatedMovie) return res.status(404).json({ msg: "Movie not found" });
 
     res.status(200).json(updatedMovie);
@@ -148,5 +152,30 @@ exports.deleteMovie = async (req, res) => {
     res.status(200).json({ msg: "Movie deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete movie" });
+  }
+};
+
+// Create multiple movies
+exports.createMovies = async (req, res) => {
+  try {
+    const movies = req.body.movies;
+
+    const newMovies = await Promise.all(
+      movies.map(async (movieData) => {
+        const { genre } = movieData;
+
+        const genreExists = await Genre.findById(genre);
+        if (!genreExists) {
+          throw new Error(`Genre not found for genre ID: ${genre}`);
+        }
+
+        const newMovie = new Movie(movieData);
+        return newMovie.save();
+      })
+    );
+
+    res.status(201).json(newMovies);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

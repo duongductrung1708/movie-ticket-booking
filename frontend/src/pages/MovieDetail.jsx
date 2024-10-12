@@ -18,8 +18,14 @@ import Footer from "../components/Footer";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import klogo from "../assets/kcinema.png";
 import Navigation from "../components/Navigation";
+import {
+  getMovieById,
+  getAllTheater,
+  getShowtimesByTheater,
+} from "../services/api";
+import dayjs from "dayjs";
+import "../styles/MovieDetailsStyle.css";
 
 const Section = styled.section`
   min-height: ${(props) => `calc(100vh - ${props.theme.navHeight})`};
@@ -119,7 +125,7 @@ const AdditionalInfoGrid = styled.div`
 `;
 
 const Details = styled.div`
-    @media (max-width: 48em) {
+  @media (max-width: 48em) {
     padding: 0.5rem;
   }
 `;
@@ -131,7 +137,7 @@ const DetailItem = styled.div`
   display: flex;
   line-height: 2;
 
-    @media (max-width: 64em) {
+  @media (max-width: 64em) {
     font-size: 1rem;
   }
 
@@ -148,7 +154,7 @@ const DetailItem = styled.div`
 const CastList = styled.div`
   margin-top: 2rem;
 
-    @media (max-width: 48em) {
+  @media (max-width: 48em) {
     display: flex;
     padding: 0.5rem;
   }
@@ -219,48 +225,6 @@ const SelectWrapper = styled.div`
   }
 `;
 
-const TheaterLogos = styled.div`
-  display: flex;
-  gap: 5rem;
-  margin-bottom: 1.5rem;
-
-  @media (max-width: 768px) {
-    gap: 3rem;
-  }
-
-  @media (max-width: 480px) {
-    gap: 2rem;
-  }
-`;
-
-const TheaterLogo = styled.img`
-  width: 70px;
-  height: 70px;
-  cursor: pointer;
-  border-radius: 50%;
-  filter: ${(props) => (props.selected ? "brightness(1)" : "brightness(0.5)")};
-  transition: filter 0.3s ease;
-
-  &:hover {
-    filter: brightness(1);
-  }
-
-  @media (max-width: 1024px) {
-    width: 60px;
-    height: 60px;
-  }
-
-  @media (max-width: 768px) {
-    width: 50px;
-    height: 50px;
-  }
-
-  @media (max-width: 480px) {
-    width: 40px;
-    height: 40px;
-  }
-`;
-
 const Address = styled.div`
   margin-left: 20rem;
   font-size: 1.2rem;
@@ -287,7 +251,7 @@ const BookingOptions = styled.div`
   flex-direction: column;
   margin-top: 5rem;
 
-    @media (max-width: 48em) {
+  @media (max-width: 48em) {
     font-size: 0.8rem;
     padding: 0.5rem;
   }
@@ -322,6 +286,25 @@ const Title = styled.h2`
   }
 `;
 
+const Subtitle = styled.p`
+  font-family: "Sora", sans-serif;
+  font-size: 1rem;
+  color: #000;
+  margin-bottom: 1rem;
+
+  @media (max-width: 1024px) {
+    font-size: 1.4rem;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+  }
+`;
+
 const ShowtimeButton = styled.button`
   font-family: "Sora", sans-serif;
   font-size: 0.8rem;
@@ -340,7 +323,7 @@ const ShowtimeButton = styled.button`
     color: white;
   }
 
-    @media (max-width: 1024px) {
+  @media (max-width: 1024px) {
     font-size: 1rem;
     padding: 0.7rem 1.2rem;
     margin: 0.5rem 1rem 1rem;
@@ -359,95 +342,112 @@ const ShowtimeButton = styled.button`
   }
 `;
 
-const movies = [
-  {
-    title: "The Matrix",
-    rating: "8.7",
-    image:
-      "https://play-lh.googleusercontent.com/zL8ya3uEa7Q-oDqc7McTIAaRvwKZNN4HMICMwHHL2eKsbE9Hms_2Dj6SWwNGI555CyauvPVjCPUzYBm2TJ8",
-    trailer: "https://www.youtube.com/watch?v=xG0iRA37IjA",
-    synopsis:
-      "The Matrix official 25th anniversary trailer has finally been released! The iconic sci-fi movie, directed by the Wachowskis, originally premiered on March 31, 1999. To celebrate this milestone, Warner Bros. has unveiled a new trailer that takes a look back at the groundbreaking film's impact on popular culture. The trailer also nods to the franchise's enduring influence, highlighting key scenes and quotes from the original movie. Fans of the series can relive the nostalgia and excitement as they prepare for the next installment in the franchise.",
-    director: "The Wachowskis",
-    country: "USA",
-    genre: "Action/Sci-Fi",
-    releaseDate: "03/31/2024",
-    duration: "136 minutes",
-    ageRating: "R",
-    cast: [
-      "Keanu Reeves",
-      "Carrie-Anne Moss",
-      "Laurence Fishburne",
-      "Hugo Weaving",
-      "Gloria Foster",
-    ],
-    showtimes: {
-      "2024-09-23": ["10:00", "12:00", "14:00"],
-      "2024-09-24": ["11:00", "13:00", "15:00"],
-      "2024-09-25": ["16:00", "17:00", "18:00"],
-    },
-  },
-  {
-    title: "Inception",
-    rating: "8.8",
-    image:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg",
-    duration: "148 minutes",
-    trailer: "https://www.youtube.com/watch?v=YoHD9XEInc0",
-    synopsis:
-      "Inception! A mind-bending idea conceived by Christopher Nolan in his 2010 film. Inception is a concept where a person can enter another person's dream within a dream, creating nested layers of reality. The idea is to plant an idea in someone's mind while they're asleep, but the difficulty lies in navigating the multiple levels of consciousness without getting lost. The film features Leonardo DiCaprio, Joseph Gordon-Levitt, and Marion Cotillard, among others. It has become a cult classic for its thought-provoking storyline and visually stunning action sequences.",
-    director: "Christopher Nolan",
-    country: "USA",
-    genre: "Action/Sci-Fi",
-    releaseDate: "03/31/2024",
-    ageRating: "R",
-    cast: [
-      "Leonardo DiCaprio",
-      "Joseph Gordon-Levitt",
-      "Marion Cotillard",
-      "Elliot Page",
-      "Tom Hardy",
-    ],
-    showtimes: {
-      "2024-09-23": ["10:30", "12:30", "14:30"],
-      "2024-09-24": ["11:30", "13:30", "15:30"],
-    },
-  },
-];
-
 const MovieDetail = () => {
+  const { id } = useParams();
+  const [movie, setMovie] = useState(null);
   const navigate = useNavigate();
   const cities = ["HCMC", "Hanoi", "Da Nang"];
-  const theaters = {
-    HCMC: ["K.CINEMA Star Cineplex - 3/2 HCMC", "K.CINEMA Hai Ba Trung HCMC"],
-    Hanoi: [
-      "K.CINEMA Ba Dinh Ha Noi",
-      "K.CINEMA Royal City Ha Noi",
-      "K.CINEMA - Cao Thang Ha Noi",
-    ],
-    "Da Nang": ["K.CINEMA Vincom Plaza Da Nang", "K.CINEMA Da Nang"],
-  };
-
-  const theaterLogos = [
-    {
-      name: "K.CINEMA",
-      logo: klogo,
-    },
-  ];
-
   const [selectedCity, setSelectedCity] = useState("");
-  const [selectedTheater, setSelectedTheater] = useState("");
   const [filteredTheaters, setFilteredTheaters] = useState([]);
-  const [selectedTheaterLogo, setSelectedTheaterLogo] = useState(null);
+  const [selectedTheater, setSelectedTheater] = useState("");
   const [selectedShowtimes, setSelectedShowtimes] = useState({});
+  const [movies, setMovies] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
 
-  const { title } = useParams();
-  const movie = movies.find((m) => m.title === title);
+  useEffect(() => {
+    const fetchMovie = async () => {
+      try {
+        const movieData = await getMovieById(id);
+        setMovie(movieData);
+      } catch (error) {
+        console.error("Error fetching movie data:", error);
+      }
+    };
+    fetchMovie();
+  }, [id]);
 
-  const filterTheatersByLogo = (theater) => {
-    setSelectedTheaterLogo(theater.name);
-  };
+  useEffect(() => {
+    const fetchTheaters = async () => {
+      if (selectedCity) {
+        try {
+          const theatersData = await getAllTheater();
+          const filtered = theatersData.filter(
+            (theater) => theater.city === selectedCity
+          );
+          setFilteredTheaters(filtered);
+        } catch (error) {
+          console.error("Error fetching theaters:", error);
+        }
+      } else {
+        setFilteredTheaters([]);
+      }
+    };
+
+    fetchTheaters();
+  }, [selectedCity]);
+
+  useEffect(() => {
+    const fetchShowtimes = async () => {
+      if (selectedTheater) {
+        const selectedTheaterDetails = filteredTheaters.find(
+          (theater) => theater.name === selectedTheater
+        );
+  
+        if (selectedTheaterDetails) {
+          const theaterId = selectedTheaterDetails._id;
+  
+          try {
+            const showtimesData = await getShowtimesByTheater(theaterId);
+  
+            const filteredShowtimes = showtimesData.filter((showtime) => {
+              if (selectedDate) {
+                return (
+                  dayjs(showtime.date).isSame(selectedDate, "day") &&
+                  showtime.movie_id._id === movie._id
+                );
+              }
+              return showtime.movie_id._id === movie._id;
+            });
+  
+            const uniqueMovies = {};
+  
+            filteredShowtimes.forEach((showtime) => {
+              const movieId = showtime.movie_id._id;
+              const movieTitle = showtime.movie_id.title;
+              const movieLanguage = showtime.movie_id.language;
+              const movieDuration = showtime.movie_id.duration;
+  
+              const movieGenres = showtime.movie_id.genre
+                .map((genre) => genre.name)
+                .join(", ");
+              const showtimeDate = dayjs(showtime.date).format("MM/DD/YYYY");
+  
+              if (!uniqueMovies[movieId]) {
+                uniqueMovies[movieId] = {
+                  title: movieTitle,
+                  showtimes: [],
+                  date: showtimeDate,
+                  movieId: movieId,
+                  language: movieLanguage,
+                  duration: movieDuration,
+                  genres: movieGenres,
+                };
+              }
+  
+              uniqueMovies[movieId].showtimes.push(showtime.start_time);
+            });
+  
+            const formattedMovies = Object.values(uniqueMovies);
+            setMovies(formattedMovies);
+          } catch (error) {
+            console.error("Error fetching showtimes:", error);
+          }
+        }
+      }
+    };
+  
+    fetchShowtimes();
+  }, [selectedTheater, selectedDate, filteredTheaters, movie]);  
 
   const handleShowtimeSelect = (movieTitle, time) => {
     setSelectedShowtimes((prevShowtimes) => ({
@@ -474,6 +474,12 @@ const MovieDetail = () => {
     }
   };
 
+  const handleCityChange = (e) => {
+    setSelectedCity(e.target.value);
+    setFilteredTheaters([]);
+    setSelectedTheater("");
+  };
+
   const opts = {
     height: "490",
     width: "100%",
@@ -485,6 +491,10 @@ const MovieDetail = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const filteredMovies = selectedDate
+    ? movies.filter((movie) => movie.showtimes.length > 0)
+    : movies;
 
   return (
     <Section>
@@ -534,7 +544,8 @@ const MovieDetail = () => {
                   <strong>Country:</strong> {movie.country}
                 </DetailItem>
                 <DetailItem variant="body1">
-                  <strong>Genre:</strong> {movie.genre}
+                  <strong>Genre:</strong>{" "}
+                  {movie.genre.map((g) => g.name).join(", ")}
                 </DetailItem>
                 <DetailItem variant="body1">
                   <strong>Release Date:</strong> {movie.releaseDate}
@@ -571,15 +582,7 @@ const MovieDetail = () => {
                     labelId="city-select-label"
                     id="city-select-label"
                     label="City"
-                    onChange={(e) => {
-                      const selectedCity = e.target.value;
-                      setSelectedCity(selectedCity);
-
-                      const filteredTheaters = theaters[selectedCity] || [];
-                      setFilteredTheaters(filteredTheaters);
-                      setSelectedTheaterLogo("");
-                      setSelectedTheater("");
-                    }}
+                    onChange={handleCityChange}
                     value={selectedCity}
                   >
                     {cities.map((city, index) => (
@@ -592,98 +595,110 @@ const MovieDetail = () => {
               </SelectWrapper>
               <Heading>Select Theater</Heading>
               {selectedCity && (
-                <>
-                  <TheaterLogos>
-                    {theaterLogos.map((theater, index) => (
-                      <TheaterLogo
-                        key={index}
-                        src={theater.logo}
-                        alt={theater.name}
-                        selected={selectedTheaterLogo === theater.name}
-                        onClick={() => filterTheatersByLogo(theater)}
-                      />
-                    ))}
-                  </TheaterLogos>
-
-                  {selectedTheaterLogo && (
-                    <SelectWrapper>
-                      <FormControl
-                        style={{ width: "40%" }}
-                        variant="filled"
-                        color="warning"
-                      >
-                        <InputLabel
-                          id="theater-select-label"
-                          sx={{
-                            color: "orange",
-                            "&.Mui-focused": { color: "#ffcc00" },
-                          }}
-                        >
-                          Select a theater
-                        </InputLabel>
-                        <Select
-                          labelId="theater-select-label"
-                          id="theater-select-label"
-                          value={selectedTheater}
-                          label="Theater"
-                          onChange={(e) => setSelectedTheater(e.target.value)}
-                        >
-                          {filteredTheaters.map((theater, index) => (
-                            <MenuItem key={index} value={theater}>
-                              {theater}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                      <Address>
-                        <LocationOnIcon /> 19 Cao Thang, Q.3
-                      </Address>
-                    </SelectWrapper>
-                  )}
-                </>
+                <SelectWrapper>
+                  <FormControl
+                    style={{ width: "40%" }}
+                    variant="filled"
+                    color="warning"
+                  >
+                    <InputLabel
+                      id="theater-select-label"
+                      sx={{
+                        color: "orange",
+                        "&.Mui-focused": { color: "#ffcc00" },
+                      }}
+                    >
+                      Select a theater
+                    </InputLabel>
+                    <Select
+                      labelId="theater-select-label"
+                      id="theater-select"
+                      value={selectedTheater}
+                      onChange={(e) => setSelectedTheater(e.target.value)}
+                    >
+                      {filteredTheaters.map((theater, index) => (
+                        <MenuItem key={index} value={theater.name}>
+                          {theater.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <Address>
+                    <LocationOnIcon />
+                    {
+                      filteredTheaters.find((t) => t.name === selectedTheater)
+                        ?.address
+                    }
+                  </Address>
+                </SelectWrapper>
               )}
+
               {selectedTheater && (
-                <div>
-                  <Heading>Select date</Heading>
+                <>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                       label="Select a date"
                       value={selectedDate}
                       onChange={(newValue) => setSelectedDate(newValue)}
+                      format="MM/DD/YYYY"
                       sx={{
                         width: "40%",
-                        ".MuiInputBase-input": { color: "black" },
-                        svg: { color: "black" },
+                        ".MuiInputBase-input": { color: "orange" },
+                        svg: { color: "white" },
                         "& .MuiOutlinedInput-notchedOutline": {
                           borderColor: "#ffcc00",
                         },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#ffcc00",
+                        },
+                        backgroundColor: "rgba(255, 255, 255, 0.1)",
                       }}
+                      renderInput={(params) => (
+                        <FormControl>
+                          <InputLabel
+                            sx={{
+                              color: "orange",
+                              "&.Mui-focused": { color: "#ffcc00" },
+                            }}
+                          >
+                            {params.label}
+                          </InputLabel>
+                          <input {...params.inputProps} />
+                        </FormControl>
+                      )}
                     />
                   </LocalizationProvider>
-                  {selectedDate && selectedTheater && (
-                    <div>
-                      <Heading>Select showtimes</Heading>
-                      <Title>{selectedTheater}</Title>
-                      <div style={{ display: "flex" }}>
-                        {movie.showtimes[
-                          selectedDate.format("YYYY-MM-DD")
-                        ]?.map((time, timeIndex) => (
-                          <Showtime key={timeIndex}>
-                            <ShowtimeButton
-                              key={timeIndex}
-                              selected={selectedShowtimes[movie.title] === time}
-                              onClick={() =>
-                                handleShowtimeSelect(movie.title, time)
-                              }
-                            >
-                              {time}
-                            </ShowtimeButton>
-                          </Showtime>
-                        ))}
+
+                  <Title>{selectedTheater}</Title>
+                  {Array.isArray(filteredMovies) &&
+                  filteredMovies.length > 0 ? (
+                    filteredMovies.map((movie, movieIndex) => (
+                      <div key={movie.movieId}>
+                        <Subtitle>
+                          {dayjs(movie.date).format("MM/DD/YYYY")}
+                        </Subtitle>
+                        <div style={{ display: "flex", flexWrap: "wrap" }}>
+                          {movie.showtimes.map((time, timeIndex) => (
+                            <Showtime key={timeIndex}>
+                              <ShowtimeButton
+                                selected={
+                                  selectedShowtimes[movie.title] === time
+                                }
+                                onClick={() =>
+                                  handleShowtimeSelect(movie.title, time)
+                                }
+                              >
+                                {time}
+                              </ShowtimeButton>
+                            </Showtime>
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    ))
+                  ) : (
+                    <Subtitle>No showtime found.</Subtitle>
                   )}
-                </div>
+                </>
               )}
             </BookingOptions>
           </>

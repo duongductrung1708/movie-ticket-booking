@@ -164,3 +164,25 @@ export const getMovieById = async (id) => {
     throw error.response ? error.response.data : error.message;
   }
 };
+
+// Function to get all movies
+export const getAllTheater = async () => {
+  try {
+    const response = await api.get("/theaters");
+    return response.data;
+  } catch (error) {
+    console.error("Get theater error:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+// Function to get showtimes by theater ID
+export const getShowtimesByTheater = async (theaterId) => {
+  try {
+    const response = await api.get(`/theaters/${theaterId}/showtimes`);
+    return response.data;
+  } catch (error) {
+    console.error("Get showtimes by theater error:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};

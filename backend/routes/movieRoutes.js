@@ -4,6 +4,7 @@ const {
   getMovies,
   getMovieById,
   createMovie,
+  createMovies,
   updateMovie,
   deleteMovie,
 } = require("../controllers/movieController");
@@ -12,6 +13,7 @@ const {
 router.get("/", getMovies);
 router.get("/:id", getMovieById);
 router.post("/", createMovie);
+router.post("/import", createMovies);
 router.put("/:id", updateMovie);
 router.delete("/:id", deleteMovie);
 
