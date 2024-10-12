@@ -39,11 +39,11 @@ app.use('/api/genres', genreRoutes);
 app.use('/api/theaters', theaterRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/seats', seatRoutes);
+app.use('/services', serviceRoutes);
+app.use('/bookings', bookingRoutes);
+app.use('/booking-details', bookingDetailRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 
-app.use('/services', serviceRoutes);
-app.use('/bookings', bookingRoutes);
-app.use('/booking-details', bookingDetailRoutes);

@@ -2,291 +2,160 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const Role = require("../models/Role");
 const sendEmail = require("../utils/sendEmail");
-const generateToken = require("../utils/generateToken");
+const generatePassword = require("../utils/utils");
+
+const getUsers = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const searchValue = req.query.searchValue || ""; // Get the search value from the query
+
+    const adminRole = await Role.findOne({ name: "admin" });
+
+    // Construct a search regex to match the search value in different fields
+    const searchRegex = new RegExp(searchValue, "i"); // 'i' for case-insensitive
+
+    const users = await User.find({
+      role: { $ne: adminRole._id },
+      $or: [
+        { username: { $regex: searchRegex } },
+        { email: { $regex: searchRegex } },
+        { phoneNumber: { $regex: searchRegex } },
+        { district: { $regex: searchRegex } },
+        { address: { $regex: searchRegex } },
+        { city: { $regex: searchRegex } },
+      ],
+    })
+      .select("-password")
+      .populate({
+        path: "role",
+        select: "name -_id",
+      })
+      .skip(skip)
+      .limit(limit);
+
+    const totalUsers = await User.countDocuments({
+      role: { $ne: adminRole._id },
+      $or: [
+        { username: { $regex: searchRegex } },
+        { email: { $regex: searchRegex } },
+        { phoneNumber: { $regex: searchRegex } },
+        { district: { $regex: searchRegex } },
+        { address: { $regex: searchRegex } },
+        { city: { $regex: searchRegex } },
+      ],
+    });
+
+    res.status(200).json({
+      users,
+      totalUsers,
+    });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).send("Server error");
+  }
+};
 
 // Create a new user
 const createUser = async (req, res) => {
-  const { username, email, phoneNumber, dob, password } = req.body;
+  const {
+    username,
+    email,
+    phoneNumber,
+    dob,
+    role,
+    address,
+    city,
+    district,
+    gender,
+  } = req.body;
 
   try {
-    const customerRole = await Role.findOne({ name: "customer" });
-    if (!customerRole) {
-      return res.status(500).json({ msg: "Customer role not found" });
+    // Check if role exists
+    const existRole = await Role.findOne({ name: role });
+    if (!existRole) {
+      return res.status(400).json({ msg: "Role not found" });
     }
 
+    // Check if username, email, or phoneNumber already exists
+    const existingUser = await User.findOne({
+      $or: [{ username }, { email }, { phoneNumber }],
+    });
+
+    if (existingUser) {
+      let errorMsg = "";
+      if (existingUser.username === username) {
+        errorMsg = "Username already exists";
+      } else if (existingUser.email === email) {
+        errorMsg = "Email already exists";
+      } else if (existingUser.phoneNumber === phoneNumber) {
+        errorMsg = "Phone number already exists";
+      }
+
+      return res.status(400).json({ msg: errorMsg });
+    }
+
+    // Generate a new password
+    const generatedPassword = generatePassword(10, {
+      includeUppercase: true,
+      includeLowercase: true,
+      includeNumbers: true,
+      includeSpecialCharacters: true,
+    });
+
+    // Hash the password
+    const hashedNewPassword = await bcrypt.hash(generatedPassword, 10);
+
+    // Create a new user
     const newUser = new User({
       username,
       email,
       phoneNumber,
       dob,
-      password,
-      role: customerRole._id,
-      isVerified: false,
+      password: hashedNewPassword, // <-- This should be 'password' instead of 'hashedNewPassword'
+      address,
+      city,
+      district,
+      gender,
+      role: existRole._id,
+      isVerified: true,
     });
 
+    // Save the new user
     await newUser.save();
 
-    const verificationToken = generateToken(
-      { email },
-      process.env.JWT_SECRET,
-      "1h"
-    );
-    const verificationLink = `http://localhost:8080/api/auth/verify-email?token=${verificationToken}`;
-
+    // Prepare the email content
     const emailContent = `
-      <html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title>Verify your email address</title>
-  <style type="text/css" rel="stylesheet" media="all">
-    /* Base ------------------------------ */
-    *:not(br):not(tr):not(html) {
-      font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
-      -webkit-box-sizing: border-box;
-      box-sizing: border-box;
-    }
-    body {
-      width: 100% !important;
-      height: 100%;
-      margin: 0;
-      line-height: 1.4;
-      background-color: #F5F7F9;
-      color: #839197;
-      -webkit-text-size-adjust: none;
-    }
-    a {
-      color: #414EF9;
-    }
+      <html>
+        <body>
+          <h1>Account Created Successfully</h1>
+          <p>Welcome, ${username}!</p>
+          <p>Your account has been successfully created. Below are your login details:</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Password:</strong> ${generatedPassword}</p>
+          <p>Thank you for joining us!</p>
+        </body>
+      </html>
+    `;
 
-    /* Layout ------------------------------ */
-    .email-wrapper {
-      width: 100%;
-      margin: 0;
-      padding: 0;
-      background-color: #F5F7F9;
-    }
-    .email-content {
-      width: 100%;
-      margin: 0;
-      padding: 0;
-    }
-
-    /* Masthead ----------------------- */
-    .email-masthead {
-      padding: 25px 0;
-      text-align: center;
-    }
-    .email-masthead_logo {
-      max-width: 400px;
-      border: 0;
-    }
-    .email-masthead_name {
-      font-size: 16px;
-      font-weight: bold;
-      color: #839197;
-      text-decoration: none;
-      text-shadow: 0 1px 0 white;
-    }
-
-    /* Body ------------------------------ */
-    .email-body {
-      width: 100%;
-      margin: 0;
-      padding: 0;
-      border-top: 1px solid #E7EAEC;
-      border-bottom: 1px solid #E7EAEC;
-      background-color: #FFFFFF;
-    }
-    .email-body_inner {
-      width: 570px;
-      margin: 0 auto;
-      padding: 0;
-    }
-    .email-footer {
-      width: 570px;
-      margin: 0 auto;
-      padding: 0;
-      text-align: center;
-    }
-    .email-footer p {
-      color: #839197;
-    }
-    .body-action {
-      width: 100%;
-      margin: 30px auto;
-      padding: 0;
-      text-align: center;
-    }
-    .body-sub {
-      margin-top: 25px;
-      padding-top: 25px;
-      border-top: 1px solid #E7EAEC;
-    }
-    .content-cell {
-      padding: 35px;
-    }
-    .align-right {
-      text-align: right;
-    }
-
-    /* Type ------------------------------ */
-    h1 {
-      margin-top: 0;
-      color: #292E31;
-      font-size: 19px;
-      font-weight: bold;
-      text-align: left;
-    }
-    h2 {
-      margin-top: 0;
-      color: #292E31;
-      font-size: 16px;
-      font-weight: bold;
-      text-align: left;
-    }
-    h3 {
-      margin-top: 0;
-      color: #292E31;
-      font-size: 14px;
-      font-weight: bold;
-      text-align: left;
-    }
-    p {
-      margin-top: 0;
-      color: #839197;
-      font-size: 16px;
-      line-height: 1.5em;
-      text-align: left;
-    }
-    p.sub {
-      font-size: 12px;
-    }
-    p.center {
-      text-align: center;
-    }
-
-    /* Buttons ------------------------------ */
-    .button {
-      display: inline-block;
-      width: 200px;
-      background-color: #414EF9;
-      border-radius: 3px;
-      color: #ffffff !important;
-      font-size: 15px;
-      line-height: 45px;
-      text-align: center;
-      text-decoration: none;
-      -webkit-text-size-adjust: none;
-      mso-hide: all;
-    }
-    .button--green {
-      background-color: #28DB67;
-    }
-    .button--red {
-      background-color: #FF3665;
-    }
-    .button--blue {
-      background-color: #414EF9;
-    }
-
-    /*Media Queries ------------------------------ */
-    @media only screen and (max-width: 600px) {
-      .email-body_inner,
-      .email-footer {
-        width: 100% !important;
-      }
-    }
-    @media only screen and (max-width: 500px) {
-      .button {
-        width: 100% !important;
-      }
-    }
-  </style>
-</head>
-<body>
-  <table class="email-wrapper" width="100%" cellpadding="0" cellspacing="0">
-    <tr>
-      <td align="center">
-        <table class="email-content" width="100%" cellpadding="0" cellspacing="0">
-          <!-- Logo -->
-          <tr>
-            <td class="email-masthead">
-              <a class="email-masthead_name">K. Cinema</a>
-            </td>
-          </tr>
-          <!-- Email Body -->
-          <tr>
-            <td class="email-body" width="100%">
-              <table class="email-body_inner" align="center" width="570" cellpadding="0" cellspacing="0">
-                <!-- Body content -->
-                <tr>
-                  <td class="content-cell">
-                    <h1>Verify your email address</h1>
-                    <p>Thanks for signing up for K. CINEMA! We're excited to have you as an early user.</p>
-                    <!-- Action -->
-                    <table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td align="center">
-                          <div>
-                            <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${verificationLink}" style="height:45px;v-text-anchor:middle;width:200px;" arcsize="7%" stroke="f" fill="t">
-                            <v:fill type="tile" color="#414EF9" />
-                            <w:anchorlock/>
-                            <center style="color:#ffffff;font-family:sans-serif;font-size:15px;">Verify Email</center>
-                          </v:roundrect><![endif]-->
-                            <a href="${verificationLink}" class="button button--red" style="text-decoration: none">Verify Email</a>
-                          </div>
-                        </td>
-                      </tr>
-                    </table>
-                    <p>Thanks,<br>The K. Cinema Team</p>
-                    <!-- Sub copy -->
-                    <table class="body-sub">
-                      <tr>
-                        <td>
-                          <p class="sub">If you’re having trouble clicking the button, copy and paste the URL below into your web browser.
-                          </p>
-                          <p class="sub"><a href="${verificationLink}">${verificationLink}</a></p>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <table class="email-footer" align="center" width="570" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td class="content-cell">
-                    <p class="sub center">
-                      K. Cinema Labs, Inc.
-                      <br>Ha Noi, Viet Nam
-                    </p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-  `;
+    // Send the email
     const emailResponse = await sendEmail(
       email,
       "Verify Your Email",
       emailContent
     );
 
+    // Check if email was sent successfully
     if (!emailResponse.success) {
-      return res.status(500).json({ msg: "Failed to send verification email" });
+      return res.status(500).json({ msg: "Failed to send email" });
     }
 
+    // Respond to the client
     return res.json({
       msg: "User created successfully! Please verify your email.",
+      user: newUser
     });
   } catch (err) {
     console.error("Registration error:", err.message);
@@ -316,32 +185,30 @@ const updateUser = async (req, res) => {
     username,
     email,
     phoneNumber,
-    password,
     dob,
+    role,
     address,
     city,
     district,
     gender,
-    role,
   } = req.body;
 
   try {
+    const existRole = await Role.findOne({ name: role });
+    if (!existRole) {
+      return res.status(400).json({ msg: "Role not found" });
+    }
     const updatedData = {
       username,
       email,
       phoneNumber,
       dob,
+      role: existRole._id,
       address,
       city,
       district,
       gender,
-      role,
     };
-
-    if (password) {
-      updatedData.password = await bcrypt.hash(password, 10);
-    }
-
     const user = await User.findByIdAndUpdate(id, updatedData, { new: true });
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
@@ -412,6 +279,7 @@ const changePassword = async (req, res) => {
 
 module.exports = {
   createUser,
+  getUsers,
   getUser,
   updateUser,
   deleteUser,

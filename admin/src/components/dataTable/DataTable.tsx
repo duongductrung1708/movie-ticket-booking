@@ -1,55 +1,59 @@
-import {
-  DataGrid,
-  GridColDef,
-  GridToolbar,
-} from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridToolbarQuickFilter } from "@mui/x-data-grid";
 import "./dataTable.scss";
-import { Link } from "react-router-dom";
-// import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 type Props = {
   columns: GridColDef[];
   rows: object[];
   slug: string;
+  pageSize: number;
+  rowCount: number;
+  currentPage: number;
+  onAction: (actionType: string, id: string) => void;
+  onPageChange: (page: number) => void;
+  onSearch: (query: string) => void;
 };
 
 const DataTable = (props: Props) => {
+  const [searchValue, setSearchValue] = useState(""); // Local state for search value
 
-  // TEST THE API
+  const handleDelete = (id: string) => {
+    props.onAction("delete", id);
+  };
 
-  // const queryClient = useQueryClient();
-  // // const mutation = useMutation({
-  // //   mutationFn: (id: number) => {
-  // //     return fetch(`http://localhost:8800/api/${props.slug}/${id}`, {
-  // //       method: "delete",
-  // //     });
-  // //   },
-  // //   onSuccess: ()=>{
-  // //     queryClient.invalidateQueries([`all${props.slug}`]);
-  // //   }
-  // // });
-
-  const handleDelete = (id: number) => {
-    //delete the item
-    // mutation.mutate(id)
+  const handleView = (id: string) => {
+    props.onAction("view", id);
   };
 
   const actionColumn: GridColDef = {
     field: "action",
     headerName: "Action",
     width: 200,
+    sortable: false,
     renderCell: (params) => {
       return (
-        <div className="action">
-          <Link to={`/${props.slug}/${params.row.id}`}>
-            <img src="/view.svg" alt="" />
-          </Link>
-          <div className="delete" onClick={() => handleDelete(params.row.id)}>
-            <img src="/delete.svg" alt="" />
-          </div>
+        <div>
+          <img
+            className="action"
+            onClick={() => handleView(params.row._id)}
+            src="/view.svg"
+            alt="View"
+          />
+          <img
+            className="action"
+            onClick={() => handleDelete(params.row._id)}
+            src="/delete.svg"
+            alt="Delete"
+          />
         </div>
       );
     },
+  };
+
+  const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      props.onSearch(searchValue); // Call onSearch with the current searchValue
+    }
   };
 
   return (
@@ -58,21 +62,27 @@ const DataTable = (props: Props) => {
         className="dataGrid"
         rows={props.rows}
         columns={[...props.columns, actionColumn]}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 10,
-            },
-          },
+        getRowId={(row) => row._id}
+        pagination
+        paginationMode="server"
+        rowCount={props.rowCount}
+        paginationModel={{
+          page: props.currentPage - 1,
+          pageSize: props.pageSize,
         }}
-        slots={{ toolbar: GridToolbar }}
+        onPaginationModelChange={(model) => {
+          props.onPageChange(model.page + 1);
+        }}
+        slots={{ toolbar: GridToolbarQuickFilter }}
         slotProps={{
           toolbar: {
-            showQuickFilter: true,
-            quickFilterProps: { debounceMs: 500 },
+            value: searchValue, // Set the current searchValue as the value of the input
+            onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+              setSearchValue(event.target.value); // Update local state with the new value
+            },
+            onKeyDown: handleSearchKeyDown, // Listen for keyDown events
           },
         }}
-        pageSizeOptions={[5]}
         checkboxSelection
         disableRowSelectionOnClick
         disableColumnFilter

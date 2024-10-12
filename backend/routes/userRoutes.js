@@ -2,6 +2,7 @@
 const express = require("express");
 const {
   createUser,
+  getUsers,
   getUser,
   updateUser,
   deleteUser,
@@ -11,8 +12,11 @@ const middleware = require("../middleware/auth");
 
 const router = express.Router();
 
+// Get list user
+router.get("", middleware.verifyToken, getUsers);
+
 // Create a new user
-router.post("/", createUser);
+router.post("/", middleware.verifyToken, createUser);
 
 // Get user information (requires authentication middleware)
 router.get("/:id", middleware.verifyToken, getUser);
