@@ -11,10 +11,20 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import DeleteIcon from "@mui/icons-material/Delete";
 import AddServiceDialog from "../../components/add/addServiceDialog";
 import UpdateServiceDialog from "../../components/update/updateService";
 import axiosInstance from "../../config/axiosConfig";
-import { Backdrop, Button, CircularProgress } from "@mui/material";
+import {
+  Backdrop,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 
 function createServiceData(
   _id: string,
@@ -37,8 +47,9 @@ function createServiceData(
 function Row(props: {
   row: ReturnType<typeof createServiceData>;
   handleUpdateService: (service: any) => void;
+  handleDeleteClick: (serviceId: string) => void;
 }) {
-  const { row, handleUpdateService } = props;
+  const { row, handleUpdateService, handleDeleteClick } = props;
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -69,6 +80,13 @@ function Row(props: {
             serviceData={row}
             setServices={handleUpdateService}
           />
+          <IconButton
+            aria-label="delete"
+            size="small"
+            onClick={() => handleDeleteClick(row._id)}
+          >
+            <DeleteIcon />
+          </IconButton>
         </TableCell>
       </TableRow>
       <TableRow>
@@ -88,6 +106,10 @@ export default function Services() {
   const [open, setOpen] = React.useState(false);
   const [rows, setRows] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = React.useState(false);
+  const [serviceToDelete, setServiceToDelete] = React.useState<string | null>(
+    null
+  );
 
   React.useEffect(() => {
     axiosInstance.get("/services").then(({ data }) => {
@@ -115,6 +137,26 @@ export default function Services() {
         service._id === updatedService._id ? updatedService : service
       )
     );
+  };
+
+  const handleDeleteClick = (serviceId: string) => {
+    setServiceToDelete(serviceId); // Set the service to delete
+    setConfirmDeleteOpen(true); // Open the confirmation dialog
+  };
+
+  const handleConfirmDelete = () => {
+    setLoading(true);
+    axiosInstance.delete(`/services/${serviceToDelete}`).then(() => {
+      setRows((prevRows) =>
+        prevRows.filter((service) => service._id !== serviceToDelete)
+      );
+      setLoading(false);
+      setConfirmDeleteOpen(false); // Close the confirmation dialog
+    });
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmDeleteOpen(false); // Close the confirmation dialog
   };
 
   return (
@@ -148,11 +190,12 @@ export default function Services() {
                 key={index}
                 row={row}
                 handleUpdateService={handleUpdateService}
+                handleDeleteClick={handleDeleteClick}
               />
             ))}
           </TableBody>
         </Table>
-        {rows.length == 0 && (
+        {rows.length === 0 && (
           <div className="empty-row">No services available</div>
         )}
       </TableContainer>
@@ -163,6 +206,29 @@ export default function Services() {
       >
         <CircularProgress color="inherit" />
       </Backdrop>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmDeleteOpen}
+        onClose={handleCancelDelete}
+        aria-labelledby="confirm-delete-title"
+        aria-describedby="confirm-delete-description"
+      >
+        <DialogTitle id="confirm-delete-title">Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="confirm-delete-description">
+            Are you sure you want to delete this service? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="secondary" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
