@@ -43,9 +43,9 @@ app.use('/api/genres', genreRoutes);
 app.use('/api/theaters', theaterRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/seats', seatRoutes);
-app.use('/services', serviceRoutes);
-app.use('/bookings', bookingRoutes);
-app.use('/booking-details', bookingDetailRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/booking-details', bookingDetailRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;

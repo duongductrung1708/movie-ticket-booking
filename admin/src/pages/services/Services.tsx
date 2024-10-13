@@ -1,88 +1,168 @@
-import { useState } from "react";
-import "./Services.scss";
-import DataTable from "../../components/dataTable/DataTable";
-import Add from "../../components/add/Add";
-import { GridColDef } from "@mui/x-data-grid";
-import { products } from "../../data";
+import * as React from "react";
+import Box from "@mui/material/Box";
+import Collapse from "@mui/material/Collapse";
+import IconButton from "@mui/material/IconButton";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import AddServiceDialog from "../../components/add/addServiceDialog";
+import UpdateServiceDialog from "../../components/update/updateService";
+import axiosInstance from "../../config/axiosConfig";
+import { Backdrop, Button, CircularProgress } from "@mui/material";
 
-const columns: GridColDef[] = [
-  { field: "id", headerName: "ID", width: 90 },
-  {
-    field: "img",
-    headerName: "Image",
-    width: 100,
-    renderCell: (params) => {
-      return <img src={params.row.img || "/noavatar.png"} alt="" />;
-    },
-  },
-  {
-    field: "title",
-    type: "string",
-    headerName: "Title",
-    width: 250,
-  },
-  {
-    field: "color",
-    type: "string",
-    headerName: "Color",
-    width: 150,
-  },
-  {
-    field: "price",
-    type: "string",
-    headerName: "Price",
-    width: 200,
-  },
-  {
-    field: "producer",
-    headerName: "Producer",
-    type: "string",
-    width: 200,
-  },
-  {
-    field: "createdAt",
-    headerName: "Created At",
-    width: 200,
-    type: "string",
-  },
-  {
-    field: "inStock",
-    headerName: "In Stock",
-    width: 150,
-    type: "boolean",
-  },
-];
+function createServiceData(
+  _id: string,
+  name: string,
+  price: number,
+  image: string,
+  description: string,
+  quantity: number
+) {
+  return {
+    _id,
+    name,
+    price,
+    image,
+    description,
+    quantity,
+  };
+}
 
-const Products = () => {
-  const [open, setOpen] = useState(false);
-
-  // TEST THE API
-
-  // const { isLoading, data } = useQuery({
-  //   queryKey: ["allproducts"],
-  //   queryFn: () =>
-  //     fetch("http://localhost:8800/api/products").then(
-  //       (res) => res.json()
-  //     ),
-  // });
+function Row(props: {
+  row: ReturnType<typeof createServiceData>;
+  handleUpdateService: (service: any) => void;
+}) {
+  const { row, handleUpdateService } = props;
+  const [open, setOpen] = React.useState(false);
 
   return (
-    <div className="products">
-      <div className="info">
-        <h1>Products</h1>
-        <button onClick={() => setOpen(true)}>Add New Products</button>
-      </div>
-      <DataTable slug="products" columns={columns} rows={products} />
-      {/* TEST THE API */}
-
-      {/* {isLoading ? (
-        "Loading..."
-      ) : (
-        <DataTable slug="products" columns={columns} rows={data} />
-      )} */}
-      {open && <Add slug="product" columns={columns} setOpen={setOpen} />}
-    </div>
+    <React.Fragment>
+      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
+        <TableCell>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </TableCell>
+        <TableCell align="left">{row.name}</TableCell>
+        <TableCell align="left">
+          <img
+            src={row.image}
+            alt=""
+            className="table-image"
+            style={{ width: "50px", height: "50px", objectFit: "cover" }}
+          />
+        </TableCell>
+        <TableCell align="left">${row.price}</TableCell>
+        <TableCell align="left">{row.quantity}</TableCell>
+        <TableCell align="left">
+          <UpdateServiceDialog
+            serviceData={row}
+            setServices={handleUpdateService}
+          />
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 1 }}>
+              <p>{row.description}</p>
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </React.Fragment>
   );
-};
+}
 
-export default Products;
+export default function Services() {
+  const [open, setOpen] = React.useState(false);
+  const [rows, setRows] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    axiosInstance.get("/services").then(({ data }) => {
+      const newRows = data.map((service: any) =>
+        createServiceData(
+          service._id,
+          service.name,
+          service.price,
+          service.image,
+          service.description,
+          service.quantity
+        )
+      );
+      setRows(newRows);
+    });
+  }, []);
+
+  const handleAddService = (newService: any) => {
+    setRows((prevRows) => [...prevRows, newService]);
+  };
+
+  const handleUpdateService = (updatedService: any) => {
+    setRows((prevRows) =>
+      prevRows.map((service) =>
+        service._id === updatedService._id ? updatedService : service
+      )
+    );
+  };
+
+  return (
+    <>
+      <div className="info">
+        <h1>Services</h1>
+        <button
+          onClick={() => {
+            setOpen(true);
+          }}
+          className="add-service"
+        >
+          Add Service
+        </button>
+      </div>
+      <TableContainer component={Paper}>
+        <Table aria-label="collapsible table">
+          <TableHead>
+            <TableRow>
+              <TableCell />
+              <TableCell align="left">Name</TableCell>
+              <TableCell align="left">Image</TableCell>
+              <TableCell align="left">Price</TableCell>
+              <TableCell align="left">Quantity</TableCell>
+              <TableCell align="left"></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {rows.map((row, index) => (
+              <Row
+                key={index}
+                row={row}
+                handleUpdateService={handleUpdateService}
+              />
+            ))}
+          </TableBody>
+        </Table>
+        {rows.length == 0 && (
+          <div className="empty-row">No services available</div>
+        )}
+      </TableContainer>
+      <AddServiceDialog open={open} setOpen={setOpen} setServices={handleAddService} />
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+    </>
+  );
+}
