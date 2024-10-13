@@ -65,8 +65,8 @@ export const menu = [
       },
       {
         id: 3,
-        title: "Rooms",
-        url: "/rooms",
+        title: "Showtimes",
+        url: "/showtimes",
         icon: "form.svg",
       },
       {

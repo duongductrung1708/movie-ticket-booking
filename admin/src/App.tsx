@@ -3,7 +3,7 @@ import Navbar from "./components/navbar/Navbar";
 import Footer from "./components/footer/Footer";
 import Menu from "./components/menu/Menu";
 import Home from "./pages/home/Home";
-import Products from "./pages/services/Services";
+import Services from "./pages/services/Services";
 import Users from "./pages/users/Users";
 import Theaters from "./pages/theaters/Theaters";
 import Movies from "./pages/movies/Movies";
@@ -14,6 +14,7 @@ import { ToastContainer } from "react-toastify"; // Import ToastContainer
 import "react-toastify/dist/ReactToastify.css"; // Import Toast CSS
 import "./styles/global.scss";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Showtimes from "./pages/Showtimes/Showtimes";
 
 const queryClient = new QueryClient();
 
@@ -64,7 +65,7 @@ function App() {
         },
         {
           path: "/services",
-          element: <Products />,
+          element: <Services />,
         },
         {
           path: "/theaters",
@@ -81,6 +82,10 @@ function App() {
         {
           path: "/payments",
           element: <Payments />,
+        },
+        {
+          path: "/showtimes",
+          element: <Showtimes />,
         },
       ],
     },
