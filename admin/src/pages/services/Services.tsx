@@ -25,6 +25,8 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function createServiceData(
   _id: string,
@@ -129,6 +131,7 @@ export default function Services() {
 
   const handleAddService = (newService: any) => {
     setRows((prevRows) => [...prevRows, newService]);
+    toast.success("Service added successfully!");
   };
 
   const handleUpdateService = (updatedService: any) => {
@@ -137,6 +140,7 @@ export default function Services() {
         service._id === updatedService._id ? updatedService : service
       )
     );
+    toast.success("Service updated successfully!");
   };
 
   const handleDeleteClick = (serviceId: string) => {
@@ -152,6 +156,7 @@ export default function Services() {
       );
       setLoading(false);
       setConfirmDeleteOpen(false); // Close the confirmation dialog
+      toast.success("Service deleted successfully!");
     });
   };
 
@@ -163,12 +168,7 @@ export default function Services() {
     <>
       <div className="info">
         <h1>Services</h1>
-        <button
-          onClick={() => {
-            setOpen(true);
-          }}
-          className="add-service"
-        >
+        <button onClick={() => setOpen(true)} className="add-service">
           Add Service
         </button>
       </div>
@@ -199,7 +199,11 @@ export default function Services() {
           <div className="empty-row">No services available</div>
         )}
       </TableContainer>
-      <AddServiceDialog open={open} setOpen={setOpen} setServices={handleAddService} />
+      <AddServiceDialog
+        open={open}
+        setOpen={setOpen}
+        setServices={handleAddService}
+      />
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={loading}
@@ -217,7 +221,8 @@ export default function Services() {
         <DialogTitle id="confirm-delete-title">Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText id="confirm-delete-description">
-            Are you sure you want to delete this service? This action cannot be undone.
+            Are you sure you want to delete this service? This action cannot be
+            undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -229,6 +234,9 @@ export default function Services() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Toast Notification */}
+      <ToastContainer />
     </>
   );
 }
