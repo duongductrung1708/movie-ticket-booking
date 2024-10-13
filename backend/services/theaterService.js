@@ -60,14 +60,18 @@ const TheaterService = {
 
   getShowtimesByTheater: async (theaterId) => {
     try {
-      const theater = await Theater.findById(theaterId).select("room_id");
-  
+      const theater = await Theater.findById(theaterId).select("rooms");
+
       if (!theater) {
         throw new Error("Theater not found");
       }
-  
-      const roomIds = theater.room_id;
-  
+
+      const roomIds = theater.rooms;
+
+      if (roomIds.length === 0) {
+        throw new Error("No rooms found in this theater");
+      }
+
       const showtimes = await Showtime.find({ room_id: { $in: roomIds } })
         .populate({
           path: "movie_id",
@@ -77,13 +81,13 @@ const TheaterService = {
             select: "name",
           },
         })
-        .select("movie_id date start_time");
-  
+        .select("movie_id date start_time end_time");
+
       return showtimes;
     } catch (error) {
       throw new Error("Error fetching showtimes by theater: " + error.message);
     }
-  }  
+  }
 };
 
 module.exports = TheaterService;
