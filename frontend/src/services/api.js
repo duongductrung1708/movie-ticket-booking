@@ -186,3 +186,14 @@ export const getShowtimesByTheater = async (theaterId) => {
     throw error.response ? error.response.data : error.message;
   }
 };
+
+// Function to get all services
+export const getAllServices = async () => {
+  try {
+    const response = await api.get("/services");
+    return response.data;
+  } catch (error) {
+    console.error("Get services error:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};
