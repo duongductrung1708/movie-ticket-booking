@@ -12,9 +12,13 @@ const bookingSchema = new mongoose.Schema({
     ref: "Showtime",
     required: true,
   },
-  seat_id: {
+  room_id: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Seat",
+    ref: "Room",
+    required: true,
+  },
+  seat:{
+    type: String,
     required: true,
   },
   timestamp: { type: Date, default: Date.now },
