@@ -329,31 +329,32 @@ const BookingTab = ({ isOpen, onClose }) => {
 
   const handleShowtimeSelect = (movieTitle, time) => {
     const selectedMovie = movies.find((movie) => movie.title === movieTitle);
-
+  
     if (selectedMovie) {
       const showtimeDate = selectedMovie.date;
-
+  
       if (!selectedDate) {
         setSelectedDate(dayjs(showtimeDate, "MM/DD/YYYY"));
       }
-
+  
       setSelectedShowtimes((prevShowtimes) => ({
         ...prevShowtimes,
         [movieTitle]: time,
       }));
-
+  
       const movieDuration = selectedMovie.duration;
+      const movieImage = movies[0].image || selectedMovie.image;
       const seatLayout = showtimeDate.seatLayout;
       const selectedTheaterDetails = filteredTheaters.find(
         (theater) => theater.name === selectedTheater
       );
-
+  
       const theaterAddress = selectedTheaterDetails?.address;
-
+  
       navigate("/seat-reservation", {
         state: {
           movieTitle: selectedMovie.title,
-          movieImage: selectedMovie.image,
+          movieImage: movieImage,
           selectedTime: time,
           selectedDate: dayjs(showtimeDate, "MM/DD/YYYY").format("MM/DD/YYYY"),
           selectedTheater: selectedTheater,
@@ -363,7 +364,7 @@ const BookingTab = ({ isOpen, onClose }) => {
         },
       });
     }
-  };
+  };  
 
   const filteredMovies = selectedDate
     ? movies.filter((movie) => movie.date === selectedDate.format("MM/DD/YYYY"))
