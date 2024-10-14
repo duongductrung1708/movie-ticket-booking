@@ -10,11 +10,12 @@ import Movies from "./pages/movies/Movies";
 import Bookings from "./pages/bookings/Bookings";
 import Payments from "./pages/payments/Payments";
 import Login from "./pages/login/Login";
-import { ToastContainer } from "react-toastify"; // Import ToastContainer
-import "react-toastify/dist/ReactToastify.css"; // Import Toast CSS
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./styles/global.scss";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Showtimes from "./pages/Showtimes/Showtimes";
+import Genres from "./pages/genres/Genres";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +31,6 @@ function App() {
           <div className="contentContainer">
             <QueryClientProvider client={queryClient}>
               <Outlet />
-              {/* Add ToastContainer here */}
               <ToastContainer
                 position="top-right"
                 autoClose={5000}
@@ -86,6 +86,10 @@ function App() {
         {
           path: "/showtimes",
           element: <Showtimes />,
+        },
+        {
+          path: "/genres",
+          element: <Genres />,
         },
       ],
     },
