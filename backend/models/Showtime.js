@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const seatSchema = new mongoose.Schema({
   type: {
     type: String,
+    enum: ['standard', 'vip'],
     required: true,
   },
   status: {
