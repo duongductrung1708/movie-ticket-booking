@@ -1,21 +1,15 @@
 import * as React from "react";
-import Box from "@mui/material/Box";
-import Collapse from "@mui/material/Collapse";
-import IconButton from "@mui/material/IconButton";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddServiceDialog from "../../components/add/addServiceDialog";
-import UpdateServiceDialog from "../../components/update/updateService";
-import axiosInstance from "../../config/axiosConfig";
 import {
+  Box,
+  Collapse,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
   Backdrop,
   Button,
   CircularProgress,
@@ -27,43 +21,33 @@ import {
 } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddGenreDialog from "../../components/add/addGenreDialog";
+import UpdateGenreDialog from "../../components/update/updateGenre";
+import axiosInstance from "../../config/axiosConfig";
 
-// Define Service Type
-type Service = {
+interface Genre {
   _id: string;
   name: string;
-  price: number;
-  image: string;
   description: string;
-  quantity: number;
-};
-
-// Helper to create service data
-function createServiceData(
-  _id: string,
-  name: string,
-  price: number,
-  image: string,
-  description: string,
-  quantity: number
-): Service {
-  return {
-    _id,
-    name,
-    price,
-    image,
-    description,
-    quantity,
-  };
 }
 
-// Row Component
+function createGenreData(
+  _id: string,
+  name: string,
+  description: string
+): Genre {
+  return { _id, name, description };
+}
+
 function Row(props: {
-  row: Service;
-  handleUpdateService: (service: Service) => void;
-  handleDeleteClick: (serviceId: string) => void;
+  row: Genre;
+  handleUpdateGenre: (genre: Genre) => void;
+  handleDeleteClick: (genreId: string) => void;
 }) {
-  const { row, handleUpdateService, handleDeleteClick } = props;
+  const { row, handleUpdateGenre, handleDeleteClick } = props;
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -80,20 +64,7 @@ function Row(props: {
         </TableCell>
         <TableCell align="left">{row.name}</TableCell>
         <TableCell align="left">
-          <img
-            src={row.image}
-            alt="Service"
-            className="table-image"
-            style={{ width: "50px", height: "50px", objectFit: "cover" }}
-          />
-        </TableCell>
-        <TableCell align="left">${row.price}</TableCell>
-        <TableCell align="left">{row.quantity}</TableCell>
-        <TableCell align="left">
-          <UpdateServiceDialog
-            serviceData={row}
-            setServices={handleUpdateService}
-          />
+          <UpdateGenreDialog genreData={row} setGenres={handleUpdateGenre} />
           <IconButton
             aria-label="delete"
             size="small"
@@ -116,60 +87,50 @@ function Row(props: {
   );
 }
 
-// Services Component
-export default function Services() {
+export default function Genres() {
   const [open, setOpen] = React.useState(false);
-  const [rows, setRows] = React.useState<Service[]>([]);
+  const [rows, setRows] = React.useState<Genre[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = React.useState(false);
-  const [serviceToDelete, setServiceToDelete] = React.useState<string | null>(
-    null
-  );
+  const [genreToDelete, setGenreToDelete] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    axiosInstance.get("/services").then(({ data }) => {
-      const newRows = data.map((service: any) =>
-        createServiceData(
-          service._id,
-          service.name,
-          service.price,
-          service.image,
-          service.description,
-          service.quantity
-        )
+    axiosInstance.get("/genres").then(({ data }) => {
+      const newRows = data.map((genre: any) =>
+        createGenreData(genre._id, genre.name, genre.description)
       );
       setRows(newRows);
     });
   }, []);
 
-  const handleAddService = (newService: Service) => {
-    setRows((prevRows) => [...prevRows, newService]);
-    toast.success("Service added successfully!");
+  const handleAddGenre = (newGenre: Genre) => {
+    setRows((prevRows) => [...prevRows, newGenre]);
+    toast.success("Genre added successfully!");
   };
 
-  const handleUpdateService = (updatedService: Service) => {
+  const handleUpdateGenre = (updatedGenre: Genre) => {
     setRows((prevRows) =>
-      prevRows.map((service) =>
-        service._id === updatedService._id ? updatedService : service
+      prevRows.map((genre) =>
+        genre._id === updatedGenre._id ? updatedGenre : genre
       )
     );
-    toast.success("Service updated successfully!");
+    toast.success("Genre updated successfully!");
   };
 
-  const handleDeleteClick = (serviceId: string) => {
-    setServiceToDelete(serviceId);
+  const handleDeleteClick = (genreId: string) => {
+    setGenreToDelete(genreId);
     setConfirmDeleteOpen(true);
   };
 
   const handleConfirmDelete = () => {
     setLoading(true);
-    axiosInstance.delete(`/services/${serviceToDelete}`).then(() => {
+    axiosInstance.delete(`/genres/${genreToDelete}`).then(() => {
       setRows((prevRows) =>
-        prevRows.filter((service) => service._id !== serviceToDelete)
+        prevRows.filter((genre) => genre._id !== genreToDelete)
       );
       setLoading(false);
       setConfirmDeleteOpen(false);
-      toast.success("Service deleted successfully!");
+      toast.success("Genre deleted successfully!");
     });
   };
 
@@ -180,20 +141,17 @@ export default function Services() {
   return (
     <>
       <div className="info">
-        <h1>Services</h1>
-        <button onClick={() => setOpen(true)} className="add-service">
-          Add Service
+        <h1>Genres</h1>
+        <button onClick={() => setOpen(true)} className="add-genre">
+          Add Genre
         </button>
       </div>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} style={{ maxHeight: "800px", overflowY: "auto" }}>
         <Table aria-label="collapsible table">
           <TableHead>
             <TableRow>
               <TableCell />
               <TableCell align="left">Name</TableCell>
-              <TableCell align="left">Image</TableCell>
-              <TableCell align="left">Price</TableCell>
-              <TableCell align="left">Quantity</TableCell>
               <TableCell align="left"></TableCell>
             </TableRow>
           </TableHead>
@@ -202,20 +160,20 @@ export default function Services() {
               <Row
                 key={index}
                 row={row}
-                handleUpdateService={handleUpdateService}
+                handleUpdateGenre={handleUpdateGenre}
                 handleDeleteClick={handleDeleteClick}
               />
             ))}
           </TableBody>
         </Table>
         {rows.length === 0 && (
-          <div className="empty-row">No services available</div>
+          <div className="empty-row">No genres available</div>
         )}
       </TableContainer>
-      <AddServiceDialog
+      <AddGenreDialog
         open={open}
         setOpen={setOpen}
-        setServices={handleAddService}
+        setGenres={handleAddGenre}
       />
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -223,8 +181,6 @@ export default function Services() {
       >
         <CircularProgress color="inherit" />
       </Backdrop>
-
-      {/* Confirmation Dialog */}
       <Dialog
         open={confirmDeleteOpen}
         onClose={handleCancelDelete}
@@ -234,7 +190,7 @@ export default function Services() {
         <DialogTitle id="confirm-delete-title">Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText id="confirm-delete-description">
-            Are you sure you want to delete this service? This action cannot be
+            Are you sure you want to delete this genre? This action cannot be
             undone.
           </DialogContentText>
         </DialogContent>
@@ -247,8 +203,6 @@ export default function Services() {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Toast Notification */}
       <ToastContainer />
     </>
   );
