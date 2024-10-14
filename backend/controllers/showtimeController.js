@@ -1,7 +1,8 @@
 const Showtime = require('../models/Showtime');
+const Room = require('../models/Room'); // Make sure to import the Room model
 const { format } = require("date-fns");
 
-// Get all showtime
+// Get all showtimes
 const getShowtime = async (req, res) => {
     try {
         const showtimes = await Showtime.find()
@@ -13,19 +14,19 @@ const getShowtime = async (req, res) => {
             movie_title: st.movie_id.title || 'Unknown Movie',
             room_id: st.room_id._id,
             room_name: st.room_id.name || 'Unknown Room',
-            date: format(new Date(st.date), "yyyy-MM-dd"),
+            date: format(new Date(st.date), "MM/dd/yyyy"),
             start_time: st.start_time,
             end_time: st.end_time,
-            seat_layout: st.seat_layout
+            seatLayout: st.seatLayout
         }));
 
         res.json(formattedShowtimes);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-}
+};
 
-// Get showtime of theater
+// Get showtimes of a theater
 const getShowtimeOfTheater = async (req, res) => {
     try {
         const theaterId = req.params.theaterId;
@@ -39,22 +40,22 @@ const getShowtimeOfTheater = async (req, res) => {
             movie_title: st.movie_id.title || 'Unknown Movie',
             room_id: st.room_id._id,
             room_name: st.room_id.name || 'Unknown Room',
-            date: format(new Date(st.date), "yyyy-MM-dd"),
+            date: format(new Date(st.date), "MM/dd/yyyy"),
             start_time: st.start_time,
             end_time: st.end_time,
-            seat_layout: st.seat_layout
+            seatLayout: st.seatLayout
         }));
 
         res.json(formattedShowtimes);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-}
+};
 
 // Create showtime
 const createShowtime = async (req, res) => {
     try {
-        const { movie_id, room_id, date, start_time, end_time, seat_layout } = req.body;
+        const { movie_id, room_id, date, start_time, end_time, seatLayout } = req.body;
 
         const showtime = new Showtime({
             movie_id,
@@ -62,7 +63,7 @@ const createShowtime = async (req, res) => {
             date,
             start_time,
             end_time,
-            seat_layout
+            seatLayout
         });
 
         await showtime.save();
@@ -74,42 +75,46 @@ const createShowtime = async (req, res) => {
             movie_title: showtime.movie_id.title || 'Unknown Movie',
             room_id: showtime.room_id._id,
             room_name: showtime.room_id.name || 'Unknown Room',
-            date: format(new Date(showtime.date), "yyyy-MM-dd"),
+            date: format(new Date(showtime.date), "MM/dd/yyyy"),
             start_time: showtime.start_time,
             end_time: showtime.end_time,
-            seat_layout: showtime.seat_layout
+            seatLayout: showtime.seatLayout
         };
 
-        res.json(formattedShowtime);
+        res.status(201).json(formattedShowtime);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-}
+};
 
 // Update showtime
 const updateShowtime = async (req, res) => {
     try {
-        const showtimeId = req.params.showtimeId;
+        const showtimeId = req.params.id;
         const showtime = await Showtime.findByIdAndUpdate(showtimeId, req.body, { new: true })
             .populate('movie_id', 'title')
             .populate('room_id', 'name');
+
+        if (!showtime) {
+            return res.status(404).json({ message: "Showtime not found" });
+        }
 
         const formattedShowtime = {
             movie_id: showtime.movie_id._id,
             movie_title: showtime.movie_id.title || 'Unknown Movie',
             room_id: showtime.room_id._id,
             room_name: showtime.room_id.name || 'Unknown Room',
-            date: format(new Date(showtime.date), "yyyy-MM-dd"),
+            date: format(new Date(showtime.date), "MM/dd/yyyy"),
             start_time: showtime.start_time,
             end_time: showtime.end_time,
-            seat_layout: showtime.seat_layout
+            seatLayout: showtime.seatLayout
         };
 
         res.json(formattedShowtime);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-}
+};
 
 module.exports = {
     getShowtime,
