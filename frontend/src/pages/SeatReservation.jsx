@@ -320,7 +320,9 @@ const SeatReservation = () => {
     selectedTime,
     selectedDate,
     selectedTheater,
+    selectedTheaterAddress,
     duration,
+    // seatLayout,
   } = location.state || {};
 
   const steps = ["Select Seats", "Confirm Payment", "Complete"];
@@ -752,7 +754,7 @@ const SeatReservation = () => {
               <div>
                 <img
                   src={movieImage}
-                  alt={movieTitle}
+                  alt={`${movieTitle} poster`}
                   style={{
                     width: "100%",
                     height: "20rem",
@@ -775,7 +777,7 @@ const SeatReservation = () => {
               </div>
               <div>
                 <Heading>Address :</Heading>
-                <Content variant="body1">19 Cao Thang, Q.3</Content>
+                <Content variant="body1">{selectedTheaterAddress}</Content>
               </div>
               <Heading>Screening Room :</Heading>
               <Content variant="body1">Room 1</Content>

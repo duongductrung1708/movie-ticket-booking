@@ -13,6 +13,6 @@ showtimeRouter.get('/:theaterId', getShowtimeOfTheater);
 showtimeRouter.post('/', createShowtime)
 
 //update showtime
-showtimeRouter.put('/',updateShowtime)
+showtimeRouter.put('/:id',updateShowtime)
 
 module.exports = showtimeRouter

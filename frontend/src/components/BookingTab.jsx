@@ -274,6 +274,7 @@ const BookingTab = ({ isOpen, onClose }) => {
             showtimesData.forEach((showtime) => {
               const movieId = showtime.movie_id._id;
               const movieTitle = showtime.movie_id.title;
+              const movieImage = showtime.movie_id.image;
               const movieLanguage = showtime.movie_id.language;
               const movieDuration = showtime.movie_id.duration;
 
@@ -290,6 +291,7 @@ const BookingTab = ({ isOpen, onClose }) => {
                   showtimes: [],
                   date: showtimeDate,
                   movieId: movieId,
+                  image: movieImage,
                   language: movieLanguage,
                   duration: movieDuration,
                   genres: movieGenres,
@@ -326,23 +328,38 @@ const BookingTab = ({ isOpen, onClose }) => {
   };
 
   const handleShowtimeSelect = (movieTitle, time) => {
-    setSelectedShowtimes((prevShowtimes) => ({
-      ...prevShowtimes,
-      [movieTitle]: time,
-    }));
-
     const selectedMovie = movies.find((movie) => movie.title === movieTitle);
+
     if (selectedMovie) {
+      const showtimeDate = selectedMovie.date;
+
+      if (!selectedDate) {
+        setSelectedDate(dayjs(showtimeDate, "MM/DD/YYYY"));
+      }
+
+      setSelectedShowtimes((prevShowtimes) => ({
+        ...prevShowtimes,
+        [movieTitle]: time,
+      }));
+
+      const movieDuration = selectedMovie.duration;
+      const seatLayout = showtimeDate.seatLayout;
+      const selectedTheaterDetails = filteredTheaters.find(
+        (theater) => theater.name === selectedTheater
+      );
+
+      const theaterAddress = selectedTheaterDetails?.address;
+
       navigate("/seat-reservation", {
         state: {
           movieTitle: selectedMovie.title,
           movieImage: selectedMovie.image,
           selectedTime: time,
-          selectedDate: selectedDate
-            ? selectedDate.format("MM/DD/YYYY")
-            : dayjs().format("MM/DD/YYYY"),
+          selectedDate: dayjs(showtimeDate, "MM/DD/YYYY").format("MM/DD/YYYY"),
           selectedTheater: selectedTheater,
-          duration: selectedMovie.duration,
+          selectedTheaterAddress: theaterAddress,
+          duration: movieDuration,
+          seatLayout: seatLayout,
         },
       });
     }

@@ -392,13 +392,13 @@ const MovieDetail = () => {
         const selectedTheaterDetails = filteredTheaters.find(
           (theater) => theater.name === selectedTheater
         );
-  
+
         if (selectedTheaterDetails) {
           const theaterId = selectedTheaterDetails._id;
-  
+
           try {
             const showtimesData = await getShowtimesByTheater(theaterId);
-  
+
             const filteredShowtimes = showtimesData.filter((showtime) => {
               if (selectedDate) {
                 return (
@@ -408,20 +408,20 @@ const MovieDetail = () => {
               }
               return showtime.movie_id._id === movie._id;
             });
-  
+
             const uniqueMovies = {};
-  
+
             filteredShowtimes.forEach((showtime) => {
               const movieId = showtime.movie_id._id;
               const movieTitle = showtime.movie_id.title;
               const movieLanguage = showtime.movie_id.language;
               const movieDuration = showtime.movie_id.duration;
-  
+
               const movieGenres = showtime.movie_id.genre
                 .map((genre) => genre.name)
                 .join(", ");
               const showtimeDate = dayjs(showtime.date).format("MM/DD/YYYY");
-  
+
               if (!uniqueMovies[movieId]) {
                 uniqueMovies[movieId] = {
                   title: movieTitle,
@@ -433,10 +433,10 @@ const MovieDetail = () => {
                   genres: movieGenres,
                 };
               }
-  
+
               uniqueMovies[movieId].showtimes.push(showtime.start_time);
             });
-  
+
             const formattedMovies = Object.values(uniqueMovies);
             setMovies(formattedMovies);
           } catch (error) {
@@ -445,30 +445,44 @@ const MovieDetail = () => {
         }
       }
     };
-  
+
     fetchShowtimes();
-  }, [selectedTheater, selectedDate, filteredTheaters, movie]);  
+  }, [selectedTheater, selectedDate, filteredTheaters, movie]);
 
   const handleShowtimeSelect = (movieTitle, time) => {
-    setSelectedShowtimes((prevShowtimes) => ({
-      ...prevShowtimes,
-      [movieTitle]: time,
-    }));
-
     const selectedMovie = movies.find((movie) => movie.title === movieTitle);
 
     if (selectedMovie) {
-      const movieImage = selectedMovie.image;
+      const showtimeDate = selectedMovie.date;
+
+      if (!selectedDate) {
+        setSelectedDate(dayjs(showtimeDate, "MM/DD/YYYY"));
+      }
+
+      setSelectedShowtimes((prevShowtimes) => ({
+        ...prevShowtimes,
+        [movieTitle]: time,
+      }));
+
       const movieDuration = selectedMovie.duration;
+      const movieImage = movie.image || selectedMovie.image;
+      const seatLayout = showtimeDate.seatLayout;
+      const selectedTheaterDetails = filteredTheaters.find(
+        (theater) => theater.name === selectedTheater
+      );
+
+      const theaterAddress = selectedTheaterDetails?.address;
 
       navigate("/seat-reservation", {
         state: {
           movieTitle: selectedMovie.title,
           movieImage: movieImage,
           selectedTime: time,
-          selectedDate: selectedDate.format("YYYY-MM-DD"),
+          selectedDate: dayjs(showtimeDate, "MM/DD/YYYY").format("MM/DD/YYYY"),
           selectedTheater: selectedTheater,
+          selectedTheaterAddress: theaterAddress,
           duration: movieDuration,
+          seatLayout: seatLayout,
         },
       });
     }
