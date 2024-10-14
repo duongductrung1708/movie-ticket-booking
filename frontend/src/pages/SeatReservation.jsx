@@ -58,6 +58,13 @@ const SeatButton = styled(IconButton)`
       ? "blue !important"
       : props.type === "selected"
       ? "orange !important"
+      // : "gray !important"
+      : props.status === "available"
+      ? "#45444433 !important" // Empty seat
+      : props.status === "reserved"
+      ? "orange !important" // Reserved seat
+      : props.status === "occupied"
+      ? "red !important" // Occupied seat
       : "gray !important"};
   border-radius: 5px;
   width: 50px;
@@ -74,6 +81,13 @@ const SeatButton = styled(IconButton)`
         ? "#ffb300 !important"
         : props.type === "selected"
         ? "#45444433 !important"
+        // : "#ff8a8a !important"
+        : props.status === "available"
+        ? "#d0d0d0 !important" // Hover for available
+        : props.status === "reserved"
+        ? "#ffb300 !important" // Hover for reserved
+        : props.status === "occupied"
+        ? "#ff8a8a !important" // Occupied seats do not change much on hover
         : "#ff8a8a !important"};
   }
 `;
@@ -155,7 +169,7 @@ const Selecting = styled.div`
   color: orange;
 `;
 
-const Selected = styled.div`
+const Occupied = styled.div`
   color: gray;
 `;
 
@@ -202,6 +216,7 @@ const ArcScreen = styled.svg`
   height: 100px;
   z-index: -1;
   margin-top: 1.5rem;
+  margin-bottom: 4rem;
 `;
 
 const Payment = styled.div`
@@ -306,6 +321,7 @@ const BankImg = styled.div`
   align-items: center;
   display: flex;
   justify-content: center;
+  margin-top: 2rem;
 `;
 
 const SeatReservation = () => {
@@ -536,36 +552,16 @@ const SeatReservation = () => {
               </Timer>
               <Heading>Max seat: 8</Heading>
               <ArcScreen viewBox="0 0 800 100">
-                <defs>
-                  <filter
-                    id="shadow"
-                    x="-50%"
-                    y="-50%"
-                    width="200%"
-                    height="200%"
-                  >
-                    <feGaussianBlur in="SourceAlpha" stdDeviation="4" />
-                    <feOffset dx="0" dy="4" result="offsetblur" />
-                    <feFlood floodColor="rgba(0, 0, 0, 0.1)" />
-                    <feComposite in2="offsetblur" operator="in" />
-                    <feMerge>
-                      <feMergeNode />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                </defs>
-
                 <path
-                  d="M 0,100 Q 400,-100 800,100"
+                  d="M 100,100 Q 400,0 700,100"
                   fill="none"
                   stroke="gray"
                   strokeWidth="4"
                   filter="url(#shadow)"
                 />
-
                 <text
                   x="400"
-                  y="60"
+                  y="90"
                   textAnchor="middle"
                   fontFamily="Sora, sans-serif"
                   fontSize="24"
@@ -608,10 +604,10 @@ const SeatReservation = () => {
                   <ChairIcon />
                   <div>Selecting</div>
                 </Selecting>
-                <Selected>
+                <Occupied>
                   <ChairIcon />
                   <div>Occupied</div>
-                </Selected>
+                </Occupied>
               </SeatType>
 
               <Btn
@@ -684,28 +680,13 @@ const SeatReservation = () => {
                       }
                       onClick={() => handlePaymentMethodChange("bank")}
                     >
-                      Pay with Bank Transfer
+                      Pay with Momo Transfer
                     </PayBankBtn>
                     <BankImg>
                       <img
-                        width="10%"
-                        src="https://rubicmarketing.com/wp-content/uploads/2022/11/y-nghia-logo-mb-bank-2.jpg"
-                        alt="mb"
-                      />
-                      <img
-                        width="10%"
-                        src="https://inkythuatso.com/uploads/thumbnails/800/2021/09/logo-techcombank-inkythuatso-10-15-17-50.jpg"
-                        alt="tcb"
-                      />
-                      <img
-                        width="10%"
-                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRmNuetJHXxe6e0YzM5wxQwkIlQBh2iA2VKA&s"
-                        alt="vcb"
-                      />
-                      <img
-                        width="10%"
-                        src="https://play-lh.googleusercontent.com/woYAzPCG1I8Z8HXCsdH3diL7oly0N8uth_1g6k7R_9Gu7lbxrsYeriEXLecRG2E9rP0=w600-h300-pc0xffffff-pd"
-                        alt="zalopay"
+                        width="5%"
+                        src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Circle.png"
+                        alt="momo"
                       />
                     </BankImg>
                   </PaymentMethod>
@@ -796,15 +777,21 @@ const SeatReservation = () => {
                 <Content variant="body1">
                   {selectedSeats.length > 0
                     ? selectedSeats
-                        .map(
-                          (seat) => `R${seat.row + 1}C${seat.col + 1}`
-                        )
+                        .map((seat) => `R${seat.row + 1}C${seat.col + 1}`)
                         .join(", ")
                     : ""}
                 </Content>
               </div>
               <Heading>Total Price :</Heading>
-              <Price>{(selectedSeats.length * 100).toFixed(3)}đ</Price>
+              <Price>
+                {selectedSeats
+                  .reduce((total, seat) => {
+                    const { row, col } = seat;
+                    return total + seats[row][col].price;
+                  }, 0)
+                  .toFixed(3)}
+                đ
+              </Price>
             </MovieInfo>
           </Grid>
         </Grid>
