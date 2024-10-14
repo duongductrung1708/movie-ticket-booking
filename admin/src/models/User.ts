@@ -8,9 +8,11 @@ export interface User {
   gender: string,
   isVerified: boolean,
   phoneNumber: string;
-  role: {
-    name: string
-  };
+  role?: Role;
   username: string;
   _id: string;
+}
+
+export interface Role {
+  name: string;
 }

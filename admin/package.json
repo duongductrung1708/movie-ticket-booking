@@ -18,6 +18,7 @@
     "@mui/x-date-pickers": "^7.20.0",
     "@reduxjs/toolkit": "^2.2.8",
     "@tanstack/react-query": "^4.29.19",
+    "styled-components": "^6.1.13",
     "axios": "^1.7.7",
     "blip-chat-widget": "^1.11.0",
     "react": "^18.2.0",
