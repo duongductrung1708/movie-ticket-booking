@@ -45,7 +45,10 @@ const UpdateMovieDialog: React.FC<UpdateMovieDialogProps> = ({
   setMovies,
 }) => {
   const [open, setOpen] = React.useState(false);
-  const [updatedMovieData, setUpdatedMovieData] = React.useState(movieData);
+  const [updatedMovieData, setUpdatedMovieData] = React.useState({
+    ...movieData,
+    genre: Array.isArray(movieData.genre) ? movieData.genre : [], // Ensure genre is an array
+  });
   const [genres, setGenres] = React.useState([]);
 
   React.useEffect(() => {
@@ -203,15 +206,15 @@ const UpdateMovieDialog: React.FC<UpdateMovieDialogProps> = ({
                 Array.isArray(updatedMovieData.genre)
                   ? updatedMovieData.genre
                   : []
-              }
+              } // Ensure it's an array
               onChange={handleGenreChange}
               input={<OutlinedInput label="Genres" />}
-              renderValue={(selected) => selected.join(", ")}
+              renderValue={(selected) => selected.join(", ")} // Render selected genres as a comma-separated string
             >
               {genres.map((genre: any) => (
                 <MenuItem key={genre._id} value={genre._id}>
                   <Checkbox
-                    checked={updatedMovieData.genre.indexOf(genre._id) > -1}
+                    checked={updatedMovieData.genre.indexOf(genre._id) > -1} // Ensure indexOf works on an array
                   />
                   <ListItemText primary={genre.name} />
                 </MenuItem>
@@ -263,11 +266,15 @@ const UpdateMovieDialog: React.FC<UpdateMovieDialogProps> = ({
             label="Cast (comma-separated)"
             fullWidth
             variant="outlined"
-            value={updatedMovieData.cast.join(", ")}
+            value={
+              Array.isArray(updatedMovieData.cast)
+                ? updatedMovieData.cast.join(", ")
+                : ""
+            }
             onChange={(e) =>
               setUpdatedMovieData({
                 ...updatedMovieData,
-                cast: e.target.value.split(", "),
+                cast: e.target.value.split(",").map((c) => c.trim()), // Ensure the cast is stored as an array
               })
             }
           />

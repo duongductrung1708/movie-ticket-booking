@@ -30,7 +30,7 @@ const AddMovieDialog: React.FC<AddMovieDialogProps> = ({
   const [movieData, setMovieData] = React.useState({
     title: "",
     rating: 0,
-    image: "", // Thay đổi từ File sang string để chứa URL của ảnh
+    image: "", 
     trailer: "",
     synopsis: "",
     language: "",
@@ -74,7 +74,13 @@ const AddMovieDialog: React.FC<AddMovieDialogProps> = ({
       console.log(updatedMovie);
 
       // Thêm movie mới vào danh sách
-      setMovies((prevMovies) => [...prevMovies, updatedMovie]);
+      setMovies((prevMovies: any[]) => {
+        if (prevMovies) {
+          return [...prevMovies, updatedMovie];
+        }
+        return [updatedMovie]; 
+      });
+  
       setOpen(false); // Đóng dialog sau khi thêm thành công
     } catch (error) {
       console.error("Error saving Movie:", error);

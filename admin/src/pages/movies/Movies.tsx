@@ -35,7 +35,7 @@ function createMovieData(
   synopsis: string,
   director: string,
   country: string,
-  genre: string,
+  genre: string[],
   releaseDate: string,
   duration: string,
   ageRating: string,
@@ -127,10 +127,13 @@ function Row(props: {
                 <strong>Country:</strong> {row.country}
               </p>
               <p>
-                <strong>Genres:</strong> {row.genre}
+                <strong>Genres:</strong>{" "}
+                {Array.isArray(row.genre)
+                  ? row.genre.map((g: any) => g.name).join(", ")
+                  : "N/A"}
               </p>
               <p>
-                <strong>Cast:</strong> {row.cast.join(", ")}
+                <strong>Cast:</strong>  {Array.isArray(row.cast) ? row.cast.join(", ") : "N/A"}
               </p>
               <p>
                 <strong>Created At:</strong> {row.createdAt}
@@ -148,7 +151,7 @@ function Row(props: {
 
 export default function Movies() {
   const [open, setOpen] = React.useState(false);
-  const [rows, setRows] = React.useState([]);
+  const [rows, setRows] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = React.useState(false);
   const [movieToDelete, setMovieToDelete] = React.useState<string | null>(null);
@@ -165,7 +168,7 @@ export default function Movies() {
           movie.synopsis,
           movie.director,
           movie.country,
-          movie.genre.join(", "),
+          movie.genre,
           new Date(movie.releaseDate).toLocaleDateString(),
           movie.duration,
           movie.ageRating,
