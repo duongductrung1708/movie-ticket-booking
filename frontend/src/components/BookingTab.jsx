@@ -277,6 +277,7 @@ const BookingTab = ({ isOpen, onClose }) => {
               const movieImage = showtime.movie_id.image;
               const movieLanguage = showtime.movie_id.language;
               const movieDuration = showtime.movie_id.duration;
+              const showtimeLayout = showtime.seatLayout;
 
               const movieGenres = showtime.movie_id.genre
                 .map((genre) => genre.name)
@@ -295,6 +296,7 @@ const BookingTab = ({ isOpen, onClose }) => {
                   language: movieLanguage,
                   duration: movieDuration,
                   genres: movieGenres,
+                  seatLayout: showtimeLayout,
                 };
               }
 
@@ -344,7 +346,7 @@ const BookingTab = ({ isOpen, onClose }) => {
   
       const movieDuration = selectedMovie.duration;
       const movieImage = movies[0].image || selectedMovie.image;
-      const seatLayout = showtimeDate.seatLayout;
+      const seatLayout = selectedMovie.seatLayout;
       const selectedTheaterDetails = filteredTheaters.find(
         (theater) => theater.name === selectedTheater
       );

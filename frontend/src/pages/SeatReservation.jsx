@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Typography,
   Grid,
@@ -55,10 +55,10 @@ const SeatButton = styled(IconButton)`
     props.type === "empty"
       ? "#45444433 !important"
       : props.type === "VIP"
-        ? "blue !important"
-        : props.type === "selected"
-          ? "orange !important"
-          : "gray !important"};
+      ? "blue !important"
+      : props.type === "selected"
+      ? "orange !important"
+      : "gray !important"};
   border-radius: 5px;
   width: 50px;
   height: 50px;
@@ -68,13 +68,13 @@ const SeatButton = styled(IconButton)`
 
   &:hover {
     background-color: ${(props) =>
-    props.type === "empty"
-      ? "#d0d0d0 !important"
-      : props.type === "VIP"
+      props.type === "empty"
+        ? "#d0d0d0 !important"
+        : props.type === "VIP"
         ? "#ffb300 !important"
         : props.type === "selected"
-          ? "#45444433 !important"
-          : "#ff8a8a !important"};
+        ? "#45444433 !important"
+        : "#ff8a8a !important"};
   }
 `;
 
@@ -314,6 +314,7 @@ const SeatReservation = () => {
   const seatSectionRef = useRef(null);
   const paymentSectionRef = useRef(null);
   const completeSectionRef = useRef(null);
+
   const {
     movieTitle,
     movieImage,
@@ -322,18 +323,15 @@ const SeatReservation = () => {
     selectedTheater,
     selectedTheaterAddress,
     duration,
-    // seatLayout,
+    seatLayout,
   } = location.state || {};
+  console.log(seatLayout);
 
   const steps = ["Select Seats", "Confirm Payment", "Complete"];
-  const totalRows = 10;
-  const totalColumns = 16;
+  const totalRows = seatLayout ? seatLayout.length : 0;
+  const totalColumns = seatLayout ? seatLayout[0].length : 0;
 
-  const [seats, setSeats] = useState(
-    Array.from({ length: totalRows }, () =>
-      Array.from({ length: totalColumns }, () => "empty")
-    )
-  );
+  const [seats, setSeats] = useState(seatLayout || []);
 
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
@@ -347,6 +345,18 @@ const SeatReservation = () => {
   const [timer, setTimer] = useState(600);
   const [timerActive, setTimerActive] = useState(false);
 
+  const handleTimeOut = useCallback(() => {
+    setSeats(
+      Array.from({ length: totalRows }, () =>
+        Array.from({ length: totalColumns }, () => "empty")
+      )
+    );
+    setSelectedSeats([]);
+    setSnackbarMessage("Time is up! Your selected seats have been released.");
+    setOpenSnackbar(true);
+    setTimerActive(false);
+  }, [totalRows, totalColumns]);
+
   useEffect(() => {
     if (activeStep === 0) {
       setSnackbarMessage("Please select your seats.");
@@ -358,28 +368,13 @@ const SeatReservation = () => {
     } else if (timer === 0) {
       handleTimeOut();
     }
-  }, [activeStep, timer, timerActive]);
-
-  const handleTimeOut = () => {
-    setSeats(
-      Array.from({ length: totalRows }, () =>
-        Array.from({ length: totalColumns }, () => "empty")
-      )
-    );
-    setSelectedSeats([]);
-    setSnackbarMessage("Time is up! Your selected seats have been released.");
-    setOpenSnackbar(true);
-    setTimerActive(false);
-  };
+  }, [activeStep, timer, timerActive, handleTimeOut]);
 
   const handleSeatSelect = (rowIndex, colIndex) => {
-    if (activeStep !== 0) {
-      return;
-    }
+    if (activeStep !== 0 || !seats.length) return;
 
-    const seatStatus = seats[rowIndex][colIndex];
-
-    if (seatStatus === "empty") {
+    const seat = seats[rowIndex][colIndex];
+    if (seat.status === "available") {
       if (selectedSeats.length >= 8) {
         setSnackbarMessage("You can select a maximum of 8 seats.");
         setOpenSnackbar(true);
@@ -387,19 +382,23 @@ const SeatReservation = () => {
       }
 
       const newSeats = [...seats];
-      newSeats[rowIndex][colIndex] = "selected";
+      newSeats[rowIndex][colIndex] = {
+        ...seat,
+        status: "selected",
+      };
       setSeats(newSeats);
-      setSelectedSeats([
-        ...selectedSeats,
-        rowIndex * totalColumns + colIndex + 1,
-      ]);
-    } else if (seatStatus === "selected") {
+      setSelectedSeats([...selectedSeats, { row: rowIndex, col: colIndex }]);
+    } else if (seat.status === "selected") {
       const newSeats = [...seats];
-      newSeats[rowIndex][colIndex] = "empty";
+      newSeats[rowIndex][colIndex] = {
+        ...seat,
+        status: "available",
+      };
       setSeats(newSeats);
       setSelectedSeats(
         selectedSeats.filter(
-          (seat) => seat !== rowIndex * totalColumns + colIndex + 1
+          (selectedSeat) =>
+            selectedSeat.row !== rowIndex || selectedSeat.col !== colIndex
         )
       );
     }
@@ -424,7 +423,8 @@ const SeatReservation = () => {
     setShowQRCode(method === "bank");
 
     setSnackbarMessage(
-      `Payment method changed to ${method === "counter" ? "Pay at Counter" : "Pay with Bank Transfer"
+      `Payment method changed to ${
+        method === "counter" ? "Pay at Counter" : "Pay with Bank Transfer"
       }`
     );
     setOpenSnackbar(true);
@@ -576,21 +576,21 @@ const SeatReservation = () => {
                 </text>
               </ArcScreen>
               <SeatGrid container spacing={0}>
-                {Array.from({ length: totalRows }).map((_, rowIndex) => (
+                {seats.map((row, rowIndex) => (
                   <Grid container item key={rowIndex} justifyContent="center">
-                    {Array.from({ length: totalColumns }).map((_, colIndex) => {
-                      return (
-                        <Grid item key={`${rowIndex}-${colIndex}`}>
-                          <SeatButton
-                            type={seats[rowIndex][colIndex]}
-                            onClick={() => handleSeatSelect(rowIndex, colIndex)}
-                            disabled={activeStep !== 0}
-                          >
-                            <ChairIcon />
-                          </SeatButton>
-                        </Grid>
-                      );
-                    })}
+                    {row.map((seat, colIndex) => (
+                      <Grid item key={`${rowIndex}-${colIndex}`}>
+                        <SeatButton
+                          type={seat.status}
+                          onClick={() => handleSeatSelect(rowIndex, colIndex)}
+                          disabled={
+                            activeStep !== 0 || seat.status === "unavailable"
+                          }
+                        >
+                          <ChairIcon />
+                        </SeatButton>
+                      </Grid>
+                    ))}
                   </Grid>
                 ))}
               </SeatGrid>
@@ -610,7 +610,7 @@ const SeatReservation = () => {
                 </Selecting>
                 <Selected>
                   <ChairIcon />
-                  <div>Selected</div>
+                  <div>Occupied</div>
                 </Selected>
               </SeatType>
 
@@ -639,7 +639,9 @@ const SeatReservation = () => {
                         />
                       </Grid>
                       <Grid item xs={8}>
-                        <Typography variant="h5" fontWeight="bold">{movieTitle}</Typography>
+                        <Typography variant="h5" fontWeight="bold">
+                          {movieTitle}
+                        </Typography>
                         <Typography>
                           Show date {selectedDate} | Showtime {selectedTime} |
                           Theater {selectedTheater} | Screening Room Room1 |
@@ -649,8 +651,12 @@ const SeatReservation = () => {
                           Payment Method: {selectedPaymentMethod}
                         </Typography>
                       </Grid>
-                      <Grid item xs={2} style={{paddingLeft: "2rem"}}>
-                        <Typography fontWeight="bold" color="red" fontSize="2rem">
+                      <Grid item xs={2} style={{ paddingLeft: "2rem" }}>
+                        <Typography
+                          fontWeight="bold"
+                          color="red"
+                          fontSize="2rem"
+                        >
                           {(selectedSeats.length * 100).toFixed(3)}đ
                         </Typography>
                       </Grid>
@@ -788,7 +794,13 @@ const SeatReservation = () => {
               <div>
                 <Heading>Selected Seats :</Heading>
                 <Content variant="body1">
-                  {selectedSeats.length > 0 ? selectedSeats.join(", ") : ""}
+                  {selectedSeats.length > 0
+                    ? selectedSeats
+                        .map(
+                          (seat) => `R${seat.row + 1}C${seat.col + 1}`
+                        )
+                        .join(", ")
+                    : ""}
                 </Content>
               </div>
               <Heading>Total Price :</Heading>

@@ -416,6 +416,7 @@ const MovieDetail = () => {
               const movieTitle = showtime.movie_id.title;
               const movieLanguage = showtime.movie_id.language;
               const movieDuration = showtime.movie_id.duration;
+              const showtimeLayout = showtime.seatLayout;
 
               const movieGenres = showtime.movie_id.genre
                 .map((genre) => genre.name)
@@ -431,6 +432,7 @@ const MovieDetail = () => {
                   language: movieLanguage,
                   duration: movieDuration,
                   genres: movieGenres,
+                  seatLayout: showtimeLayout,
                 };
               }
 
@@ -451,28 +453,29 @@ const MovieDetail = () => {
 
   const handleShowtimeSelect = (movieTitle, time) => {
     const selectedMovie = movies.find((movie) => movie.title === movieTitle);
-
+  
     if (selectedMovie) {
       const showtimeDate = selectedMovie.date;
-
+  
       if (!selectedDate) {
         setSelectedDate(dayjs(showtimeDate, "MM/DD/YYYY"));
       }
-
+  
       setSelectedShowtimes((prevShowtimes) => ({
         ...prevShowtimes,
         [movieTitle]: time,
       }));
-
+  
       const movieDuration = selectedMovie.duration;
       const movieImage = movie.image || selectedMovie.image;
-      const seatLayout = showtimeDate.seatLayout;
+  
+      const seatLayout = selectedMovie.seatLayout; 
       const selectedTheaterDetails = filteredTheaters.find(
         (theater) => theater.name === selectedTheater
       );
-
+  
       const theaterAddress = selectedTheaterDetails?.address;
-
+  
       navigate("/seat-reservation", {
         state: {
           movieTitle: selectedMovie.title,
@@ -486,7 +489,7 @@ const MovieDetail = () => {
         },
       });
     }
-  };
+  };  
 
   const handleCityChange = (e) => {
     setSelectedCity(e.target.value);
