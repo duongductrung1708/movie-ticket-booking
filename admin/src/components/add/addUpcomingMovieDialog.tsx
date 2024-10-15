@@ -16,8 +16,7 @@ import {
 } from "@mui/material";
 import axiosInstance from "../../config/axiosConfig";
 import { toast, ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
-import { format } from "date-fns";
+import "react-toastify/dist/ReactToastify.css";
 
 interface AddUpcomingMovieDialogProps {
   open: boolean;
@@ -53,14 +52,7 @@ const AddUpcomingMovieDialog: React.FC<AddUpcomingMovieDialogProps> = ({
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    
-    if (name === 'release_date') {
-      const formattedDate = format(new Date(value), 'MM/dd/yyyy');
-      setMovieData({ ...movieData, [name]: formattedDate });
-    } else {
-      setMovieData({ ...movieData, [name]: value });
-    }
+    setMovieData({ ...movieData, [e.target.name]: e.target.value });
   };
 
   const handleGenreChange = (event: any) => {
@@ -95,7 +87,12 @@ const AddUpcomingMovieDialog: React.FC<AddUpcomingMovieDialogProps> = ({
 
   return (
     <>
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Add New Upcoming Movie</DialogTitle>
         <DialogContent>
           <TextField
@@ -195,7 +192,7 @@ const AddUpcomingMovieDialog: React.FC<AddUpcomingMovieDialogProps> = ({
 
           <TextField
             label="Release Date"
-            type="date"
+            type="text"
             fullWidth
             variant="outlined"
             InputLabelProps={{

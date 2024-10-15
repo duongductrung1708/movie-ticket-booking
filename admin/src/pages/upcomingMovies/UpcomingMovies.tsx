@@ -27,12 +27,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import UpdateMovieDialog from "../../components/update/updateUpcomingMovie";
 import { toast, ToastContainer } from "react-toastify";
 
-// Helper function to create movie data
 function createUpcomingMovieData(
   _id: string,
   title: string,
   poster_image: string,
-  genre: string[],
+  genre: { name: string }[],
   language: string,
   release_date: string,
   duration: string,
@@ -48,7 +47,7 @@ function createUpcomingMovieData(
     _id,
     title,
     poster_image,
-    genre,
+    genre: genre.map((g) => g.name),
     language,
     release_date,
     duration,
@@ -62,7 +61,6 @@ function createUpcomingMovieData(
   };
 }
 
-// Row component to display the movie data
 function Row(props: {
   row: ReturnType<typeof createUpcomingMovieData>;
   handleUpdateMovie: (movie: any) => void;
@@ -98,7 +96,12 @@ function Row(props: {
         <TableCell align="left">{row.language}</TableCell>
         <TableCell align="left">{row.status}</TableCell>
         <TableCell align="left">
-          <UpdateMovieDialog movieData={row} setUpcomingMovies={handleUpdateMovie} />
+          <UpdateMovieDialog
+            open={updateDialogOpen}
+            setOpen={setUpdateDialogOpen}
+            movieData={row}
+            setUpcomingMovies={handleUpdateMovie}
+          />
           <IconButton
             aria-label="delete"
             size="small"
@@ -193,7 +196,7 @@ export default function UpcomingMovies() {
 
   const handleConfirmDelete = () => {
     setLoading(true);
-    axiosInstance.delete(`/upcoming-movies/${movieToDelete}`).then(() => {
+    axiosInstance.delete(`/upcoming-movie/${movieToDelete}`).then(() => {
       setRows((prevRows) =>
         prevRows.filter((movie) => movie._id !== movieToDelete)
       );
@@ -252,7 +255,11 @@ export default function UpcomingMovies() {
           <div className="empty-row">No upcoming movies available</div>
         )}
       </TableContainer>
-      <AddMovieDialog open={open} setOpen={setOpen} setUpcomingMovies={handleAddMovie} />
+      <AddMovieDialog
+        open={open}
+        setOpen={setOpen}
+        setUpcomingMovies={handleAddMovie}
+      />
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={loading}

@@ -16,7 +16,6 @@ import {
 } from "@mui/material";
 import axiosInstance from "../../config/axiosConfig";
 import EditIcon from "@mui/icons-material/Edit";
-import { format, parse } from "date-fns";
 
 interface UpdateUpcomingMovieDialogProps {
   open: boolean;
@@ -46,7 +45,7 @@ const UpdateUpcomingMovieDialog: React.FC<UpdateUpcomingMovieDialogProps> = ({
   const [updatedMovieData, setUpdatedMovieData] = React.useState({
     ...movieData,
     genre: Array.isArray(movieData.genre) ? movieData.genre : [],
-    release_date: format(new Date(movieData.release_date), "MM/dd/yyyy"),
+    cast: Array.isArray(movieData.cast) ? movieData.cast : [],
   });
 
   const [genres, setGenres] = React.useState([]);
@@ -76,13 +75,11 @@ const UpdateUpcomingMovieDialog: React.FC<UpdateUpcomingMovieDialogProps> = ({
 
   const handleUpdateMovie = async () => {
     try {
-      const parsedReleaseDate = parse(updatedMovieData.release_date, "MM/dd/yyyy", new Date());
 
       const response = await axiosInstance.put(
         `/upcoming-movie/${updatedMovieData._id}`,
         {
-          ...updatedMovieData,
-          release_date: parsedReleaseDate,
+          ...updatedMovieData
         }
       );
       const updatedMovie = response.data;
@@ -234,7 +231,12 @@ const UpdateUpcomingMovieDialog: React.FC<UpdateUpcomingMovieDialogProps> = ({
               id="status"
               name="status"
               value={updatedMovieData.status}
-              onChange={handleChange}
+              onChange={(e) =>
+                setUpdatedMovieData({
+                  ...updatedMovieData,
+                  status: e.target.value,
+                })
+              }
             >
               <MenuItem value="coming soon">Coming Soon</MenuItem>
               <MenuItem value="released">Released</MenuItem>
