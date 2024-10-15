@@ -159,7 +159,7 @@ const MovieListItem = React.forwardRef(({ movie }, ref) => {
         <MovieRating>
           {movie.duration} | {movie.releaseDate}
         </MovieRating>
-        <Button onClick={handleBooking}>Book Now</Button>
+        <Button onClick={handleBooking}>Details</Button>
       </MovieInfo>
     </MovieItem>
   );
