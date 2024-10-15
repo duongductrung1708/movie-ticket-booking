@@ -55,8 +55,6 @@ exports.createUpcomingMovie = async (req, res) => {
       poster_image,
     } = req.body;
 
-    const parsedReleaseDate = parse(release_date, "MM/dd/yyyy", new Date());
-
     const genreExists = await Genre.findById(genre);
     if (!genreExists) return res.status(404).json({ error: "Genre not found" });
 
@@ -65,7 +63,7 @@ exports.createUpcomingMovie = async (req, res) => {
       genre,
       language,
       duration,
-      release_date: parsedReleaseDate,
+      release_date,
       status,
       director,
       cast,
@@ -103,11 +101,6 @@ exports.updateUpcomingMovie = async (req, res) => {
     if (title) updateFields.title = title;
     if (language) updateFields.language = language;
     if (duration) updateFields.duration = duration;
-    
-    if (release_date) {
-      updateFields.release_date = parse(release_date, "MM/dd/yyyy", new Date());
-    }
-    
     if (status) updateFields.status = status;
     if (director) updateFields.director = director;
     if (cast) updateFields.cast = cast;
@@ -137,7 +130,7 @@ exports.updateUpcomingMovie = async (req, res) => {
 // Delete an upcoming movie
 exports.deleteUpcomingMovie = async (req, res) => {
   try {
-    const deletedMovie = await UpcomingMovie.findByIdAndDelete(req.params.id);
+    const deletedMovie = await UpcomingMovie.findByIdAndDelete(req.params.movieId);
     if (!deletedMovie) return res.status(404).json({ msg: "Upcoming movie not found" });
 
     res.status(200).json({ msg: "Upcoming movie deleted successfully" });
