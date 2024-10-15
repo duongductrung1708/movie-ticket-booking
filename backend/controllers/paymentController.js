@@ -26,15 +26,30 @@ const getPaymentById = async (req, res) => {
 
 
 //create payment
+// const createPayment = async (req, res) => {
+//     try {
+//         const { amount, paymentMethod } = req.body;
+//         const payment = await Payment.create({ amount, paymentMethod });
+//         res.status(201).json(payment);
+//     } catch (error) {
+//         res.status(500).json({ message: 'Error creating payment' });
+//     }
+// }
 const createPayment = async (req, res) => {
     try {
-        const { amount, paymentMethod } = req.body;
-        const payment = await Payment.create({ amount, paymentMethod });
+        const { amount, paymentMethodId, bookingId, status } = req.body;
+        const payment = new Payment({
+            amount,
+            paymentMethodId,
+            bookingId,
+            status,
+        });
+        await payment.save();
         res.status(201).json(payment);
     } catch (error) {
-        res.status(500).json({ message: 'Error creating payment' });
+        res.status(400).json({ error: error.message });
     }
-}
+};
 
 
 //update payment

@@ -15,6 +15,8 @@ const corsOptions = require('./config/corsOptions');
 const serviceRoutes = require('./routes/serviceRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const bookingDetailRoutes = require('./routes/bookingDetailRoutes');
+const paymentMethodRoutes = require('./routes/paymentMethodRoutes');
+
 const path = require('path');
 
 const app = express();
@@ -46,6 +48,7 @@ app.use('/api/seats', seatRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/booking-details', bookingDetailRoutes);
+app.use('/api/paymentMethod', paymentMethodRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;

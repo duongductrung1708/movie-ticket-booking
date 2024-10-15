@@ -200,7 +200,7 @@ const AddMovieDialog: React.FC<AddMovieDialogProps> = ({
             labelId="genre-label"
             id="genre"
             multiple
-            value={movieData.genre} // Lưu các ObjectId của các thể loại
+            value={movieData.genre} 
             onChange={handleGenreChange}
             input={<OutlinedInput label="Genres" />}
             renderValue={(selected) => selected.join(", ")}
@@ -208,6 +208,7 @@ const AddMovieDialog: React.FC<AddMovieDialogProps> = ({
             {genres.map((genre: any) => (
               <MenuItem key={genre._id} value={genre._id}>
                 <Checkbox checked={movieData.genre.indexOf(genre._id) > -1} />
+                
                 <ListItemText primary={genre.name} />
               </MenuItem>
             ))}

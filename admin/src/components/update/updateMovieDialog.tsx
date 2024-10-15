@@ -21,21 +21,23 @@ interface UpdateMovieDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   movieData: {
-    _id: string;
-    title: string;
-    rating: number;
-    image: string;
-    synopsis: string;
-    director: string;
-    country: string;
-    genre: string[];
-    releaseDate: string;
-    duration: string;
-    ageRating: string;
-    cast: string[];
-    status: string;
-    trailer: string;
-    language: string;
+    _id: string,
+    title: string,
+    rating: number,
+    image: string,
+    synopsis: string,
+    director: string,
+    country: string,
+    genre: string[],
+    releaseDate: string,
+    duration: string,
+    ageRating: string,
+    cast: string[],
+    status: string,
+    trailer: string,
+    language: string,
+    createdAt : string,
+    updatedAt: string
   };
   setMovies: React.Dispatch<React.SetStateAction<any[]>>;
 }
@@ -47,7 +49,7 @@ const UpdateMovieDialog: React.FC<UpdateMovieDialogProps> = ({
   const [open, setOpen] = React.useState(false);
   const [updatedMovieData, setUpdatedMovieData] = React.useState({
     ...movieData,
-    genre: Array.isArray(movieData.genre) ? movieData.genre : [], // Ensure genre is an array
+    genre: Array.isArray(movieData.genre) ? movieData.genre : [], 
   });
   const [genres, setGenres] = React.useState([]);
 
