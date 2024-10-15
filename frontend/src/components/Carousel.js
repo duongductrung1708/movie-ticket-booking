@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -7,33 +7,7 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { EffectCards, Pagination, Navigation, Autoplay } from "swiper";
 import Arrow from "../assets/Arrow.svg";
-
-const movieImages = [
-  {
-    img: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_FMjpg_UX1000_.jpg",
-    title: "The Avengers",
-  },
-  {
-    img: "https://m.media-amazon.com/images/M/MV5BNGNhMDIzZTUtNTBlZi00MTRlLWFjM2ItYzViMjE3YzI5MjljXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
-    title: "Pulp Fiction",
-  },
-  {
-    img: "https://m.media-amazon.com/images/M/MV5BNWIwODRlZTUtY2U3ZS00Yzg1LWJhNzYtMmZiYmEyNmU1NjMzXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_FMjpg_UX1000_.jpg",
-    title: "Forrest Gump",
-  },
-  {
-    img: "https://m.media-amazon.com/images/M/MV5BOTgyOGQ1NDItNGU3Ny00MjU3LTg2YWEtNmEyYjBiMjI1Y2M5XkEyXkFqcGc@._V1_.jpg",
-    title: "Fight Club",
-  },
-  {
-    img: "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_.jpg",
-    title: "The Shawshank Redemption",
-  },
-  {
-    img: "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_.jpg",
-    title: "Parasite",
-  },
-];
+import { getMovies } from "../services/api";
 
 const Container = styled.div`
   width: 25vw;
@@ -122,6 +96,21 @@ const Container = styled.div`
 `;
 
 const Carousel = () => {
+  const [movies, setMovies] = useState([]);
+
+  useEffect(() => {
+    const fetchMovies = async () => {
+      try {
+        const data = await getMovies();
+        setMovies(data);
+      } catch (error) {
+        console.error("Error fetching movies:", error);
+      }
+    };
+
+    fetchMovies();
+  }, []);
+
   return (
     <Container>
       <Swiper
@@ -134,9 +123,9 @@ const Carousel = () => {
         modules={[EffectCards, Pagination, Navigation, Autoplay]}
         className="mySwiper"
       >
-        {movieImages.map((movie, index) => (
+        {movies.map((movie, index) => (
           <SwiperSlide key={index}>
-            <img src={movie.img} alt={movie.title} />
+            <img src={movie.image} alt={movie.title} />
           </SwiperSlide>
         ))}
       </Swiper>
