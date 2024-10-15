@@ -83,8 +83,8 @@ export const menu = [
     listItems: [
       {
         id: 1,
-        title: "Settings",
-        url: "/",
+        title: "Upcoming Movies",
+        url: "/upcomingMovies",
         icon: "setting.svg",
       },
       {
