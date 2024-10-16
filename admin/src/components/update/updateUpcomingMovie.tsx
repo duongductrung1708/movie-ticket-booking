@@ -74,14 +74,20 @@ const UpdateUpcomingMovieDialog: React.FC<UpdateUpcomingMovieDialogProps> = ({
   };
 
   const handleUpdateMovie = async () => {
-    try {
+    const movieToUpdate = {
+      ...updatedMovieData,
+      genre: updatedMovieData.genre.filter((g: string) =>
+        g.match(/^[0-9a-fA-F]{24}$/)
+      ),
+    };
 
+    try {
       const response = await axiosInstance.put(
-        `/upcoming-movie/${updatedMovieData._id}`,
-        {
-          ...updatedMovieData
-        }
+        `/upcoming-movie/${movieToUpdate._id}`,
+        movieToUpdate
       );
+      console.log("Updated movie response:", response.data);
+
       const updatedMovie = response.data;
 
       setUpcomingMovies((prevMovies) =>
