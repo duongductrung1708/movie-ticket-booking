@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import axiosInstance from "../../config/axiosConfig";
 import EditIcon from "@mui/icons-material/Edit";
+import { toast, ToastContainer } from "react-toastify";
 
 interface UpdateUpcomingMovieDialogProps {
   open: boolean;
@@ -96,9 +97,11 @@ const UpdateUpcomingMovieDialog: React.FC<UpdateUpcomingMovieDialogProps> = ({
         )
       );
 
+      toast.success("Upcoming movie updated successfully!");
       setOpen(false);
     } catch (error) {
       console.error("Error updating movie:", error);
+      toast.error("Failed to update the upcoming movie.");
     }
   };
 
@@ -256,6 +259,9 @@ const UpdateUpcomingMovieDialog: React.FC<UpdateUpcomingMovieDialogProps> = ({
           <Button onClick={handleUpdateMovie}>Update Movie</Button>
         </DialogActions>
       </Dialog>
+      
+      {/* Toast container */}
+      <ToastContainer />
     </>
   );
 };
