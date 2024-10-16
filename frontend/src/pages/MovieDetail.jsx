@@ -575,6 +575,9 @@ const MovieDetail = () => {
                   <strong>Director:</strong> {movie.director}
                 </DetailItem>
                 <DetailItem variant="body1">
+                  <strong>Language:</strong> {movie.language}
+                </DetailItem>
+                <DetailItem variant="body1">
                   <strong>Country:</strong> {movie.country}
                 </DetailItem>
                 <DetailItem variant="body1">
