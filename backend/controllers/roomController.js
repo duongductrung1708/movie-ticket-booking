@@ -48,7 +48,21 @@ const RoomController = {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
+
+  getRoomsByTheaterId: async (req, res) => {
+
+    try {
+      const room = await RoomService.getRoomsByTheaterId(req.params.id);
+      if (room) {
+        res.status(200).json(room);
+      } else {
+        res.status(404).json({ message: 'Room not found' })
+      }
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  },
 };
 
 module.exports = RoomController;

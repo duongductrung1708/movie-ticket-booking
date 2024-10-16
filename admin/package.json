@@ -21,6 +21,7 @@
     "axios": "^1.7.7",
     "blip-chat-widget": "^1.11.0",
     "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-query": "^3.39.3",
