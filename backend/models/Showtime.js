@@ -3,11 +3,12 @@ const mongoose = require("mongoose");
 const seatSchema = new mongoose.Schema({
   type: {
     type: String,
+    enum: ['standard', 'vip'],
     required: true,
   },
   status: {
     type: String,
-    enum: ['available', 'reserved', 'occupied'], // Example statuses
+    enum: ['available', 'reserved', 'occupied'],
     required: true,
   },
   price: {
@@ -24,7 +25,7 @@ const showtimeSchema = new mongoose.Schema({
     required: true,
   },
   seatLayout: {
-    type: [[seatSchema]], // 2D array of seat objects
+    type: [[seatSchema]],
     required: true,
   },
   start_time: {

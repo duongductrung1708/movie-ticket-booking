@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Typography,
   Grid,
@@ -55,10 +55,17 @@ const SeatButton = styled(IconButton)`
     props.type === "empty"
       ? "#45444433 !important"
       : props.type === "VIP"
-        ? "blue !important"
-        : props.type === "selected"
-          ? "orange !important"
-          : "gray !important"};
+      ? "blue !important"
+      : props.type === "selected"
+      ? "orange !important"
+      // : "gray !important"
+      : props.status === "available"
+      ? "#45444433 !important" // Empty seat
+      : props.status === "reserved"
+      ? "orange !important" // Reserved seat
+      : props.status === "occupied"
+      ? "red !important" // Occupied seat
+      : "gray !important"};
   border-radius: 5px;
   width: 50px;
   height: 50px;
@@ -68,13 +75,20 @@ const SeatButton = styled(IconButton)`
 
   &:hover {
     background-color: ${(props) =>
-    props.type === "empty"
-      ? "#d0d0d0 !important"
-      : props.type === "VIP"
+      props.type === "empty"
+        ? "#d0d0d0 !important"
+        : props.type === "VIP"
         ? "#ffb300 !important"
         : props.type === "selected"
-          ? "#45444433 !important"
-          : "#ff8a8a !important"};
+        ? "#45444433 !important"
+        // : "#ff8a8a !important"
+        : props.status === "available"
+        ? "#d0d0d0 !important" // Hover for available
+        : props.status === "reserved"
+        ? "#ffb300 !important" // Hover for reserved
+        : props.status === "occupied"
+        ? "#ff8a8a !important" // Occupied seats do not change much on hover
+        : "#ff8a8a !important"};
   }
 `;
 
@@ -155,7 +169,7 @@ const Selecting = styled.div`
   color: orange;
 `;
 
-const Selected = styled.div`
+const Occupied = styled.div`
   color: gray;
 `;
 
@@ -202,6 +216,7 @@ const ArcScreen = styled.svg`
   height: 100px;
   z-index: -1;
   margin-top: 1.5rem;
+  margin-bottom: 4rem;
 `;
 
 const Payment = styled.div`
@@ -306,6 +321,7 @@ const BankImg = styled.div`
   align-items: center;
   display: flex;
   justify-content: center;
+  margin-top: 2rem;
 `;
 
 const SeatReservation = () => {
@@ -314,24 +330,24 @@ const SeatReservation = () => {
   const seatSectionRef = useRef(null);
   const paymentSectionRef = useRef(null);
   const completeSectionRef = useRef(null);
+
   const {
     movieTitle,
     movieImage,
     selectedTime,
     selectedDate,
     selectedTheater,
+    selectedTheaterAddress,
     duration,
+    seatLayout,
   } = location.state || {};
+  console.log(seatLayout);
 
   const steps = ["Select Seats", "Confirm Payment", "Complete"];
-  const totalRows = 10;
-  const totalColumns = 16;
+  const totalRows = seatLayout ? seatLayout.length : 0;
+  const totalColumns = seatLayout ? seatLayout[0].length : 0;
 
-  const [seats, setSeats] = useState(
-    Array.from({ length: totalRows }, () =>
-      Array.from({ length: totalColumns }, () => "empty")
-    )
-  );
+  const [seats, setSeats] = useState(seatLayout || []);
 
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
@@ -345,6 +361,18 @@ const SeatReservation = () => {
   const [timer, setTimer] = useState(600);
   const [timerActive, setTimerActive] = useState(false);
 
+  const handleTimeOut = useCallback(() => {
+    setSeats(
+      Array.from({ length: totalRows }, () =>
+        Array.from({ length: totalColumns }, () => "empty")
+      )
+    );
+    setSelectedSeats([]);
+    setSnackbarMessage("Time is up! Your selected seats have been released.");
+    setOpenSnackbar(true);
+    setTimerActive(false);
+  }, [totalRows, totalColumns]);
+
   useEffect(() => {
     if (activeStep === 0) {
       setSnackbarMessage("Please select your seats.");
@@ -356,28 +384,13 @@ const SeatReservation = () => {
     } else if (timer === 0) {
       handleTimeOut();
     }
-  }, [activeStep, timer, timerActive]);
-
-  const handleTimeOut = () => {
-    setSeats(
-      Array.from({ length: totalRows }, () =>
-        Array.from({ length: totalColumns }, () => "empty")
-      )
-    );
-    setSelectedSeats([]);
-    setSnackbarMessage("Time is up! Your selected seats have been released.");
-    setOpenSnackbar(true);
-    setTimerActive(false);
-  };
+  }, [activeStep, timer, timerActive, handleTimeOut]);
 
   const handleSeatSelect = (rowIndex, colIndex) => {
-    if (activeStep !== 0) {
-      return;
-    }
+    if (activeStep !== 0 || !seats.length) return;
 
-    const seatStatus = seats[rowIndex][colIndex];
-
-    if (seatStatus === "empty") {
+    const seat = seats[rowIndex][colIndex];
+    if (seat.status === "available") {
       if (selectedSeats.length >= 8) {
         setSnackbarMessage("You can select a maximum of 8 seats.");
         setOpenSnackbar(true);
@@ -385,19 +398,23 @@ const SeatReservation = () => {
       }
 
       const newSeats = [...seats];
-      newSeats[rowIndex][colIndex] = "selected";
+      newSeats[rowIndex][colIndex] = {
+        ...seat,
+        status: "selected",
+      };
       setSeats(newSeats);
-      setSelectedSeats([
-        ...selectedSeats,
-        rowIndex * totalColumns + colIndex + 1,
-      ]);
-    } else if (seatStatus === "selected") {
+      setSelectedSeats([...selectedSeats, { row: rowIndex, col: colIndex }]);
+    } else if (seat.status === "selected") {
       const newSeats = [...seats];
-      newSeats[rowIndex][colIndex] = "empty";
+      newSeats[rowIndex][colIndex] = {
+        ...seat,
+        status: "available",
+      };
       setSeats(newSeats);
       setSelectedSeats(
         selectedSeats.filter(
-          (seat) => seat !== rowIndex * totalColumns + colIndex + 1
+          (selectedSeat) =>
+            selectedSeat.row !== rowIndex || selectedSeat.col !== colIndex
         )
       );
     }
@@ -422,7 +439,8 @@ const SeatReservation = () => {
     setShowQRCode(method === "bank");
 
     setSnackbarMessage(
-      `Payment method changed to ${method === "counter" ? "Pay at Counter" : "Pay with Bank Transfer"
+      `Payment method changed to ${
+        method === "counter" ? "Pay at Counter" : "Pay with Bank Transfer"
       }`
     );
     setOpenSnackbar(true);
@@ -534,36 +552,16 @@ const SeatReservation = () => {
               </Timer>
               <Heading>Max seat: 8</Heading>
               <ArcScreen viewBox="0 0 800 100">
-                <defs>
-                  <filter
-                    id="shadow"
-                    x="-50%"
-                    y="-50%"
-                    width="200%"
-                    height="200%"
-                  >
-                    <feGaussianBlur in="SourceAlpha" stdDeviation="4" />
-                    <feOffset dx="0" dy="4" result="offsetblur" />
-                    <feFlood floodColor="rgba(0, 0, 0, 0.1)" />
-                    <feComposite in2="offsetblur" operator="in" />
-                    <feMerge>
-                      <feMergeNode />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                </defs>
-
                 <path
-                  d="M 0,100 Q 400,-100 800,100"
+                  d="M 100,100 Q 400,0 700,100"
                   fill="none"
                   stroke="gray"
                   strokeWidth="4"
                   filter="url(#shadow)"
                 />
-
                 <text
                   x="400"
-                  y="60"
+                  y="90"
                   textAnchor="middle"
                   fontFamily="Sora, sans-serif"
                   fontSize="24"
@@ -574,21 +572,21 @@ const SeatReservation = () => {
                 </text>
               </ArcScreen>
               <SeatGrid container spacing={0}>
-                {Array.from({ length: totalRows }).map((_, rowIndex) => (
+                {seats.map((row, rowIndex) => (
                   <Grid container item key={rowIndex} justifyContent="center">
-                    {Array.from({ length: totalColumns }).map((_, colIndex) => {
-                      return (
-                        <Grid item key={`${rowIndex}-${colIndex}`}>
-                          <SeatButton
-                            type={seats[rowIndex][colIndex]}
-                            onClick={() => handleSeatSelect(rowIndex, colIndex)}
-                            disabled={activeStep !== 0}
-                          >
-                            <ChairIcon />
-                          </SeatButton>
-                        </Grid>
-                      );
-                    })}
+                    {row.map((seat, colIndex) => (
+                      <Grid item key={`${rowIndex}-${colIndex}`}>
+                        <SeatButton
+                          type={seat.status}
+                          onClick={() => handleSeatSelect(rowIndex, colIndex)}
+                          disabled={
+                            activeStep !== 0 || seat.status === "unavailable"
+                          }
+                        >
+                          <ChairIcon />
+                        </SeatButton>
+                      </Grid>
+                    ))}
                   </Grid>
                 ))}
               </SeatGrid>
@@ -606,10 +604,10 @@ const SeatReservation = () => {
                   <ChairIcon />
                   <div>Selecting</div>
                 </Selecting>
-                <Selected>
+                <Occupied>
                   <ChairIcon />
-                  <div>Selected</div>
-                </Selected>
+                  <div>Occupied</div>
+                </Occupied>
               </SeatType>
 
               <Btn
@@ -637,7 +635,9 @@ const SeatReservation = () => {
                         />
                       </Grid>
                       <Grid item xs={8}>
-                        <Typography variant="h5" fontWeight="bold">{movieTitle}</Typography>
+                        <Typography variant="h5" fontWeight="bold">
+                          {movieTitle}
+                        </Typography>
                         <Typography>
                           Show date {selectedDate} | Showtime {selectedTime} |
                           Theater {selectedTheater} | Screening Room Room1 |
@@ -647,8 +647,12 @@ const SeatReservation = () => {
                           Payment Method: {selectedPaymentMethod}
                         </Typography>
                       </Grid>
-                      <Grid item xs={2} style={{paddingLeft: "2rem"}}>
-                        <Typography fontWeight="bold" color="red" fontSize="2rem">
+                      <Grid item xs={2} style={{ paddingLeft: "2rem" }}>
+                        <Typography
+                          fontWeight="bold"
+                          color="red"
+                          fontSize="2rem"
+                        >
                           {(selectedSeats.length * 100).toFixed(3)}đ
                         </Typography>
                       </Grid>
@@ -676,28 +680,13 @@ const SeatReservation = () => {
                       }
                       onClick={() => handlePaymentMethodChange("bank")}
                     >
-                      Pay with Bank Transfer
+                      Pay with Momo Transfer
                     </PayBankBtn>
                     <BankImg>
                       <img
-                        width="10%"
-                        src="https://rubicmarketing.com/wp-content/uploads/2022/11/y-nghia-logo-mb-bank-2.jpg"
-                        alt="mb"
-                      />
-                      <img
-                        width="10%"
-                        src="https://inkythuatso.com/uploads/thumbnails/800/2021/09/logo-techcombank-inkythuatso-10-15-17-50.jpg"
-                        alt="tcb"
-                      />
-                      <img
-                        width="10%"
-                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRmNuetJHXxe6e0YzM5wxQwkIlQBh2iA2VKA&s"
-                        alt="vcb"
-                      />
-                      <img
-                        width="10%"
-                        src="https://play-lh.googleusercontent.com/woYAzPCG1I8Z8HXCsdH3diL7oly0N8uth_1g6k7R_9Gu7lbxrsYeriEXLecRG2E9rP0=w600-h300-pc0xffffff-pd"
-                        alt="zalopay"
+                        width="5%"
+                        src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Circle.png"
+                        alt="momo"
                       />
                     </BankImg>
                   </PaymentMethod>
@@ -752,7 +741,7 @@ const SeatReservation = () => {
               <div>
                 <img
                   src={movieImage}
-                  alt={movieTitle}
+                  alt={`${movieTitle} poster`}
                   style={{
                     width: "100%",
                     height: "20rem",
@@ -775,7 +764,7 @@ const SeatReservation = () => {
               </div>
               <div>
                 <Heading>Address :</Heading>
-                <Content variant="body1">19 Cao Thang, Q.3</Content>
+                <Content variant="body1">{selectedTheaterAddress}</Content>
               </div>
               <Heading>Screening Room :</Heading>
               <Content variant="body1">Room 1</Content>
@@ -786,11 +775,23 @@ const SeatReservation = () => {
               <div>
                 <Heading>Selected Seats :</Heading>
                 <Content variant="body1">
-                  {selectedSeats.length > 0 ? selectedSeats.join(", ") : ""}
+                  {selectedSeats.length > 0
+                    ? selectedSeats
+                        .map((seat) => `R${seat.row + 1}C${seat.col + 1}`)
+                        .join(", ")
+                    : ""}
                 </Content>
               </div>
               <Heading>Total Price :</Heading>
-              <Price>{(selectedSeats.length * 100).toFixed(3)}đ</Price>
+              <Price>
+                {selectedSeats
+                  .reduce((total, seat) => {
+                    const { row, col } = seat;
+                    return total + seats[row][col].price;
+                  }, 0)
+                  .toFixed(3)}
+                đ
+              </Price>
             </MovieInfo>
           </Grid>
         </Grid>
