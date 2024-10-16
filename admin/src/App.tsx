@@ -9,13 +9,15 @@ import Theaters from "./pages/theaters/Theaters";
 import Movies from "./pages/movies/Movies";
 import Bookings from "./pages/bookings/Bookings";
 import Payments from "./pages/payments/Payments";
-import Login from "./pages/login/Login";
+import Login from "./pages/signin/signIn";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./styles/global.scss";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Showtimes from "./pages/Showtimes/Showtimes";
 import Genres from "./pages/genres/Genres";
+import ProtectedRoute from "./routers/ProtectedRouter"; // Adjust the import path
+import UpcomingMovies from "./pages/upcomingMovies/upcomingMovies";
 
 const queryClient = new QueryClient();
 
@@ -57,39 +59,83 @@ function App() {
       children: [
         {
           path: "/",
-          element: <Home />,
+          element: (
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "/users",
-          element: <Users />,
+          element: (
+            <ProtectedRoute>
+              <Users />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "/services",
-          element: <Services />,
+          element: (
+            <ProtectedRoute>
+              <Services />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "/theaters",
-          element: <Theaters />,
+          element: (
+            <ProtectedRoute>
+              <Theaters />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "/movies",
-          element: <Movies />,
+          element: (
+            <ProtectedRoute>
+              <Movies />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "/bookings",
-          element: <Bookings />,
+          element: (
+            <ProtectedRoute>
+              <Bookings />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "/payments",
-          element: <Payments />,
+          element: (
+            <ProtectedRoute>
+              <Payments />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "/showtimes",
-          element: <Showtimes />,
+          element: (
+            <ProtectedRoute>
+              <Showtimes />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "/genres",
-          element: <Genres />,
+          element: (
+            <ProtectedRoute>
+              <Genres />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "/upcomingMovies",
+          element: (
+            <ProtectedRoute>
+              <UpcomingMovies />
+            </ProtectedRoute>
+          ),
         },
       ],
     },

@@ -372,7 +372,7 @@ exports.loginUser = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { email, password } = req.body;
+  const { email, password, isAdmin } = req.body;
 
   try {
     const user = await User.findOne({ email });
@@ -392,6 +392,13 @@ exports.loginUser = async (req, res) => {
     const customerRole = await Role.findOne({ name: "customer" });
     if (!customerRole) {
       return res.status(500).json({ msg: "Customer role not found" });
+    }
+
+    if (isAdmin) {
+      const adminRole = await Role.findOne({ name: "admin" });
+      if (user.role.toString() !== adminRole._id.toString()) {
+        return res.status(403).json({ msg: "Access denied: Not an admin" });
+      }
     }
 
     const accessToken = jwt.sign(

@@ -1,6 +1,6 @@
 import "@fontsource/akaya-telivigala";
 import "@fontsource/sora";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import {
@@ -11,6 +11,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Button,
 } from "@mui/material";
 import YouTube from "react-youtube";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -115,7 +116,6 @@ const AdditionalInfoGrid = styled.div`
   display: grid;
   grid-template-columns: 2fr 0.5fr 2fr;
   grid-gap: 2rem;
-  margin-top: 1.5rem;
   font-family: "Sora", sans-serif;
   font-size: 1.2rem;
 
@@ -354,6 +354,8 @@ const MovieDetail = () => {
   const [movies, setMovies] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
 
+  const bookingRef = useRef(null);
+
   useEffect(() => {
     const fetchMovie = async () => {
       try {
@@ -416,6 +418,7 @@ const MovieDetail = () => {
               const movieTitle = showtime.movie_id.title;
               const movieLanguage = showtime.movie_id.language;
               const movieDuration = showtime.movie_id.duration;
+              const showtimeLayout = showtime.seatLayout;
 
               const movieGenres = showtime.movie_id.genre
                 .map((genre) => genre.name)
@@ -431,6 +434,7 @@ const MovieDetail = () => {
                   language: movieLanguage,
                   duration: movieDuration,
                   genres: movieGenres,
+                  seatLayout: showtimeLayout,
                 };
               }
 
@@ -466,7 +470,8 @@ const MovieDetail = () => {
 
       const movieDuration = selectedMovie.duration;
       const movieImage = movie.image || selectedMovie.image;
-      const seatLayout = showtimeDate.seatLayout;
+
+      const seatLayout = selectedMovie.seatLayout;
       const selectedTheaterDetails = filteredTheaters.find(
         (theater) => theater.name === selectedTheater
       );
@@ -506,6 +511,12 @@ const MovieDetail = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  const scrollToBooking = () => {
+    if (bookingRef.current) {
+      bookingRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const filteredMovies = selectedDate
     ? movies.filter((movie) => movie.showtimes.length > 0)
     : movies;
@@ -533,13 +544,22 @@ const MovieDetail = () => {
                 />
               </VideoWrapper>
             </MovieInfoGrid>
+            <div>
+              <Button
+                variant="contained"
+                color="warning"
+                onClick={scrollToBooking}
+              >
+                Book Now
+              </Button>
+            </div>
             <AdditionalInfoGrid>
               <div>
                 <MovieSynopsis>
                   <Heading>Content</Heading>
                   {movie.synopsis}
                 </MovieSynopsis>
-                <CastList>
+                <CastList ref={bookingRef}>
                   <Heading>Cast</Heading>
                   {movie.cast.map((actor, index) => (
                     <CastMember key={index} variant="body1">

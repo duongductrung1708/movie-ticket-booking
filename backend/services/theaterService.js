@@ -75,13 +75,13 @@ const TheaterService = {
       const showtimes = await Showtime.find({ room_id: { $in: roomIds } })
         .populate({
           path: "movie_id",
-          select: "title language duration genre",
+          select: "title image language duration genre",
           populate: {
             path: "genre",
             select: "name",
           },
         })
-        .select("movie_id date start_time end_time");
+        .select("movie_id seatLayout date start_time end_time");
 
       return showtimes;
     } catch (error) {

@@ -1,6 +1,16 @@
 import "./navbar.scss";
+import { useAuth } from "../../context/AuthProvider"; // Import the useAuth hook
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  }
+
   return (
     <div className="navbar">
       <div className="logo">
@@ -22,7 +32,7 @@ const Navbar = () => {
           />
           <span>Admin</span>
         </div>
-        <img src="/settings.svg" alt="" className="icon" />
+        <img style={{cursor: "pointer"}} onClick={handleLogout} src="/logout.svg" alt="" className="icon" />
       </div>
     </div>
   );

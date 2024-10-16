@@ -197,3 +197,14 @@ export const getAllServices = async () => {
     throw error.response ? error.response.data : error.message;
   }
 };
+
+// Function to get all upcoming movies
+export const getUpcomingMovies = async () => {
+  try {
+    const response = await api.get("/upcoming-movie");
+    return response.data;
+  } catch (error) {
+    console.error("Get upcoming movies error:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};

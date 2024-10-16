@@ -1,5 +1,5 @@
-const Showtime = require('../models/Showtime');
-const Room = require('../models/Room'); // Make sure to import the Room model
+const Showtime = require("../models/Showtime");
+const Room = require("../models/Room"); // Make sure to import the Room model
 const { format } = require("date-fns");
 const showtimeService = require('../services/showtimeService');
 const { getTheaterOfRoom } = require('../services/theaterService');
@@ -7,10 +7,10 @@ const Theater = require('../models/Theater');
 
 // Get all showtimes
 const getShowtime = async (req, res) => {
-    try {
-        const showtimes = await Showtime.find()
-            .populate('movie_id', 'title')
-            .populate('room_id', 'name');
+  try {
+    const showtimes = await Showtime.find()
+      .populate("movie_id", "title")
+      .populate("room_id", "name");
 
         const formattedShowtimes = showtimes.map((st) => ({
             movie_id: st.movie_id._id,
@@ -258,28 +258,30 @@ const getShowtimesByRoomId = async (req, res) => {
 
 // Get showtimes of a theater
 const getShowtimeOfTheater = async (req, res) => {
-    try {
-        const theaterId = req.params.theaterId;
-        const rooms = await Room.find({ theaterId: theaterId });
-        const showtimes = await Showtime.find({ room_id: { $in: rooms.map(r => r._id) } })
-            .populate('movie_id', 'title')
-            .populate('room_id', 'name');
+  try {
+    const theaterId = req.params.theaterId;
+    const rooms = await Room.find({ theaterId: theaterId });
+    const showtimes = await Showtime.find({
+      room_id: { $in: rooms.map((r) => r._id) },
+    })
+      .populate("movie_id", "title")
+      .populate("room_id", "name");
 
-        const formattedShowtimes = showtimes.map((st) => ({
-            movie_id: st.movie_id._id,
-            movie_title: st.movie_id.title || 'Unknown Movie',
-            room_id: st.room_id._id,
-            room_name: st.room_id.name || 'Unknown Room',
-            date: format(new Date(st.date), "MM/dd/yyyy"),
-            start_time: st.start_time,
-            end_time: st.end_time,
-            seatLayout: st.seatLayout
-        }));
+    const formattedShowtimes = showtimes.map((st) => ({
+      movie_id: st.movie_id._id,
+      movie_title: st.movie_id.title || "Unknown Movie",
+      room_id: st.room_id._id,
+      room_name: st.room_id.name || "Unknown Room",
+      date: format(new Date(st.date), "MM/dd/yyyy"),
+      start_time: st.start_time,
+      end_time: st.end_time,
+      seatLayout: st.seatLayout,
+    }));
 
-        res.json(formattedShowtimes);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+    res.json(formattedShowtimes);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 // Create showtime
@@ -348,11 +350,13 @@ const createShowtime = async (req, res) => {
 
 // Update showtime
 const updateShowtime = async (req, res) => {
-    try {
-        const showtimeId = req.params.id;
-        const showtime = await Showtime.findByIdAndUpdate(showtimeId, req.body, { new: true })
-            .populate('movie_id', 'title')
-            .populate('room_id', 'name');
+  try {
+    const showtimeId = req.params.id;
+    const showtime = await Showtime.findByIdAndUpdate(showtimeId, req.body, {
+      new: true,
+    })
+      .populate("movie_id", "title")
+      .populate("room_id", "name");
 
         if (!showtime) {
             return res.status(404).json({ message: "Showtime not found" });

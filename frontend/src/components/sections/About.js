@@ -157,7 +157,7 @@ const About = () => {
           </SubTextLight>
           <ButtonContainer>
             <ThemeProvider theme={dark}>
-              <Button text="BOOK NOW" link="#booking" />
+              <Button text="EXPLORE NOW" link="#about" />
             </ThemeProvider>
           </ButtonContainer>
         </Box>

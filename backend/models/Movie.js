@@ -21,7 +21,8 @@ const movieSchema = new Schema({
     type: String,
   },
   language: { 
-    type: String 
+    type: String,
+    required: true,
   },
   director: {
     type: String,
@@ -33,13 +34,16 @@ const movieSchema = new Schema({
     {
       type: Schema.Types.ObjectId,
       ref: "Genre",
+      required: true,
     },
   ],
   releaseDate: {
     type: Date,
+    required: true,
   },
   duration: {
     type: String,
+    required: true,
   },
   ageRating: {
     type: String,

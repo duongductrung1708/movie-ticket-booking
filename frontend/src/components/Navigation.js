@@ -214,7 +214,7 @@ const Navigation = () => {
                 Home
               </MenuItemStyled>
               <MenuItemStyled onClick={() => scrollTo("about")}>
-                Movies
+                About
               </MenuItemStyled>
               <MenuItemStyled onClick={() => scrollTo("movie-list")}>
                 Now showing

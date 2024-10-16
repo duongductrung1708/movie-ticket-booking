@@ -15,7 +15,7 @@ import constants from "../../constants/constants";
 import { toast } from "react-toastify";
 
 type Field = SimpleField | SelectField;
-const columns: GridColDef[] = [
+const columns: GridColDef<User>[] = [
   {
     field: "username",
     headerName: "User Name",
@@ -40,7 +40,7 @@ const columns: GridColDef[] = [
     field: "role",
     headerName: "Role",
     width: 150,
-    valueGetter: (params) => params.row.role.name,
+    valueGetter: (params: any) => params.name || "N/A",
   },
 ];
 

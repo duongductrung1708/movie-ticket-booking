@@ -100,7 +100,7 @@ const TypeWriterText = () => {
       </Title>
       <SubTitle>Find the best movies and get your tickets now!</SubTitle>
       <ButtonContainer>
-        <Button text="Book Now" link="#movies" />
+        <Button text="Explore Now" link="#movies" />
       </ButtonContainer>
     </>
   );

@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import ConfettiComponent from "../Confetti";
+import Modal from "react-modal";
+import YouTube from "react-youtube";
+import { getUpcomingMovies } from "../../services/api";
 
 const Section = styled.section`
   min-height: 100vh;
@@ -72,7 +75,6 @@ const Item = styled.div`
   padding: 1rem;
   color: ${(props) => props.theme.body};
   position: relative;
-  z-index: 5;
   backdrop-filter: blur(4px);
   border: 2px solid ${(props) => props.theme.text};
   border-radius: 20px;
@@ -141,71 +143,123 @@ const ShowMoreButton = styled.button`
   font-size: ${(props) => props.theme.fontmd};
 `;
 
-const Movie = ({ img, name = "", releaseDate = "" }) => {
+const ModalContent = styled.div`
+  position: relative;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 650px !important;
+  max-heigh: 650px !important;
+  margin: auto;
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: -20px;
+  right: -7px;
+  background: none;
+  border: none;
+  font-size: ${(props) => props.theme.fontx1};
+  cursor: pointer;
+`;
+
+const VideoWrapper = styled.div`
+  position: relative;
+  padding-bottom: 100%;
+  height: 0;
+  overflow: hidden;
+  max-width: 100%;
+`;
+
+const StyledYouTube = styled(YouTube)`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+`;
+
+const extractYouTubeVideoId = (url) => {
+  const regExp = /^.*(youtu.be\/|v\/|\/u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11 ? match[2] : null;
+};
+
+const Movie = ({ img, name = "", releaseDate = "", trailerUrl = "" }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+  const videoId = extractYouTubeVideoId(trailerUrl);
+
+  const opts = {
+    height: "490",
+    width: "100%",
+    playerVars: {
+      autoplay: 0,
+    },
+  };
+
   return (
-    <Item>
-      <MovieImage src={img} alt={name} />
-      <Name>{name}</Name>
-      <ReleaseDate>{releaseDate}</ReleaseDate>
-      <Button>Watch Trailer</Button>
-    </Item>
+    <>
+      <Item>
+        <MovieImage src={img} alt={name} />
+        <Name>{name}</Name>
+        <ReleaseDate>{releaseDate}</ReleaseDate>
+        <Button onClick={openModal}>Watch Trailer</Button>
+      </Item>
+
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={closeModal}
+        contentLabel="Watch Trailer"
+        style={{
+          overlay: {
+            backgroundColor: "rgba(0, 0, 0, 0.75)",
+          },
+          content: {
+            maxWidth: "650px",
+            maxHeight: "650px",
+            margin: "auto",
+            borderRadius: "10px",
+          },
+        }}
+      >
+        <ModalContent>
+          <CloseButton onClick={closeModal}>×</CloseButton>
+          <VideoWrapper>
+            {videoId ? (
+              <StyledYouTube videoId={videoId} opts={opts} />
+            ) : (
+              <p>Trailer not available</p>
+            )}
+          </VideoWrapper>
+        </ModalContent>
+      </Modal>
+    </>
   );
 };
 
 const UpcomingMovies = () => {
+  const [movies, setMovies] = useState([]);
   const [visibleMovies, setVisibleMovies] = useState(5);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const movies = [
-    {
-      img: "https://m.media-amazon.com/images/M/MV5BNDYxNjQyMjAtNTdiOS00NGYwLWFmNTAtNThmYjU5ZGI2YTI1XkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_FMjpg_UX1000_.jpg",
-      name: "The Avengers",
-      releaseDate: "December 2024",
-    },
-    {
-      img: "https://m.media-amazon.com/images/M/MV5BNGNhMDIzZTUtNTBlZi00MTRlLWFjM2ItYzViMjE3YzI5MjljXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_.jpg",
-      name: "Pulp Fiction",
-      releaseDate: "January 2025",
-    },
-    {
-      img: "https://m.media-amazon.com/images/M/MV5BNWIwODRlZTUtY2U3ZS00Yzg1LWJhNzYtMmZiYmEyNmU1NjMzXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_FMjpg_UX1000_.jpg",
-      name: "Forrest Gump",
-      releaseDate: "February 2025",
-    },
-    {
-      img: "https://m.media-amazon.com/images/M/MV5BOTgyOGQ1NDItNGU3Ny00MjU3LTg2YWEtNmEyYjBiMjI1Y2M5XkEyXkFqcGc@._V1_.jpg",
-      name: "Fight Club",
-      releaseDate: "March 2025",
-    },
-    {
-      img: "https://m.media-amazon.com/images/M/MV5BNDE3ODcxYzMtY2YzZC00NmNlLWJiNDMtZDViZWM2MzIxZDYwXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_.jpg",
-      name: "The Shawshank Redemption",
-      releaseDate: "April 2025",
-    },
-    {
-      img: "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_.jpg",
-      name: "Parasite",
-      releaseDate: "May 2025",
-    },
-    {
-      img: "https://m.media-amazon.com/images/M/MV5BMjIwMjE1Nzc4NV5BMl5BanBnXkFtZTgwNDg4OTA1NzM@._V1_FMjpg_UX1000_.jpg",
-      name: "The Lion King",
-      releaseDate: "June 2025",
-    },
-    {
-      img: "https://m.media-amazon.com/images/M/MV5BN2EyZjM3NzUtNWUzMi00MTgxLWI0NTctMzY4M2VlOTdjZWRiXkEyXkFqcGdeQXVyNDUzOTQ5MjY@._V1_.jpg",
-      name: "The Lord of the Rings",
-      releaseDate: "July 2025",
-    },
-    {
-      img: "https://m.media-amazon.com/images/M/MV5BNmQ0ODBhMjUtNDRhOC00MGQzLTk5MTAtZDliODg5NmU5MjZhXkEyXkFqcGdeQXVyNDUyOTg3Njg@._V1_.jpg",
-      name: "Harry Potter",
-      releaseDate: "August 2025",
-    },
-  ];
+  useEffect(() => {
+    const fetchMovies = async () => {
+      try {
+        const data = await getUpcomingMovies();
+        setMovies(data);
+      } catch (error) {
+        console.error("Error fetching upcoming movies:", error);
+      }
+    };
+
+    fetchMovies();
+  }, []);
 
   const filteredMovies = movies.filter((movie) =>
-    movie.name.toLowerCase().includes(searchQuery.toLowerCase())
+    movie.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const toggleMovies = () => {
@@ -230,9 +284,10 @@ const UpcomingMovies = () => {
         {filteredMovies.slice(0, visibleMovies).map((movie, index) => (
           <Movie
             key={index}
-            img={movie.img}
-            name={movie.name}
-            releaseDate={movie.releaseDate}
+            img={movie.poster_image}
+            name={movie.title}
+            releaseDate={movie.release_date}
+            trailerUrl={movie.trailer_url}
           />
         ))}
       </Container>
