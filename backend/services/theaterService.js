@@ -87,6 +87,22 @@ const TheaterService = {
     } catch (error) {
       throw new Error("Error fetching showtimes by theater: " + error.message);
     }
+  },
+  getTheaterOfRoom: async (roomId) => {
+    try {
+      // Find the theater that contains the room with the provided roomId
+      const theater = await Theater.findOne({ rooms: roomId }).populate('rooms');
+
+      if (!theater) {
+        return { message: 'Theater not found for the given room.' };
+      }
+
+      // Return the theater information
+      return theater;
+    } catch (error) {
+      console.error('Error fetching theater:', error);
+      throw error;
+    }
   }
 };
 
