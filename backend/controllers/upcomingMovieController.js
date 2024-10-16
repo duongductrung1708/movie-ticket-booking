@@ -114,7 +114,7 @@ exports.updateUpcomingMovie = async (req, res) => {
     }
 
     const updatedMovie = await UpcomingMovie.findByIdAndUpdate(
-      req.params.id,
+      req.params.movieId,
       { $set: updateFields },
       { new: true }
     ).populate("genre", "name");
