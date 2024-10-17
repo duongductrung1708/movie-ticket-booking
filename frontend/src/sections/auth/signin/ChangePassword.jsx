@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "@fontsource/akaya-telivigala";
 import "@fontsource/sora";
 import {
@@ -139,6 +139,10 @@ const ChangePassword = () => {
       console.error("Error changing password:", error);
     }
   };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <Section>

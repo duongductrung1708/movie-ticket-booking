@@ -3,7 +3,8 @@ import styled from "styled-components";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useNavigate } from "react-router-dom";
-import { getMovies } from "../../services/api"; // Import the getMovies function
+import { getMovies, getShowtimesByMovieId } from "../../services/api"; // Import the getMovies function
+import dayjs from "dayjs";
 
 const Section = styled.section`
   min-height: 100vh;
@@ -124,6 +125,24 @@ const Button = styled.button`
   &:hover {
     background-color: gray;
   }
+
+  @media (max-width: 1024px) {
+    font-size: 1rem;
+    padding: 0.7rem 1.2rem;
+    margin: 0.5rem 1rem 1rem;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0.8rem 1rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 1rem 1rem;
+  }
 `;
 
 const ButtonWrapper = styled.div`
@@ -143,7 +162,75 @@ const ShowMoreButton = styled.button`
   font-size: ${(props) => props.theme.fontmd};
 `;
 
-const MovieListItem = React.forwardRef(({ movie }, ref) => {
+const ShowtimeButton = styled.button`
+  padding: 0.5rem 1rem;
+  background-color: transition;
+  color: ${(props) => props.theme.text};
+  border: 1px solid orange;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #f8ca7f;
+    color: white;
+  }
+
+  @media (max-width: 1024px) {
+    font-size: 1rem;
+    padding: 0.7rem 1.2rem;
+    margin: 0.5rem 1rem 1rem;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0.8rem 1rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 1rem 1rem;
+  }
+`;
+
+const ShowtimeContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+`;
+
+const ShowtimeCard = styled.div`
+  margin: 10px 0;
+`;
+
+const Modal = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: ${(props) => (props.isOpen ? "block" : "none")};
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: ${(props) => (props.isOpen ? "block" : "none")};
+`;
+
+const MovieListItem = React.forwardRef(({ movie, onShowtimeClick }, ref) => {
   const navigate = useNavigate();
 
   const handleBooking = () => {
@@ -159,7 +246,13 @@ const MovieListItem = React.forwardRef(({ movie }, ref) => {
         <MovieRating>
           {movie.duration} | {movie.releaseDate}
         </MovieRating>
+        <div style={{display: "flex", flexDirection: "column"}}>
         <Button onClick={handleBooking}>Details</Button>
+        <ShowtimeButton onClick={() => onShowtimeClick(movie)}>
+          Showtimes
+        </ShowtimeButton>
+        </div>
+        
       </MovieInfo>
     </MovieItem>
   );
@@ -169,6 +262,9 @@ const MovieList = () => {
   const [visibleMovies, setVisibleMovies] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [movies, setMovies] = useState([]);
+  const [showtimes, setShowtimes] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState(null);
   const revealRefs = useRef([]);
   revealRefs.current = [];
   gsap.registerPlugin(ScrollTrigger);
@@ -191,10 +287,19 @@ const MovieList = () => {
   );
 
   const toggleMovies = () => {
-    if (visibleMovies < filteredMovies.length) {
-      setVisibleMovies((prevValue) => prevValue + 10);
-    } else {
-      setVisibleMovies(10);
+    setVisibleMovies((prev) =>
+      prev === filteredMovies.length ? 10 : filteredMovies.length
+    );
+  };
+
+  const handleShowtimeClick = async (movie) => {
+    try {
+      const fetchedShowtimes = await getShowtimesByMovieId(movie._id);
+      setShowtimes(fetchedShowtimes);
+      setSelectedMovie(movie);
+      setModalOpen(true);
+    } catch (error) {
+      console.error("Failed to fetch showtimes:", error);
     }
   };
 
@@ -217,6 +322,7 @@ const MovieList = () => {
               <MovieListItem
                 key={index}
                 movie={movie}
+                onShowtimeClick={handleShowtimeClick}
               />
             ))
         )}
@@ -228,6 +334,19 @@ const MovieList = () => {
             : "Show Less ←"}
         </ShowMoreButton>
       </ButtonWrapper>
+      <ModalOverlay isOpen={modalOpen} onClick={() => setModalOpen(false)} />
+      <Modal isOpen={modalOpen}>
+        <h2>{selectedMovie?.title} Showtimes</h2>
+        <ShowtimeContainer>
+          {showtimes.map((showtime, index) => (
+            <ShowtimeCard key={index}>
+              {dayjs(showtime.date).format("MM/DD/YYYY")} at{" "}
+              {showtime.start_time}
+            </ShowtimeCard>
+          ))}
+        </ShowtimeContainer>
+        <Button onClick={() => setModalOpen(false)}>Close</Button>
+      </Modal>
     </Section>
   );
 };

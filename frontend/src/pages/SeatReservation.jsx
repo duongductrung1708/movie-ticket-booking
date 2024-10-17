@@ -660,7 +660,14 @@ const SeatReservation = () => {
                         <Typography>
                           Show date {selectedDate} | Showtime {selectedTime} |
                           Theater {selectedTheater} | Screening Room Room1 |
-                          Selected Seats: {selectedSeats.join(", ")}
+                          Selected Seats:{" "}
+                          {selectedSeats.length > 0
+                            ? selectedSeats
+                                .map(
+                                  (seat) => `R${seat.row + 1}C${seat.col + 1}`
+                                )
+                                .join(", ")
+                            : ""}
                         </Typography>
                         <Typography>
                           Payment Method: {selectedPaymentMethod}

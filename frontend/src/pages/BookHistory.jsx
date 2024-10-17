@@ -1,6 +1,6 @@
 import "@fontsource/akaya-telivigala";
 import "@fontsource/sora";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Typography,
   Table,
@@ -138,10 +138,13 @@ const BookHistory = () => {
     setPage(0);
   };
 
-  // Filtered bookings based on search query
   const filteredBookings = bookings.filter((booking) =>
     booking.movieName.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <Section>
