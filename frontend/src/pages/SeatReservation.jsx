@@ -58,8 +58,8 @@ const SeatButton = styled(IconButton)`
       ? "blue !important"
       : props.type === "selected"
       ? "orange !important"
-      // : "gray !important"
-      : props.status === "available"
+      : // : "gray !important"
+      props.status === "available"
       ? "#45444433 !important" // Empty seat
       : props.status === "reserved"
       ? "orange !important" // Reserved seat
@@ -81,8 +81,8 @@ const SeatButton = styled(IconButton)`
         ? "#ffb300 !important"
         : props.type === "selected"
         ? "#45444433 !important"
-        // : "#ff8a8a !important"
-        : props.status === "available"
+        : // : "#ff8a8a !important"
+        props.status === "available"
         ? "#d0d0d0 !important" // Hover for available
         : props.status === "reserved"
         ? "#ffb300 !important" // Hover for reserved
@@ -641,7 +641,14 @@ const SeatReservation = () => {
                         <Typography>
                           Show date {selectedDate} | Showtime {selectedTime} |
                           Theater {selectedTheater} | Screening Room Room1 |
-                          Selected Seats: {selectedSeats.join(", ")}
+                          Selected Seats:{" "}
+                          {selectedSeats.length > 0
+                            ? selectedSeats
+                                .map(
+                                  (seat) => `R${seat.row + 1}C${seat.col + 1}`
+                                )
+                                .join(", ")
+                            : ""}
                         </Typography>
                         <Typography>
                           Payment Method: {selectedPaymentMethod}
