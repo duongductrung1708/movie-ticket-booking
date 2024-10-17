@@ -1,32 +1,43 @@
-const express = require('express')
-const { getShowtime, getShowtimeOfTheater, createShowtime, updateShowtime, getPaginatedShowtime, getShowtimesByRoomId, deleteShowtime, getShowtimeById } = require('../controllers/showtimeController');
-const showtimeValidation = require('../validation/showtimeValidation');
+const express = require("express");
+const {
+  getShowtime,
+  getShowtimeOfTheater,
+  createShowtime,
+  updateShowtime,
+  getPaginatedShowtime,
+  getShowtimesByRoomId,
+  deleteShowtime,
+  getShowtimeById,
+  getShowtimesByMovieId,
+} = require("../controllers/showtimeController");
+const showtimeValidation = require("../validation/showtimeValidation");
 
-const showtimeRouter = express.Router()
+const showtimeRouter = express.Router();
 
 //get all showtime
-showtimeRouter.get('/', getShowtime);
+showtimeRouter.get("/", getShowtime);
 
 //get paginated showtime
-showtimeRouter.get('/paginated', getPaginatedShowtime);
+showtimeRouter.get("/paginated", getPaginatedShowtime);
 
 //get showtime by id
-showtimeRouter.get('/:id', getShowtimeById);
-
+showtimeRouter.get("/:id", getShowtimeById);
 
 //get showtime by room id and date
-showtimeRouter.get('/room/:id', getShowtimesByRoomId)
+showtimeRouter.get("/room/:id", getShowtimesByRoomId);
 
 //get showtime of theater
-showtimeRouter.get('/:theaterId', getShowtimeOfTheater);
+showtimeRouter.get("/:theaterId", getShowtimeOfTheater);
 
 //create showtime
-showtimeRouter.post('/', showtimeValidation.verifyTime, createShowtime)
+showtimeRouter.post("/", showtimeValidation.verifyTime, createShowtime);
 
 //update showtime
-showtimeRouter.put('/:id', updateShowtime)
+showtimeRouter.put("/:id", updateShowtime);
 
 //delete showtime
-showtimeRouter.delete('/:id', deleteShowtime)
+showtimeRouter.delete("/:id", deleteShowtime);
 
-module.exports = showtimeRouter
+showtimeRouter.get("/all/:movieId", getShowtimesByMovieId);
+
+module.exports = showtimeRouter;

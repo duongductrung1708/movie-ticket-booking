@@ -208,3 +208,14 @@ export const getUpcomingMovies = async () => {
     throw error.response ? error.response.data : error.message;
   }
 };
+
+// Function to get all showtime of movieId
+export const getShowtimesByMovieId = async (movieId) => {
+  try {
+    const response = await api.get(`/showtimes/all/${movieId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching showtimes:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};

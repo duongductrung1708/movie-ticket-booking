@@ -226,6 +226,10 @@ const UserProfile = () => {
     toast.info("Form reset.");
   };
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <Section>
       <Navigation />
