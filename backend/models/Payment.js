@@ -5,10 +5,6 @@ const paymentSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    transaction_id:{
-        type:String,
-        required:true
-    },
     paymentMethodId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'PaymentMethod',
@@ -25,7 +21,9 @@ const paymentSchema = new mongoose.Schema({
             ['pending', 'success', 'failed'],
     }
 }, {
-    timestamps: true,
+    timestamps: {
+        type: String
+    },
 });
 
 const Payment = mongoose.model('Payment', paymentSchema);
