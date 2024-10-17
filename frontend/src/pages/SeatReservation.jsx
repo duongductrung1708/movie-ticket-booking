@@ -576,28 +576,28 @@ const SeatReservation = () => {
                     {row.map((seat, colIndex) => (
                       <Grid item key={`${rowIndex}-${colIndex}`}>
                         <SeatButton
-                          type={seat.status}
+                          type={seat?.status}
                           onClick={() => handleSeatSelect(rowIndex, colIndex)}
                           disabled={
-                            activeStep !== 0 || seat.status === "unavailable"
+                            activeStep !== 0 || seat?.status === "unavailable"
                           }
                         >
-                          {seat.status === "available" && seat.type === "standard" && (
+                          {seat?.status === "available" && seat?.type === "standard" && (
                             <Empty>
                               <ChairIcon />
                             </Empty>
                           )}
-                          {seat.status === "available" && seat.type === "vip" && (
+                          {seat?.status === "available" && seat?.type === "vip" && (
                             <Vip>
                               <ChairIcon />
                             </Vip>
                           )}
-                          {seat.status === "selected" && (seat.type === "vip" || seat.type === "standard") && (
+                          {seat?.status === "selected" && (seat?.type === "vip" || seat?.type === "standard") && (
                             <Selecting>
                               <ChairIcon />
                             </Selecting>
                           )}
-                          {seat.status === "occupied" && (seat.type === "vip" || seat.type === "standard") && (
+                          {seat?.status === "occupied" && (seat?.type === "vip" || seat?.type === "standard") && (
                             <Selecting>
                               <ChairIcon />
                             </Selecting>
