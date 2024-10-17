@@ -15,9 +15,8 @@ const corsOptions = require('./config/corsOptions');
 const serviceRoutes = require('./routes/serviceRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const bookingDetailRoutes = require('./routes/bookingDetailRoutes');
-
+const upcomingMovieRoutes = require('./routes/upcomingMovieRoutes');
 const path = require('path');
-const PaymentMethodRoutes = require('./routes/paymentMethodRoutes');
 
 const app = express();
 
@@ -48,10 +47,8 @@ app.use('/api/seats', seatRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/booking-details', bookingDetailRoutes);
-app.use('/api/paymentMethod', PaymentMethodRoutes);
-
+app.use('/api/upcoming-movie', upcomingMovieRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
-
