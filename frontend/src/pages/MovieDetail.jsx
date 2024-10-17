@@ -356,6 +356,15 @@ const MovieDetail = () => {
 
   const bookingRef = useRef(null);
 
+  // Reset Select State Function
+  const resetSelection = () => {
+    setSelectedCity("");
+    setFilteredTheaters([]);
+    setSelectedTheater("");
+    setSelectedDate(null);
+    setSelectedShowtimes({});
+  };
+
   useEffect(() => {
     const fetchMovie = async () => {
       try {
@@ -705,6 +714,15 @@ const MovieDetail = () => {
                       )}
                     />
                   </LocalizationProvider>
+
+                  {/* Reset Button */}
+                  <Button style={{width: "15%", marginTop: "1rem"}}
+                    variant="contained"
+                    color="warning"
+                    onClick={resetSelection}
+                  >
+                    Reset Selections
+                  </Button>
 
                   <Title>{selectedTheater}</Title>
                   {Array.isArray(filteredMovies) &&

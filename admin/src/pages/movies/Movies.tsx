@@ -41,10 +41,10 @@ function createMovieData(
   ageRating: string,
   cast: string[],
   status: string,
+  trailer: string,
+  language: string,
   createdAt: string,
   updatedAt: string,
-  trailer: string,
-  language: string
 ) {
   return {
     _id,
@@ -60,10 +60,10 @@ function createMovieData(
     ageRating,
     cast,
     status,
-    createdAt,
-    updatedAt,
     trailer,
     language,
+    createdAt,
+    updatedAt,
   };
 }
 
@@ -74,7 +74,6 @@ function Row(props: {
 }) {
   const { row, handleUpdateMovie, handleDeleteClick } = props;
   const [open, setOpen] = React.useState(false);
-  const [updateDialogOpen, setUpdateDialogOpen] = React.useState(false);
 
   return (
     <React.Fragment>
@@ -133,7 +132,8 @@ function Row(props: {
                   : "N/A"}
               </p>
               <p>
-                <strong>Cast:</strong>  {Array.isArray(row.cast) ? row.cast.join(", ") : "N/A"}
+                <strong>Cast:</strong>{" "}
+                {Array.isArray(row.cast) ? row.cast.join(", ") : "N/A"}
               </p>
               <p>
                 <strong>Created At:</strong> {row.createdAt}

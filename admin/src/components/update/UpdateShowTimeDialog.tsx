@@ -137,9 +137,16 @@ const UpdateShowtimeDialog: React.FC<UpdateShowtimeDialogProps> = ({
       );
       setSelectedTheater(tempTheater);
       setSelectedRoom(showtimeResponse.data.room_id);
-      setSelectedDate(showtimeResponse.data.date.split("T")[0]);
-      console.log(showtimeResponse);
+      let dateObj = new Date(showtimeResponse.data.date);
 
+      // Customize the locale and format options
+      let formattedDate = dateObj.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        timeZone: "Asia/Ho_Chi_Minh",
+      });
+      setSelectedDate(formattedDate);
       setStartHour(showtimeResponse.data.start_time.split(":")[0]);
       setStartMinute(showtimeResponse.data.start_time.split(":")[1]);
       setEndHour(showtimeResponse.data.end_time.split(":")[0]);
@@ -167,11 +174,14 @@ const UpdateShowtimeDialog: React.FC<UpdateShowtimeDialogProps> = ({
     setShowtimes([]);
     const fetchShowtimeByRoom = async () => {
       if (selectedDate && selectedRoom) {
+        console.log(selectedDate);
         const response = await getShowtimesByRoom(
           { date: selectedDate },
           selectedRoom._id
         );
+        console.log(selectedDate);
         setShowtimes(response.data);
+        console.log(response.data);
       }
     };
     fetchShowtimeByRoom();
@@ -193,13 +203,16 @@ const UpdateShowtimeDialog: React.FC<UpdateShowtimeDialogProps> = ({
     const startTime = `${startHour}:${startMinute}`;
     const endTime = `${endHour}:${endMinute}`;
 
+    const [day, month, year] = selectedDate.split("/"); // Split the date into components
+    const formattedDate = `${month}/${day}/${year}`; 
     const requestData = {
       movie_id: selectedMovie?.id,
       room_id: selectedRoom?._id,
-      date: selectedDate,
-      start_time: startTime,
-      end_time: endTime,
+      date: formattedDate,
+      startTime,
+      endTime,
     };
+    console.log(requestData);
 
     try {
       const response = await updateShowtime(existingShowtimeId, requestData);
@@ -252,10 +265,6 @@ const UpdateShowtimeDialog: React.FC<UpdateShowtimeDialogProps> = ({
     }
   };
 
-  const handleSelectDate = (date: any) => {
-    let formattedDate = new Date(date).toLocaleDateString();
-    setSelectedDate(formattedDate);
-  };
 
   return (
     <React.Fragment>
@@ -272,7 +281,7 @@ const UpdateShowtimeDialog: React.FC<UpdateShowtimeDialogProps> = ({
           variant="h6"
           style={{ fontWeight: "bold" }}
         >
-          {showtime ? "Update Showtime" : "Add New Showtime"}
+          Update Showtime
           <IconButton
             aria-label="close"
             onClick={handleClose}
@@ -330,10 +339,15 @@ const UpdateShowtimeDialog: React.FC<UpdateShowtimeDialogProps> = ({
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DemoContainer components={["DatePicker"]}>
               <DatePicker
-                defaultValue={dayjs(selectedDate?.toString())}
+                value={selectedDate ? dayjs(selectedDate, "DD/MM/YYYY") : null} // Use selectedDate in DD/MM/YYYY
                 label="Select Date"
-                value={dayjs(selectedDate?.toString())}
-                onChange={(date) => handleSelectDate(date)}
+                onChange={(date) => {
+                  if (date) {
+                    // Ensure the selected date is formatted back to DD/MM/YYYY
+                    const formattedDate = dayjs(date).format("DD/MM/YYYY");
+                    setSelectedDate(formattedDate);
+                  }
+                }}
                 renderInput={(params) => (
                   <TextField {...params} margin="dense" fullWidth />
                 )}

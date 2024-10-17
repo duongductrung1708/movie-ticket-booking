@@ -15,6 +15,7 @@ import { AuthProvider } from './hooks/AuthProvider';
 
 import { RedirectRoute, ProtectedRoute } from './components/ProtectedRoute';
 import NotFound from "./pages/NotFound";
+import PaymentPage from "./pages/PaymentPage";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/movie/:id" element={<MovieDetail />} />
         <Route path="/seat-reservation" element={<ProtectedRoute element={<SeatReservation />} />} />
+        <Route path="/payment" element={<ProtectedRoute element={<PaymentPage />} />} />
         <Route path="/user-profile" element={<ProtectedRoute element={<UserProfile />} />} />
         <Route path="/booking-history" element={<ProtectedRoute element={<BookHistory />} />} />
         <Route path="*" element={<NotFound/>} />
