@@ -5,9 +5,7 @@ const showtimeValidation = {
     verifyTime: async (req, res, next) => {
         try {
             const { startTime, endTime, date, roomId } = req.body;
-            console.log("hihih");
-
-
+            
             const formatTime = (time) => {
                 const [hour, minute] = time.split(":").map(Number); // Split time and convert to numbers
                 const formattedHour = hour < 10 ? `0${hour}` : `${hour}`; // Add leading zero to hour if needed
@@ -22,13 +20,11 @@ const showtimeValidation = {
             if (formattedStartTime >= formattedEndTime) {
                 return res.status(400).send({ message: "Invalid time range: Start time must be less than end time." });
             }
-            let parts = date.split('/'); // Split the date string into [DD, MM, YYYY]
 
-            const requestDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]) + 1);
+            const requestDate = new Date(date);
 
             requestDate.setHours(0, 0, 0, 0); // Set time to 00:00:00 for accurate date comparison
             // return console.log(requestDate);
-
 
             // Get all showtimes for the given date by matching only the date part
             const showtimes = await Showtime.find({

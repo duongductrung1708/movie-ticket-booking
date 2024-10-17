@@ -17,7 +17,7 @@ const getShowtime = async (req, res) => {
             movie_title: st.movie_id.title || 'Unknown Movie',
             room_id: st.room_id._id,
             room_name: st.room_id.name || 'Unknown Room',
-            date: format(new Date(st.date), "MM/dd/yyyy"),
+            date: st.date,
             start_time: st.start_time,
             end_time: st.end_time,
             seatLayout: st.seatLayout
@@ -217,12 +217,12 @@ const getPaginatedShowtime = async (req, res) => {
 const getShowtimesByRoomId = async (req, res) => {
     try {
         const roomId = req.params.id;
-        let parts = req.query.date.split('/'); // Split the date string into [DD, MM, YYYY]
+        const [day, month, year] = req.query.date.split("/").map(Number);  // Split and parse the date
 
-        const requestDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]) + 1);
+        const requestDate = new Date(year, month - 1, day);  // Create a Date object
+        requestDate.setHours(0, 0, 0, 0);  // Set time to 00:00:00 for accurate date comparison
 
-        requestDate.setHours(0, 0, 0, 0); // Set time to 00:00:00 for accurate date comparison
-
+        console.log(requestDate);
         const showtimes = await showtimeService.getShowtimesByRoomId(roomId);
 
         // Utility function to check if two dates are the same (ignoring time)
@@ -402,8 +402,6 @@ const updateShowtime = async (req, res) => {
         }
 
         const theater = await getTheaterOfRoom(showtime.room_id._id);
-        console.log(req.body);
-
 
         const formattedShowtime = {
             _id: showtime._id,

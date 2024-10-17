@@ -26,6 +26,7 @@ import {
 import { Box, Grid2 } from "@mui/material";
 import { toast } from "react-toastify";
 import { dateFormat } from "../../services/formatService";
+import dayjs from "dayjs";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -132,7 +133,6 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
     };
     fetchRoomsByTheaterId();
   }, [selectedTheater]);
-  console.log(selectedDate);
 
   useEffect(() => {
     setShowtimes([]);
@@ -166,14 +166,17 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
   const handleSave = async () => {
     const startTime = `${startHour}:${startMinute}`;
     const endTime = `${endHour}:${endMinute}`;
-
+    const [day, month, year] = selectedDate.split("/"); // Split the date into components
+    const formattedDate = `${month}/${day}/${year}`; 
     const requestData = {
       movieId: selectedMovie?.id,
       roomId: selectedRoom?._id,
-      date: selectedDate,
+      date: formattedDate,
       startTime,
       endTime,
     };
+
+    console.log(requestData);
 
     try {
       const response = await saveShowtime(requestData);
@@ -226,7 +229,8 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
   };
 
   const handleSelectDate = (date: any) => {
-    let formattedDate = new Date(date).toLocaleDateString();
+    // Ensure the selected date is formatted back to DD/MM/YYYY
+    const formattedDate = dayjs(date).format("DD/MM/YYYY");
     setSelectedDate(formattedDate);
   };
 
