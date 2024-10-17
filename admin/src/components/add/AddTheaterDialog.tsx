@@ -13,6 +13,7 @@ import Typography from "@mui/material/Typography";
 import MenuItem from "@mui/material/MenuItem";
 import AdjustSeatLayout from "../update/AdjustSeatLayout";
 import axiosInstance from "../../config/axiosConfig";
+import { toast } from "react-toastify";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -104,7 +105,7 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
 
       // Add or replace the updated theater in the list of theaters
       setTheaters(updatedTheater);
-
+      toast.success("Add theater successfully")
       setOpen(false); // Close the dialog on success
     } catch (error) {
       console.error("Error saving theater:", error);
