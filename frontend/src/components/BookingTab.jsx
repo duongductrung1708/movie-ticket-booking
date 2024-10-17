@@ -345,7 +345,7 @@ const BookingTab = ({ isOpen, onClose }) => {
       }));
   
       const movieDuration = selectedMovie.duration;
-      const movieImage = movies[0].image || selectedMovie.image;
+      const movieImage = selectedMovie.image;
       const seatLayout = selectedMovie.seatLayout;
       const selectedTheaterDetails = filteredTheaters.find(
         (theater) => theater.name === selectedTheater
