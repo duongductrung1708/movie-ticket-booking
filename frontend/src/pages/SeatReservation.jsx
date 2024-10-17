@@ -77,6 +77,9 @@ const SeatButton = styled(IconButton)`
     props.type === "empty"
       ? "#d0d0d0 !important"
       : props.type === "vip"
+    props.type === "empty"
+      ? "#d0d0d0 !important"
+      : props.type === "vip"
         ? "#ffb300 !important"
         : props.type === "selected"
           ? "#45444433 !important"
@@ -443,7 +446,7 @@ const SeatReservation = () => {
                     {row.map((seat, colIndex) => (
                       <Grid item key={`${rowIndex}-${colIndex}`}>
                         <SeatButton
-                          type={seat.status}
+                          type={seat?.status}
                           onClick={() => handleSeatSelect(rowIndex, colIndex)}
                           disabled={
                             seat.status === "unavailable"
@@ -560,8 +563,8 @@ const SeatReservation = () => {
                 <Content variant="body1">
                   {selectedSeats.length > 0
                     ? selectedSeats
-                        .map((seat) => `R${seat.row + 1}C${seat.col + 1}`)
-                        .join(", ")
+                      .map((seat) => `R${seat.row + 1}C${seat.col + 1}`)
+                      .join(", ")
                     : ""}
                 </Content>
               </div>
