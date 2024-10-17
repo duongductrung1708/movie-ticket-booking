@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import axiosInstance from "../../config/axiosConfig";
 import EditIcon from "@mui/icons-material/Edit";
+import { toast, ToastContainer } from "react-toastify";
 
 interface UpdateMovieDialogProps {
   open: boolean;
@@ -51,7 +52,13 @@ const UpdateMovieDialog: React.FC<UpdateMovieDialogProps> = ({
     ...movieData,
     genre: Array.isArray(movieData.genre) ? movieData.genre : [], 
   });
-  const [genres, setGenres] = React.useState([]);
+
+
+  interface Genre {
+    _id: string;
+    name: string;
+  }
+  const [genres, setGenres] = React.useState<Genre[]>([]);
 
   React.useEffect(() => {
     axiosInstance.get("/genres").then(({ data }) => {
@@ -90,9 +97,11 @@ const UpdateMovieDialog: React.FC<UpdateMovieDialogProps> = ({
         )
       );
 
+      toast.success("Movie updated successfully!");
       setOpen(false);
     } catch (error) {
       console.error("Error updating movie:", error);
+      toast.error("Failed to update the movie.");
     }
   };
 
@@ -208,15 +217,18 @@ const UpdateMovieDialog: React.FC<UpdateMovieDialogProps> = ({
                 Array.isArray(updatedMovieData.genre)
                   ? updatedMovieData.genre
                   : []
-              } // Ensure it's an array
+              } 
               onChange={handleGenreChange}
               input={<OutlinedInput label="Genres" />}
-              renderValue={(selected) => selected.join(", ")} // Render selected genres as a comma-separated string
+              renderValue={(selected) => 
+                (selected as string[]) // Chuyển đổi selected thành kiểu string[]
+                  .map((id) => genres.find((genre) => genre._id === id)?.name) // Tìm tên genre dựa trên ID
+                  .join(", ")}
             >
               {genres.map((genre: any) => (
                 <MenuItem key={genre._id} value={genre._id}>
                   <Checkbox
-                    checked={updatedMovieData.genre.indexOf(genre._id) > -1} // Ensure indexOf works on an array
+                    checked={updatedMovieData.genre.indexOf(genre._id) > -1}
                   />
                   <ListItemText primary={genre.name} />
                 </MenuItem>
@@ -304,6 +316,9 @@ const UpdateMovieDialog: React.FC<UpdateMovieDialogProps> = ({
           <Button onClick={handleUpdateMovie}>Update Movie</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Toast container */}
+      <ToastContainer />
     </>
   );
 };

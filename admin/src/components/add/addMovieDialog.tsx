@@ -15,6 +15,7 @@ import {
   OutlinedInput,
 } from "@mui/material";
 import axiosInstance from "../../config/axiosConfig";
+import { toast, ToastContainer } from "react-toastify";
 
 interface AddMovieDialogProps {
   open: boolean;
@@ -43,7 +44,12 @@ const AddMovieDialog: React.FC<AddMovieDialogProps> = ({
     cast: "",
   });
 
-  const [genres, setGenres] = React.useState([]); // Lưu danh sách thể loại từ API
+  interface Genre {
+    _id: string;
+    name: string;
+  }
+
+  const [genres, setGenres] = React.useState<Genre[]>([]); // Lưu danh sách thể loại từ API
 
   React.useEffect(() => {
     // Fetch genres từ API
@@ -81,13 +87,19 @@ const AddMovieDialog: React.FC<AddMovieDialogProps> = ({
         return [updatedMovie]; 
       });
   
+      toast.success("Movie added successfully!");
       setOpen(false); // Đóng dialog sau khi thêm thành công
     } catch (error) {
       console.error("Error saving Movie:", error);
+      toast.error("Failed to add the movie.");
     }
   };
 
+
+
+  
   return (
+    <>
     <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
       <DialogTitle>Add New Movie</DialogTitle>
       <DialogContent>
@@ -203,12 +215,15 @@ const AddMovieDialog: React.FC<AddMovieDialogProps> = ({
             value={movieData.genre} 
             onChange={handleGenreChange}
             input={<OutlinedInput label="Genres" />}
-            renderValue={(selected) => selected.join(", ")}
+            renderValue={(selected) => 
+              (selected as string[]) // Chuyển đổi selected thành kiểu string[]
+                .map((id) => genres.find((genre) => genre._id === id)?.name) // Tìm tên genre dựa trên ID
+                .join(", ")}
+
           >
             {genres.map((genre: any) => (
               <MenuItem key={genre._id} value={genre._id}>
                 <Checkbox checked={movieData.genre.indexOf(genre._id) > -1} />
-                
                 <ListItemText primary={genre.name} />
               </MenuItem>
             ))}
@@ -234,6 +249,10 @@ const AddMovieDialog: React.FC<AddMovieDialogProps> = ({
         <Button onClick={handleAddMovie}>Add Movie</Button>
       </DialogActions>
     </Dialog>
+
+    {/* Toast container */}
+    <ToastContainer />
+    </>
   );
 };
 
