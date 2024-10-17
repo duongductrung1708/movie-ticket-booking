@@ -9,24 +9,22 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
-
-import "./adjustseat.scss";
+import Switch from "@mui/material/Switch";
+import "./seatlayout.scss"
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialog-paper": {
-    // Mở rộng tối đa 80% màn hình
-    maxWidth: "80%", // Bỏ giới hạn mặc định
+    maxWidth: "80%",
   },
   "& .MuiDialogContent-root": {
     padding: theme.spacing(2),
-    overflowX: "auto", // Cho phép cuộn ngang
+    overflowX: "auto",
   },
   "& .MuiDialogActions-root": {
     padding: theme.spacing(1),
   },
 }));
 
-// Tạo hai nút có phong cách khác nhau
 const CancelButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.grey[300],
   color: theme.palette.text.primary,
@@ -46,8 +44,8 @@ const SaveButton = styled(Button)(({ theme }) => ({
 interface AdjustSeatLayoutProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  seatLayout: number[][]; // Current seat layout
-  onSave: (newLayout: number[][]) => void; // Callback to save the new layout
+  seatLayout: number[][];
+  onSave: (newLayout: number[][]) => void;
 }
 
 const AdjustSeatLayout: React.FC<AdjustSeatLayoutProps> = ({
@@ -56,22 +54,19 @@ const AdjustSeatLayout: React.FC<AdjustSeatLayoutProps> = ({
   seatLayout: initialSeatLayout,
   onSave,
 }) => {
-  const [rows, setRows] = React.useState<number>(initialSeatLayout?.length); // Default rows
+  const [rows, setRows] = React.useState<number>(initialSeatLayout?.length);
   const [columns, setColumns] = React.useState<number>(
     initialSeatLayout?.[0]?.length
-  ); // Default columns
+  );
   const [seatLayout, setSeatLayout] =
     React.useState<number[][]>(initialSeatLayout);
+
+  const [vipMode, setVipMode] = React.useState<boolean>(false); // State for VIP mode
 
   React.useEffect(() => {
     setSeatLayout(initialSeatLayout);
     setRows(initialSeatLayout?.length);
     setColumns(initialSeatLayout?.[0].length);
-
-    return () => {
-      const resetLayout = Array(rows).fill(Array(columns).fill(0));
-      setSeatLayout(resetLayout);
-    };
   }, [open]);
 
   const handleClose = () => {
@@ -79,7 +74,7 @@ const AdjustSeatLayout: React.FC<AdjustSeatLayoutProps> = ({
   };
 
   const handleSaveSetup = () => {
-    onSave(seatLayout); // Pass the updated layout back to the parent component
+    onSave(seatLayout);
     setOpen(false);
   };
 
@@ -87,24 +82,34 @@ const AdjustSeatLayout: React.FC<AdjustSeatLayoutProps> = ({
     const newLayout = seatLayout.map((row, rIndex) =>
       row.map((seat, cIndex) => {
         if (rIndex === rowIndex && cIndex === colIndex) {
-          return seat === 0 ? -1 : 0; // Toggle between unbooked (0) and blocked (3)
+          if (vipMode) {
+            // Set seat as VIP if VIP mode is active
+            return seat == 1 ? 0 : 1;
+          } else {
+            // Toggle between standard (0) and blocked (-1)
+            return seat === 0 ? -1 : 0;
+          }
         }
         return seat;
       })
     );
     setSeatLayout(newLayout);
   };
+  console.log(seatLayout);
 
   const renderSeats = () => {
     return seatLayout.map((row, rowIndex) => (
       <div key={`row-${rowIndex}`} className="row">
         <span className="row-label">{String.fromCharCode(65 + rowIndex)}</span>{" "}
-        {/* Row labels (A, B, C, etc.) */}
         {row.map((seat, colIndex) => (
           <span
             key={`seat-${rowIndex}-${colIndex}`}
             className={`seat ${
-              seat === 0 ? "seat-not-booked" : "seat-blocked"
+              seat === 0
+                ? "seat-standard"
+                : seat === 1
+                ? "seat-vip"
+                : "seat-blocked"
             }`}
             onClick={() => onSeatClick(rowIndex, colIndex)}
           >
@@ -140,7 +145,7 @@ const AdjustSeatLayout: React.FC<AdjustSeatLayoutProps> = ({
         <DialogContent dividers>
           <Typography gutterBottom>
             Adjust the number of rows and columns, then click on seats to
-            block/unblock them.
+            block/unblock them or set VIP seats.
           </Typography>
           <div className="input-container">
             <TextField
@@ -165,10 +170,19 @@ const AdjustSeatLayout: React.FC<AdjustSeatLayoutProps> = ({
               }}
             />
           </div>
+          <div>
+            <Typography gutterBottom>VIP Mode</Typography>
+            <Switch
+              checked={vipMode}
+              onChange={() => setVipMode(!vipMode)} // Toggle VIP mode
+              name="vipMode"
+              color="primary"
+            />
+          </div>
           <div className="seat-layout">{renderSeats()}</div>
         </DialogContent>
         <DialogActions>
-          <CancelButton onClick={handleClose}>Cancle</CancelButton>
+          <CancelButton onClick={handleClose}>Cancel</CancelButton>
           <SaveButton onClick={handleSaveSetup} autoFocus>
             Save Setup
           </SaveButton>

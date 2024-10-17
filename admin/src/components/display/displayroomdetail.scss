@@ -35,9 +35,14 @@
 }
 
 .seat-blocked {
-  background-color: #ff6b6b;
+  background-color: red;
   color: white;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* Đổ bóng cho ghế bị chặn */
+}
+
+.seat-vip{
+  background-color: gold;
+  color: white;
 }
 
 .input-container{
