@@ -54,18 +54,18 @@ const SeatButton = styled(IconButton)`
   color: ${(props) =>
     props.type === "empty"
       ? "#45444433 !important"
-      : props.type === "VIP"
-      ? "blue !important"
-      : props.type === "selected"
-      ? "orange !important"
-      // : "gray !important"
-      : props.status === "available"
-      ? "#45444433 !important" // Empty seat
-      : props.status === "reserved"
-      ? "orange !important" // Reserved seat
-      : props.status === "occupied"
-      ? "red !important" // Occupied seat
-      : "gray !important"};
+      : props.type === "vip"
+        ? "blue !important"
+        : props.type === "selected"
+          ? "orange !important"
+          // : "gray !important"
+          : props.status === "available"
+            ? "#45444433 !important" // Empty seat
+            : props.status === "reserved"
+              ? "orange !important" // Reserved seat
+              : props.status === "occupied"
+                ? "red !important" // Occupied seat
+                : "gray !important"};
   border-radius: 5px;
   width: 50px;
   height: 50px;
@@ -75,20 +75,20 @@ const SeatButton = styled(IconButton)`
 
   &:hover {
     background-color: ${(props) =>
-      props.type === "empty"
-        ? "#d0d0d0 !important"
-        : props.type === "VIP"
+    props.type === "empty"
+      ? "#d0d0d0 !important"
+      : props.type === "vip"
         ? "#ffb300 !important"
         : props.type === "selected"
-        ? "#45444433 !important"
-        // : "#ff8a8a !important"
-        : props.status === "available"
-        ? "#d0d0d0 !important" // Hover for available
-        : props.status === "reserved"
-        ? "#ffb300 !important" // Hover for reserved
-        : props.status === "occupied"
-        ? "#ff8a8a !important" // Occupied seats do not change much on hover
-        : "#ff8a8a !important"};
+          ? "#45444433 !important"
+          // : "#ff8a8a !important"
+          : props.status === "available"
+            ? "#d0d0d0 !important" // Hover for available
+            : props.status === "reserved"
+              ? "#ffb300 !important" // Hover for reserved
+              : props.status === "occupied"
+                ? "#ff8a8a !important" // Occupied seats do not change much on hover
+                : "#ff8a8a !important"};
   }
 `;
 
@@ -439,8 +439,7 @@ const SeatReservation = () => {
     setShowQRCode(method === "bank");
 
     setSnackbarMessage(
-      `Payment method changed to ${
-        method === "counter" ? "Pay at Counter" : "Pay with Bank Transfer"
+      `Payment method changed to ${method === "counter" ? "Pay at Counter" : "Pay with Bank Transfer"
       }`
     );
     setOpenSnackbar(true);
@@ -583,7 +582,27 @@ const SeatReservation = () => {
                             activeStep !== 0 || seat.status === "unavailable"
                           }
                         >
-                          <ChairIcon />
+                          {seat.status === "available" && seat.type === "standard" && (
+                            <Empty>
+                              <ChairIcon />
+                            </Empty>
+                          )}
+                          {seat.status === "available" && seat.type === "vip" && (
+                            <Vip>
+                              <ChairIcon />
+                            </Vip>
+                          )}
+                          {seat.status === "selected" && (seat.type === "vip" || seat.type === "standard") && (
+                            <Selecting>
+                              <ChairIcon />
+                            </Selecting>
+                          )}
+                          {seat.status === "occupied" && (seat.type === "vip" || seat.type === "standard") && (
+                            <Selecting>
+                              <ChairIcon />
+                            </Selecting>
+                          )}
+
                         </SeatButton>
                       </Grid>
                     ))}
@@ -777,8 +796,8 @@ const SeatReservation = () => {
                 <Content variant="body1">
                   {selectedSeats.length > 0
                     ? selectedSeats
-                        .map((seat) => `R${seat.row + 1}C${seat.col + 1}`)
-                        .join(", ")
+                      .map((seat) => `R${seat.row + 1}C${seat.col + 1}`)
+                      .join(", ")
                     : ""}
                 </Content>
               </div>
