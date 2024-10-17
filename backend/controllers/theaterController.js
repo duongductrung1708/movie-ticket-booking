@@ -17,6 +17,8 @@ const TheaterController = {
 
   getAll: async (req, res) => {
     try {
+      console.log(req.params);
+      
       const theaters = await TheaterService.getAll();
       res.status(200).json(theaters);
     } catch (error) {
@@ -255,8 +257,6 @@ const TheaterController = {
       res.status(500).json({ success: false, message: 'Server error, please try again later' });
     }
   }
-
-
 };
 
 module.exports = TheaterController;

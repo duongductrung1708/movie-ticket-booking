@@ -1,8 +1,15 @@
 export const dateFormat = (dateString: string) => {
   const date = new Date(dateString);
-  const day = date.getUTCDate().toString().padStart(2, "0");
-  const month = (date.getUTCMonth() + 1).toString().padStart(2, "0"); // Months are zero-indexed, so +1
-  const year = date.getUTCFullYear();
 
-  return `${day}/${month}/${year}`;
+  // Convert to readable format in your timezone (UTC+7)
+  const options = {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Ho_Chi_Minh", 
+  };
+
+  const formattedDate = date.toLocaleString("vi-VN", options);
+
+  return formattedDate; // Return as DD/MM/YYYY format
 };

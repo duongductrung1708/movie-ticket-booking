@@ -5,14 +5,14 @@ const showtimeValidation = {
     verifyTime: async (req, res, next) => {
         try {
             const { startTime, endTime, date, roomId } = req.body;
-
-
+            
             const formatTime = (time) => {
                 const [hour, minute] = time.split(":").map(Number); // Split time and convert to numbers
                 const formattedHour = hour < 10 ? `0${hour}` : `${hour}`; // Add leading zero to hour if needed
                 const formattedMinute = minute < 10 ? `0${minute}` : `${minute}`; // Add leading zero to minute if needed
                 return `${formattedHour}:${formattedMinute}`;
             }
+
             const formattedStartTime = formatTime(startTime);
             const formattedEndTime = formatTime(endTime);
 
@@ -21,9 +21,10 @@ const showtimeValidation = {
                 return res.status(400).send({ message: "Invalid time range: Start time must be less than end time." });
             }
 
-            // Convert the date string into a Date object and reset time to midnight
             const requestDate = new Date(date);
+
             requestDate.setHours(0, 0, 0, 0); // Set time to 00:00:00 for accurate date comparison
+            // return console.log(requestDate);
 
             // Get all showtimes for the given date by matching only the date part
             const showtimes = await Showtime.find({
@@ -46,11 +47,15 @@ const showtimeValidation = {
                     return res.status(400).json({ message: "Showtime overlaps with an existing showtime." });
                 }
             }
+
+            req.body.date = requestDate;
             req.body.startTime = formattedStartTime;
             req.body.endTime = formattedEndTime;
             // If no conflict, proceed to the next middleware
             next();
         } catch (err) {
+            console.log(err);
+
             res.status(500).send({ message: err.message });
         }
     }

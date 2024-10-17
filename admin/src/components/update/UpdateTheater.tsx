@@ -15,6 +15,7 @@ import AdjustSeatLayout from "../update/AdjustSeatLayout";
 import axiosInstance from "../../config/axiosConfig";
 import EditIcon from "@mui/icons-material/Edit";
 import constants from "../../constants/constants";
+import { toast } from "react-toastify";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -64,7 +65,7 @@ const UpdateTheaterDialog: React.FC<UpdateTheaterDialogProps> = ({
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [theaterImage, setTheaterImage] = useState<File | null>(null);
   const [theaterImageUrl, setTheaterImageUrl] = useState<string | null>(null);
-  
+
   useEffect(() => {
     if (theaterData) {
       setName(theaterData.name);
@@ -111,7 +112,6 @@ const UpdateTheaterDialog: React.FC<UpdateTheaterDialogProps> = ({
   const [removedRooms, setRemovedRooms] = useState<string[]>([]);
 
   const handleRemoveRoom = (roomId: string) => {
-
     setRemovedRooms((prevRemovedRooms) => [...prevRemovedRooms, roomId]);
 
     const updatedRooms = rooms.filter((room) => room.id !== roomId);
@@ -150,7 +150,7 @@ const UpdateTheaterDialog: React.FC<UpdateTheaterDialogProps> = ({
     formData.append("removedRooms", JSON.stringify(removedRooms));
 
     console.log(theaterData);
-    
+
     try {
       const response = await axiosInstance.put(
         `/theaters/${theaterData?._id}`,
@@ -161,11 +161,12 @@ const UpdateTheaterDialog: React.FC<UpdateTheaterDialogProps> = ({
           },
         }
       );
+      toast.success("Update Successfully");
       console.log(response.data);
       setTheaters(response.data);
-      
       setOpen(false);
     } catch (error) {
+      toast.error(error);
       console.error("Error updating theater:", error);
     }
   };
