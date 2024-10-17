@@ -278,13 +278,19 @@ const SeatReservation = () => {
 
   const handleSeatSelect = (rowIndex, colIndex) => {
     const seat = seats[rowIndex][colIndex];
+  
+    if (!seat) {
+      console.error(`Seat at row ${rowIndex} and column ${colIndex} is undefined or null.`);
+      return;
+    }
+  
     if (seat.status === "available") {
       if (selectedSeats.length >= 8) {
         setSnackbarMessage("You can select a maximum of 8 seats.");
         setOpenSnackbar(true);
         return;
       }
-
+  
       const newSeats = [...seats];
       newSeats[rowIndex][colIndex] = {
         ...seat,
@@ -306,7 +312,7 @@ const SeatReservation = () => {
         )
       );
     }
-  };
+  };  
 
   const handleSelectSeatButton = () => {
     if (selectedSeats.length === 0) {
