@@ -26,6 +26,7 @@ import {
 import { Box, Grid2 } from "@mui/material";
 import { toast } from "react-toastify";
 import { dateFormat } from "../../services/formatService";
+import dayjs from "dayjs";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -141,6 +142,9 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
           { date: selectedDate },
           selectedRoom._id
         );
+        console.log(selectedDate);
+        console.log(response.data);
+
         setShowtimes(response.data);
       }
     };
@@ -162,27 +166,33 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
   const handleSave = async () => {
     const startTime = `${startHour}:${startMinute}`;
     const endTime = `${endHour}:${endMinute}`;
-
+    const [day, month, year] = selectedDate.split("/"); // Split the date into components
+    const formattedDate = `${month}/${day}/${year}`; 
     const requestData = {
       movieId: selectedMovie?.id,
       roomId: selectedRoom?._id,
-      date: selectedDate,
+      date: formattedDate,
       startTime,
       endTime,
     };
+
+    console.log(requestData);
 
     try {
       const response = await saveShowtime(requestData);
       toast.success(response.data.message);
       console.log(response.data); // Successfully added showtime
-      const updateData ={
+      const updateData = {
         _id: response.data.showtime._id,
-        date: dateFormat( response.data.showtime.date),
-        time: response.data.showtime.start_time + " - "+ response.data.showtime.end_time,
+        date: dateFormat(response.data.showtime.date),
+        time:
+          response.data.showtime.start_time +
+          " - " +
+          response.data.showtime.end_time,
         room: response.data.showtime.room,
-        theater:response.data.showtime.theater,
-        movie:response.data.showtime.movie,
-      }
+        theater: response.data.showtime.theater,
+        movie: response.data.showtime.movie,
+      };
       setShowtimesList((prev: any) => [...prev, updateData]);
       setOpen(false); // Close the dialog on success
     } catch (error: any) {
@@ -219,7 +229,8 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
   };
 
   const handleSelectDate = (date: any) => {
-    let formattedDate = new Date(date).toLocaleDateString();
+    // Ensure the selected date is formatted back to DD/MM/YYYY
+    const formattedDate = dayjs(date).format("DD/MM/YYYY");
     setSelectedDate(formattedDate);
   };
 

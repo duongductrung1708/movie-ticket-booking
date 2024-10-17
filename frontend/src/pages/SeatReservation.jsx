@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Typography,
   Grid,
-  Button,
   Paper,
   Step,
   StepLabel,
@@ -13,19 +12,20 @@ import {
   Snackbar,
   SnackbarContent,
   Box,
-  StepContent,
-  FormControlLabel,
-  Checkbox,
+  Button,
 } from "@mui/material";
 import styled from "styled-components";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { QRCodeSVG } from "qrcode.react";
 import ChairIcon from "@mui/icons-material/Chair";
 import "@fontsource/akaya-telivigala";
 import "@fontsource/sora";
 import "../styles/StepperStyles.css";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
+import { getAllServices } from "../services/api";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import Slider from "react-slick";
 
 const Container = styled.div`
   width: 75%;
@@ -54,18 +54,17 @@ const SeatButton = styled(IconButton)`
   color: ${(props) =>
     props.type === "empty"
       ? "#45444433 !important"
-      : props.type === "VIP"
-      ? "blue !important"
-      : props.type === "selected"
-      ? "orange !important"
-      : // : "gray !important"
-      props.status === "available"
-      ? "#45444433 !important" // Empty seat
-      : props.status === "reserved"
-      ? "orange !important" // Reserved seat
-      : props.status === "occupied"
-      ? "red !important" // Occupied seat
-      : "gray !important"};
+      : props.type === "vip"
+        ? "blue !important"
+        : props.type === "selected"
+          ? "orange !important"
+          : props.status === "available"
+            ? "#45444433 !important"
+            : props.status === "reserved"
+              ? "orange !important"
+              : props.status === "occupied"
+                ? "red !important"
+                : "gray !important"};
   border-radius: 5px;
   width: 50px;
   height: 50px;
@@ -75,20 +74,19 @@ const SeatButton = styled(IconButton)`
 
   &:hover {
     background-color: ${(props) =>
-      props.type === "empty"
-        ? "#d0d0d0 !important"
-        : props.type === "VIP"
+    props.type === "empty"
+      ? "#d0d0d0 !important"
+      : props.type === "vip"
         ? "#ffb300 !important"
         : props.type === "selected"
-        ? "#45444433 !important"
-        : // : "#ff8a8a !important"
-        props.status === "available"
-        ? "#d0d0d0 !important" // Hover for available
-        : props.status === "reserved"
-        ? "#ffb300 !important" // Hover for reserved
-        : props.status === "occupied"
-        ? "#ff8a8a !important" // Occupied seats do not change much on hover
-        : "#ff8a8a !important"};
+          ? "#45444433 !important"
+          : props.status === "available"
+            ? "#d0d0d0 !important"
+            : props.status === "reserved"
+              ? "#ffb300 !important"
+              : props.status === "occupied"
+                ? "#ff8a8a !important"
+                : "#ff8a8a !important"};
   }
 `;
 
@@ -219,117 +217,15 @@ const ArcScreen = styled.svg`
   margin-bottom: 4rem;
 `;
 
-const Payment = styled.div`
-  margin-top: 20rem;
-`;
-
-const Complete = styled.div`
-  margin-top: 75rem;
-`;
-
 const Timer = styled.div`
   text-align: center;
   align-items: center;
-`;
-
-const PaymentMethod = styled.div`
-  font-family: "Sora", sans-serif;
-  font-weight: bold;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
-`;
-
-const PayCounterBtn = styled.button`
-  display: inline-block;
-  background-color: gray;
-  color: ${(props) => props.theme.body};
-  outline: none;
-  border: none;
-  margin-top: 1rem;
-  font-size: ${(props) => props.theme.fontlg};
-  padding: 0.9rem 2.3rem;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    transform: scale(0.9);
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    border: 2px solid gray;
-    width: 100%;
-    height: 100%;
-    border-radius: 50px;
-    transition: all 0.2s ease;
-  }
-
-  &:hover::after {
-    transform: translate(-50%, -50%) scale(1);
-    padding: 0.3rem;
-  }
-`;
-
-const PayBankBtn = styled.button`
-  display: inline-block;
-  background-color: orange;
-  color: ${(props) => props.theme.body};
-  outline: none;
-  border: none;
-  margin-top: 1rem;
-  font-size: ${(props) => props.theme.fontlg};
-  padding: 0.9rem 2.3rem;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    transform: scale(0.9);
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    border: 2px solid orange;
-    width: 100%;
-    height: 100%;
-    border-radius: 50px;
-    transition: all 0.2s ease;
-  }
-
-  &:hover::after {
-    transform: translate(-50%, -50%) scale(1);
-    padding: 0.3rem;
-  }
-`;
-
-const BankImg = styled.div`
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
 `;
 
 const SeatReservation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const seatSectionRef = useRef(null);
-  const paymentSectionRef = useRef(null);
-  const completeSectionRef = useRef(null);
 
   const {
     movieTitle,
@@ -343,23 +239,21 @@ const SeatReservation = () => {
   } = location.state || {};
   console.log(seatLayout);
 
-  const steps = ["Select Seats", "Confirm Payment", "Complete"];
+  const steps = ["Select Seats"];
   const totalRows = seatLayout ? seatLayout.length : 0;
   const totalColumns = seatLayout ? seatLayout[0].length : 0;
 
   const [seats, setSeats] = useState(seatLayout || []);
 
   const [selectedSeats, setSelectedSeats] = useState([]);
-  const [activeStep, setActiveStep] = useState(0);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
-
-  const [agreeTerms, setAgreeTerms] = useState(false);
-  const [showQRCode, setShowQRCode] = useState(false);
 
   const [timer, setTimer] = useState(600);
   const [timerActive, setTimerActive] = useState(false);
+
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const handleTimeOut = useCallback(() => {
     setSeats(
@@ -374,21 +268,15 @@ const SeatReservation = () => {
   }, [totalRows, totalColumns]);
 
   useEffect(() => {
-    if (activeStep === 0) {
-      setSnackbarMessage("Please select your seats.");
-      setOpenSnackbar(true);
-    }
     if (timerActive && timer > 0) {
       const countdown = setTimeout(() => setTimer(timer - 1), 1000);
       return () => clearTimeout(countdown);
     } else if (timer === 0) {
       handleTimeOut();
     }
-  }, [activeStep, timer, timerActive, handleTimeOut]);
+  }, [timer, timerActive, handleTimeOut]);
 
   const handleSeatSelect = (rowIndex, colIndex) => {
-    if (activeStep !== 0 || !seats.length) return;
-
     const seat = seats[rowIndex][colIndex];
     if (seat.status === "available") {
       if (selectedSeats.length >= 8) {
@@ -427,60 +315,42 @@ const SeatReservation = () => {
       return;
     }
 
-    if (activeStep === 0) {
-      setActiveStep(activeStep + 1);
-      paymentSectionRef.current?.scrollIntoView({ behavior: "smooth" });
-      setTimerActive(true);
-    }
+    navigate("/payment", {
+      state: {
+        movieTitle,
+        movieImage,
+        selectedSeats,
+        selectedDate,
+        selectedTime,
+        selectedTheater,
+        seats,
+        seatLayout,
+        selectedTheaterAddress,
+        duration,
+      },
+    });
   };
 
-  const handlePaymentMethodChange = (method) => {
-    setSelectedPaymentMethod(method);
-    setShowQRCode(method === "bank");
-
-    setSnackbarMessage(
-      `Payment method changed to ${
-        method === "counter" ? "Pay at Counter" : "Pay with Bank Transfer"
-      }`
-    );
-    setOpenSnackbar(true);
-  };
-
-  const handleConfirmPayment = () => {
-    if (!selectedPaymentMethod) {
-      setSnackbarMessage("Please select a payment method.");
-      setOpenSnackbar(true);
-      return;
-    }
-
-    if (!agreeTerms) {
-      setSnackbarMessage("You must agree to the terms of use.");
-      setOpenSnackbar(true);
-      return;
-    }
-
-    if (activeStep === 1) {
-      setActiveStep(activeStep + 1);
-      completeSectionRef.current?.scrollIntoView({ behavior: "smooth" });
-      setTimerActive(true);
-    }
-
-    setActiveStep(activeStep + 1);
-    setTimerActive(false);
-  };
-
-  const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-    setTimer(600);
-    setTimerActive(false);
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-  };
-
-  const handleBookingHistoryClick = () => {
-    navigate("/booking-history");
+  const settings = {
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 3,
+    slidesToScroll: 1,
+    responsive: [
+      {
+        breakpoint: 768,
+        settings: {
+          slidesToShow: 2,
+        },
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 1,
+        },
+      },
+    ],
   };
 
   const formatTime = (timeInSeconds) => {
@@ -490,8 +360,25 @@ const SeatReservation = () => {
   };
 
   useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const data = await getAllServices();
+        setServices(data);
+      } catch (error) {
+        console.error("Error fetching services:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <Section>
@@ -508,31 +395,10 @@ const SeatReservation = () => {
         <Grid container spacing={2}>
           <Grid item xs={1}>
             <StepContainer>
-              <Stepper activeStep={activeStep} orientation="vertical">
+              <Stepper orientation="vertical">
                 {steps.map((label, index) => (
                   <Step key={label}>
                     <StepLabel>{label}</StepLabel>
-                    <StepContent>
-                      <Box sx={{ mb: 2 }}>
-                        <Button
-                          disabled={
-                            index === 0 || activeStep === steps.length - 1
-                          }
-                          onClick={handleBack}
-                          color="warning"
-                          sx={{ mt: 1, mr: 1 }}
-                        >
-                          Back
-                        </Button>
-                        {activeStep === steps.length - 1 && (
-                          <Paper square elevation={0} sx={{ p: 3 }}>
-                            <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
-                              Reset
-                            </Button>
-                          </Paper>
-                        )}
-                      </Box>
-                    </StepContent>
                   </Step>
                 ))}
               </Stepper>
@@ -577,13 +443,33 @@ const SeatReservation = () => {
                     {row.map((seat, colIndex) => (
                       <Grid item key={`${rowIndex}-${colIndex}`}>
                         <SeatButton
-                          type={seat.status}
+                          type={seat?.status}
                           onClick={() => handleSeatSelect(rowIndex, colIndex)}
                           disabled={
-                            activeStep !== 0 || seat.status === "unavailable"
+                            seat?.status === "unavailable"
                           }
                         >
-                          <ChairIcon />
+                          {seat?.status === "available" && seat?.type === "standard" && (
+                            <Empty>
+                              <ChairIcon />
+                            </Empty>
+                          )}
+                          {seat?.status === "available" && seat?.type === "vip" && (
+                            <Vip>
+                              <ChairIcon />
+                            </Vip>
+                          )}
+                          {seat?.status === "selected" && (seat?.type === "vip" || seat?.type === "standard") && (
+                            <Selecting>
+                              <ChairIcon />
+                            </Selecting>
+                          )}
+                          {seat?.status === "occupied" && (seat?.type === "vip" || seat?.type === "standard") && (
+                            <Selecting>
+                              <ChairIcon />
+                            </Selecting>
+                          )}
+
                         </SeatButton>
                       </Grid>
                     ))}
@@ -610,137 +496,27 @@ const SeatReservation = () => {
                 </Occupied>
               </SeatType>
 
-              <Btn
-                onClick={handleSelectSeatButton}
-                disabled={activeStep !== 0 && selectedSeats.length === 0}
-              >
-                Confirm Selection
-              </Btn>
-            </Box>
-            <Box ref={paymentSectionRef}>
-              {activeStep === 1 && (
-                <Payment>
-                  <Paper style={{ padding: "2rem", marginTop: "1rem" }}>
-                    <Grid container spacing={4}>
-                      <Grid item xs={2}>
-                        <img
-                          src={movieImage}
-                          alt={movieTitle}
-                          style={{
-                            width: "100%",
-                            height: "8rem",
-                            borderRadius: "8px",
-                            marginBottom: "1rem",
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={8}>
-                        <Typography variant="h5" fontWeight="bold">
-                          {movieTitle}
-                        </Typography>
-                        <Typography>
-                          Show date {selectedDate} | Showtime {selectedTime} |
-                          Theater {selectedTheater} | Screening Room Room1 |
-                          Selected Seats:{" "}
-                          {selectedSeats.length > 0
-                            ? selectedSeats
-                                .map(
-                                  (seat) => `R${seat.row + 1}C${seat.col + 1}`
-                                )
-                                .join(", ")
-                            : ""}
-                        </Typography>
-                        <Typography>
-                          Payment Method: {selectedPaymentMethod}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={2} style={{ paddingLeft: "2rem" }}>
-                        <Typography
-                          fontWeight="bold"
-                          color="red"
-                          fontSize="2rem"
-                        >
-                          {(selectedSeats.length * 100).toFixed(3)}đ
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                  </Paper>
-                  <PaymentMethod
-                    value={selectedPaymentMethod}
-                    onChange={handlePaymentMethodChange}
-                  >
-                    <PayCounterBtn
-                      variant={
-                        selectedPaymentMethod === "counter"
-                          ? "contained"
-                          : "outlined"
-                      }
-                      onClick={() => handlePaymentMethodChange("counter")}
-                    >
-                      Pay at Counter
-                    </PayCounterBtn>
-                    <PayBankBtn
-                      variant={
-                        selectedPaymentMethod === "bank"
-                          ? "contained"
-                          : "outlined"
-                      }
-                      onClick={() => handlePaymentMethodChange("bank")}
-                    >
-                      Pay with Momo Transfer
-                    </PayBankBtn>
-                    <BankImg>
-                      <img
-                        width="5%"
-                        src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Circle.png"
-                        alt="momo"
-                      />
-                    </BankImg>
-                  </PaymentMethod>
-                  {showQRCode && (
-                    <div>
-                      <Typography variant="h6">Scan QR Code</Typography>
-                      <QRCodeSVG value="YourPaymentURL" />
-                    </div>
-                  )}
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={agreeTerms}
-                        onChange={(e) => setAgreeTerms(e.target.checked)}
-                      />
-                    }
-                    label="I agree to the terms of use and tickets purchased are non-refundable."
-                  />
-                  <Btn onClick={handleConfirmPayment}>Confirm Payment</Btn>
-                </Payment>
-              )}
-            </Box>
-            <Box ref={completeSectionRef}>
-              {activeStep === steps.length - 1 && (
-                <Complete>
-                  <Paper square elevation={0} sx={{ p: 3 }}>
-                    <Typography
-                      fontFamily="Akaya Telivigala, cursive"
-                      fontWeight="bold"
-                      fontSize="2rem"
-                    >
-                      <div>Thank you for using our service.</div>{" "}
-                      <div>
-                        Please check your email for the transaction results.
-                      </div>{" "}
-                      <div>Have a nice day, see you at the theater.</div>{" "}
-                      <div>
-                        If you want to check your transaction history, click the
-                        button below.
-                      </div>
-                    </Typography>
-                    <Btn onClick={handleBookingHistoryClick}>
-                      Booking History
-                    </Btn>
-                  </Paper>
-                </Complete>
-              )}
+              <Slider {...settings} style={{marginTop: "3rem"}}>
+                {services.map((service, index) => (
+                  <Box key={index} style={{ padding: "1rem" }}>
+                    <img
+                      src={service.image}
+                      alt={service.name}
+                      style={{ width: "80%", borderRadius: "8px" }}
+                    />
+                    <Heading>{service.name}</Heading>
+                    <Content variant="body1">{service.description}</Content>
+                    <Price>
+                      <strong>Price:</strong> {service.price}đ
+                    </Price>
+                    <Button variant="contained" color="primary">
+                      Add to Cart
+                    </Button>
+                  </Box>
+                ))}
+              </Slider>
+
+              <Btn onClick={handleSelectSeatButton}>Confirm Selection</Btn>
             </Box>
           </Grid>
           <Grid item xs={3}>

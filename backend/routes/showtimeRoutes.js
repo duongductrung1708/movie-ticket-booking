@@ -33,7 +33,7 @@ showtimeRouter.get("/:theaterId", getShowtimeOfTheater);
 showtimeRouter.post("/", showtimeValidation.verifyTime, createShowtime);
 
 //update showtime
-showtimeRouter.put("/:id", updateShowtime);
+showtimeRouter.put('/:id', showtimeValidation.verifyTime, updateShowtime)
 
 //delete showtime
 showtimeRouter.delete("/:id", deleteShowtime);

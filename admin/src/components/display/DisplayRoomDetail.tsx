@@ -96,7 +96,7 @@ const DisplayRoomDetail: React.FC<DisplayRoomDetailProps> = ({
               seat === 0
                 ? "seat-not-booked"
                 : seat === 1
-                ? "seat-blocked"
+                ? "seat-vip"
                 : "seat-invisible"
             }`}
             style={seat === -1 ? { visibility: "hidden" } : {}}

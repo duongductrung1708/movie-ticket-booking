@@ -66,11 +66,13 @@ const Showtimes = () => {
             movie: st.movie.title,
             theater: st.theater.name,
             room: st.room.name,
-            date: date,
+            date: dateFormat(st.date),
             time: `${st.start_time} - ${st.end_time}`,
           };
         });
-        console.log(showtimes);
+        console.log(response.data.showtimes[0].date);
+        
+        console.log(dateFormat(response.data.showtimes[0].date));
 
         setShowtimes(showtimes);
         setTotalShowtime(response.data.totalCount);
