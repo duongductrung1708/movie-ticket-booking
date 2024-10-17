@@ -132,6 +132,7 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
     };
     fetchRoomsByTheaterId();
   }, [selectedTheater]);
+  console.log(selectedDate);
 
   useEffect(() => {
     setShowtimes([]);
@@ -141,6 +142,9 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
           { date: selectedDate },
           selectedRoom._id
         );
+        console.log(selectedDate);
+        console.log(response.data);
+
         setShowtimes(response.data);
       }
     };
@@ -175,14 +179,17 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
       const response = await saveShowtime(requestData);
       toast.success(response.data.message);
       console.log(response.data); // Successfully added showtime
-      const updateData ={
+      const updateData = {
         _id: response.data.showtime._id,
-        date: dateFormat( response.data.showtime.date),
-        time: response.data.showtime.start_time + " - "+ response.data.showtime.end_time,
+        date: dateFormat(response.data.showtime.date),
+        time:
+          response.data.showtime.start_time +
+          " - " +
+          response.data.showtime.end_time,
         room: response.data.showtime.room,
-        theater:response.data.showtime.theater,
-        movie:response.data.showtime.movie,
-      }
+        theater: response.data.showtime.theater,
+        movie: response.data.showtime.movie,
+      };
       setShowtimesList((prev: any) => [...prev, updateData]);
       setOpen(false); // Close the dialog on success
     } catch (error: any) {

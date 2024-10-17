@@ -137,8 +137,16 @@ const UpdateShowtimeDialog: React.FC<UpdateShowtimeDialogProps> = ({
       );
       setSelectedTheater(tempTheater);
       setSelectedRoom(showtimeResponse.data.room_id);
-      setSelectedDate(showtimeResponse.data.date.split("T")[0]);
-      console.log(showtimeResponse);
+      let dateObj = new Date(showtimeResponse.data.date.split("T")[0]);
+
+      // Customize the locale and format options
+      let formattedDate = dateObj.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      setSelectedDate(formattedDate);
+      console.log(formattedDate);
 
       setStartHour(showtimeResponse.data.start_time.split(":")[0]);
       setStartMinute(showtimeResponse.data.start_time.split(":")[1]);
@@ -171,7 +179,10 @@ const UpdateShowtimeDialog: React.FC<UpdateShowtimeDialogProps> = ({
           { date: selectedDate },
           selectedRoom._id
         );
+        console.log(selectedDate);
+
         setShowtimes(response.data);
+        console.log(response.data);
       }
     };
     fetchShowtimeByRoom();
@@ -197,9 +208,10 @@ const UpdateShowtimeDialog: React.FC<UpdateShowtimeDialogProps> = ({
       movie_id: selectedMovie?.id,
       room_id: selectedRoom?._id,
       date: selectedDate,
-      start_time: startTime,
-      end_time: endTime,
+      startTime,
+      endTime,
     };
+    console.log(requestData);
 
     try {
       const response = await updateShowtime(existingShowtimeId, requestData);
@@ -253,9 +265,19 @@ const UpdateShowtimeDialog: React.FC<UpdateShowtimeDialogProps> = ({
   };
 
   const handleSelectDate = (date: any) => {
-    let formattedDate = new Date(date).toLocaleDateString();
+    
+    let dateObj = new Date(date);
+    let formattedDate = dateObj.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    
     setSelectedDate(formattedDate);
   };
+  const formattedDate = selectedDate
+    ? dayjs(selectedDate.split("/").reverse().join("-"))
+    : null;
 
   return (
     <React.Fragment>
@@ -272,7 +294,7 @@ const UpdateShowtimeDialog: React.FC<UpdateShowtimeDialogProps> = ({
           variant="h6"
           style={{ fontWeight: "bold" }}
         >
-          {showtime ? "Update Showtime" : "Add New Showtime"}
+          Update Showtime
           <IconButton
             aria-label="close"
             onClick={handleClose}
@@ -330,9 +352,8 @@ const UpdateShowtimeDialog: React.FC<UpdateShowtimeDialogProps> = ({
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DemoContainer components={["DatePicker"]}>
               <DatePicker
-                defaultValue={dayjs(selectedDate?.toString())}
+                value={formattedDate}
                 label="Select Date"
-                value={dayjs(selectedDate?.toString())}
                 onChange={(date) => handleSelectDate(date)}
                 renderInput={(params) => (
                   <TextField {...params} margin="dense" fullWidth />
