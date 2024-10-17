@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Container, TextField, Typography } from "@mui/material";
+import { Button, Container, Typography } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/starterstyle.css";
 import backgroundImage from "../assets/netflix-junio.jpg";
