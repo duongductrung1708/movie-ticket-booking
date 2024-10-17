@@ -1,5 +1,6 @@
 const Room = require('../models/Room');
 const Seat = require('../models/Seat');
+const Theater = require('../models/Theater')
 
 const RoomService = {
   create: async (roomData) => {
@@ -23,6 +24,12 @@ const RoomService = {
     await Seat.deleteMany({ roomId: roomId });
 
     return await Room.findByIdAndDelete(roomId);
+  },
+  getRoomsByTheaterId: async (theaterId) => {
+    const theater = await Theater.findById(theaterId).populate({
+      path:"rooms"
+    });
+    return theater;
   }
 };
 

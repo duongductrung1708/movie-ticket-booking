@@ -24,6 +24,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Typography,
 } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -179,11 +180,23 @@ export default function Services() {
 
   return (
     <>
-      <div className="info">
-        <h1>Services</h1>
-        <button onClick={() => setOpen(true)} className="add-service">
-          Add Service
-        </button>
+      <div>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={2}
+        >
+          <Typography variant="h4">Services</Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setOpen(true)}
+            className="add-service"
+          >
+            Add Service
+          </Button>
+        </Box>
       </div>
       <TableContainer component={Paper}>
         <Table aria-label="collapsible table">

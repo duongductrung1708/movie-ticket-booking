@@ -21,6 +21,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Typography,
 } from "@mui/material";
 import AddMovieDialog from "../../components/add/addUpcomingMovieDialog";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -212,16 +213,25 @@ export default function UpcomingMovies() {
 
   return (
     <>
-      <div className="info">
-        <h1>Upcoming Movies</h1>
-        <button
-          onClick={() => {
-            setOpen(true);
-          }}
-          className="add-movie"
+      <div>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={2}
         >
-          Add Movie
-        </button>
+          <Typography variant="h4">Upcoming Movies</Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              setOpen(true);
+            }}
+            className="add-movie"
+          >
+            Add Movie
+          </Button>
+        </Box>
       </div>
       <TableContainer
         component={Paper}

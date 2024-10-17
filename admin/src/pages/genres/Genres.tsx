@@ -18,6 +18,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Typography,
 } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -140,13 +141,28 @@ export default function Genres() {
 
   return (
     <>
-      <div className="info">
-        <h1>Genres</h1>
-        <button onClick={() => setOpen(true)} className="add-genre">
-          Add Genre
-        </button>
+      <div>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={2}
+        >
+          <Typography variant="h4">Genres</Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setOpen(true)}
+            className="add-genre"
+          >
+            Add Genre
+          </Button>
+        </Box>
       </div>
-      <TableContainer component={Paper} style={{ maxHeight: "800px", overflowY: "auto" }}>
+      <TableContainer
+        component={Paper}
+        style={{ maxHeight: "800px", overflowY: "auto" }}
+      >
         <Table aria-label="collapsible table">
           <TableHead>
             <TableRow>
