@@ -140,7 +140,7 @@ const Content = styled.div`
 const Price = styled.div`
   font-family: "Sora", sans-serif;
   font-weight: bold;
-  font-size: 1.5rem;
+  font-size: 1.0rem;
   color: red;
 `;
 
@@ -237,15 +237,17 @@ const SeatReservation = () => {
     duration,
     seatLayout,
   } = location.state || {};
-  console.log(selectedDate);
 
   const steps = ["Select Seats"];
   const totalRows = seatLayout ? seatLayout.length : 0;
   const totalColumns = seatLayout ? seatLayout[0].length : 0;
+  const [total, setTotal] = useState(0);
 
   const [seats, setSeats] = useState(seatLayout || []);
-
   const [selectedSeats, setSelectedSeats] = useState([]);
+
+  const [selectedServices, setSelectedService] = useState([])
+
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
@@ -278,19 +280,19 @@ const SeatReservation = () => {
 
   const handleSeatSelect = (rowIndex, colIndex) => {
     const seat = seats[rowIndex][colIndex];
-  
+
     if (!seat) {
       console.error(`Seat at row ${rowIndex} and column ${colIndex} is undefined or null.`);
       return;
     }
-  
+
     if (seat.status === "available") {
       if (selectedSeats.length >= 8) {
         setSnackbarMessage("You can select a maximum of 8 seats.");
         setOpenSnackbar(true);
         return;
       }
-  
+
       const newSeats = [...seats];
       newSeats[rowIndex][colIndex] = {
         ...seat,
@@ -298,6 +300,7 @@ const SeatReservation = () => {
       };
       setSeats(newSeats);
       setSelectedSeats([...selectedSeats, { row: rowIndex, col: colIndex }]);
+      setTotal(prev => prev + seat.price)
     } else if (seat.status === "selected") {
       const newSeats = [...seats];
       newSeats[rowIndex][colIndex] = {
@@ -311,8 +314,11 @@ const SeatReservation = () => {
             selectedSeat.row !== rowIndex || selectedSeat.col !== colIndex
         )
       );
+      setTotal(prev => prev - seat.price)
     }
-  };  
+  };
+
+
 
   const handleSelectSeatButton = () => {
     if (selectedSeats.length === 0) {
@@ -365,6 +371,24 @@ const SeatReservation = () => {
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
   };
 
+  const handleSelectedService = (service) => {
+    const existedService = selectedServices.find((sv) => sv._id === service._id);
+    if (!existedService) {
+      service.number = 1;
+      setSelectedService((prev) => [...prev, service]);
+    } else {
+      setSelectedService((prev) =>
+        prev.map((s) =>
+          s.id === service.id ? { ...s, number: s.number + 1 } : s
+        )
+      );
+    }
+
+    setTotal(prev => prev + service.price)
+  }
+  console.log(selectedServices);
+
+
   useEffect(() => {
     const fetchServices = async () => {
       try {
@@ -379,6 +403,27 @@ const SeatReservation = () => {
 
     fetchServices();
   }, []);
+
+  const handleDecreaseQuantity = (service) => {
+    setSelectedService((prev) =>
+      prev.map((s) =>
+        s._id === service._id ? { ...s, number: s.number - 1 } :
+          s
+      )
+    );
+    setTotal(prev => prev - service.price)
+  }
+
+  const handleIncreaseQuantity = (service) => {
+    setSelectedService((prev) =>
+      prev.map((s) =>
+        s._id === service._id ? { ...s, number: s.number + 1 } :
+          s
+      )
+    );
+    setTotal(prev => prev + service.price)
+  }
+
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -502,25 +547,57 @@ const SeatReservation = () => {
                 </Occupied>
               </SeatType>
 
-              <Slider {...settings} style={{marginTop: "3rem"}}>
-                {services.map((service, index) => (
-                  <Box key={index} style={{ padding: "1rem" }}>
-                    <img
-                      src={service.image}
-                      alt={service.name}
-                      style={{ width: "80%", borderRadius: "8px" }}
-                    />
-                    <Heading>{service.name}</Heading>
-                    <Content variant="body1">{service.description}</Content>
-                    <Price>
-                      <strong>Price:</strong> {service.price}đ
-                    </Price>
-                    <Button variant="contained" color="primary">
-                      Add to Cart
-                    </Button>
-                  </Box>
-                ))}
+              <Slider {...settings} style={{ marginTop: "3rem" }}>
+                {services.map((service) => {
+                  // Find if the service is already in the selectedService array
+                  const selected = selectedServices.find((s) => s._id === service._id);
+
+                  return (
+                    <Box key={service.id} style={{ padding: "1rem" }}>
+                      <img
+                        src={service.image}
+                        alt={service.name}
+                        style={{ width: "80%", borderRadius: "8px" }}
+                      />
+                      <Heading>{service.name}</Heading>
+                      <Content variant="body1">{service.description}</Content>
+                      <Price>
+                        <strong>Price:</strong> {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(service.price * 1000)}
+                      </Price>
+                      {selected && selected.number > 0 ? (
+                        // If the service is selected, display the decrement button, the number, and the increment button
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={() => handleDecreaseQuantity(service)}
+                          >
+                            -
+                          </Button>
+                          <span style={{ margin: "0 1rem" }}>{selected.number}</span>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleIncreaseQuantity(service)}
+                          >
+                            +
+                          </Button>
+                        </div>
+                      ) : (
+                        // If the service is not selected yet, show the "Add to Cart" button
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleSelectedService(service)}
+                        >
+                          Add to Cart
+                        </Button>
+                      )}
+                    </Box>
+                  );
+                })}
               </Slider>
+
 
               <Btn onClick={handleSelectSeatButton}>Confirm Selection</Btn>
             </Box>
@@ -566,20 +643,20 @@ const SeatReservation = () => {
                 <Content variant="body1">
                   {selectedSeats.length > 0
                     ? selectedSeats
-                        .map((seat) => `R${seat.row + 1}C${seat.col + 1}`)
-                        .join(", ")
+                      .map((seat) => `R${seat.row + 1}C${seat.col + 1}`)
+                      .join(", ")
                     : ""}
                 </Content>
               </div>
               <Heading>Total Price :</Heading>
               <Price>
-                {selectedSeats
-                  .reduce((total, seat) => {
+                {/* {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
+                  .format(selectedSeats.reduce((total, seat) => {
                     const { row, col } = seat;
-                    return total + seats[row][col].price;
-                  }, 0)
-                  .toFixed(3)}
-                đ
+                    return total + seats[row][col].price * 1000;
+                  }, 0))} */}
+                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
+                  .format(total * 1000)}
               </Price>
             </MovieInfo>
           </Grid>
@@ -597,7 +674,7 @@ const SeatReservation = () => {
         />
       </Snackbar>
       <Footer />
-    </Section>
+    </Section >
   );
 };
 
