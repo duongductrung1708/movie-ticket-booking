@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useNavigate } from "react-router-dom";
-import { getMovies, getShowtimesByMovieId } from "../../services/api"; // Import the getMovies function
+import { getMovies, getShowtimesByMovieId, getTheaterByRoomId } from "../../services/api"; // Import the getMovies function
 import dayjs from "dayjs";
 
 const Section = styled.section`
@@ -206,6 +206,7 @@ const ShowtimeCard = styled.div`
   margin: 10px 0;
 `;
 
+
 const Modal = styled.div`
   position: fixed;
   top: 50%;
@@ -246,19 +247,20 @@ const MovieListItem = React.forwardRef(({ movie, onShowtimeClick }, ref) => {
         <MovieRating>
           {movie.duration} | {movie.releaseDate}
         </MovieRating>
-        <div style={{display: "flex", flexDirection: "column"}}>
-        <Button onClick={handleBooking}>Details</Button>
-        <ShowtimeButton onClick={() => onShowtimeClick(movie)}>
-          Showtimes
-        </ShowtimeButton>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <Button onClick={handleBooking}>Details</Button>
+          <ShowtimeButton onClick={() => onShowtimeClick(movie)}>
+            Showtimes
+          </ShowtimeButton>
         </div>
-        
+
       </MovieInfo>
     </MovieItem>
   );
 });
 
 const MovieList = () => {
+  const navigate = useNavigate();
   const [visibleMovies, setVisibleMovies] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
   const [movies, setMovies] = useState([]);
@@ -303,6 +305,39 @@ const MovieList = () => {
     }
   };
 
+  const handlSelectShowtime = async (showtime) => {
+    console.log(showtime);
+    // console.log(movies);
+
+    const selectedMovie = movies.find((movie) => movie._id === showtime.movie_id._id);
+    console.log(selectedMovie);
+
+    if (selectedMovie) {
+      const showtimeDate = showtime.date;
+
+      const movieDuration = selectedMovie.duration;
+      const movieImage = selectedMovie.image;
+      const seatLayout = showtime.seatLayout;
+      const time = showtime.start_time;
+      const theaterResponse = await getTheaterByRoomId(showtime.room_id);
+      console.log(theaterResponse);
+
+      navigate("/seat-reservation", {
+        state: {
+          movieTitle: selectedMovie.title,
+          movieImage: movieImage,
+          selectedTime: time,
+          selectedDate: showtimeDate,
+          selectedTheater: theaterResponse.name,
+          selectedTheaterAddress: theaterResponse.address + ", " + theaterResponse.city,
+          duration: movieDuration,
+          seatLayout: seatLayout,
+        },
+      });
+    }
+
+  }
+
   return (
     <Section id="movie-list">
       <Title>Now Showing</Title>
@@ -339,9 +374,13 @@ const MovieList = () => {
         <h2>{selectedMovie?.title} Showtimes</h2>
         <ShowtimeContainer>
           {showtimes.map((showtime, index) => (
-            <ShowtimeCard key={index}>
+            <ShowtimeCard key={index} >
               {dayjs(showtime.date).format("MM/DD/YYYY")} at{" "}
-              {showtime.start_time}
+              <ShowtimeButton onClick={() => {
+                handlSelectShowtime(showtime)
+              }} >
+                {showtime.start_time}
+              </ShowtimeButton>
             </ShowtimeCard>
           ))}
         </ShowtimeContainer>

@@ -8,6 +8,15 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
+export const getTheaterByRoomId = async (id) => {
+  try {
+    const response = await api.get("/theaters/room/" + id);
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+}
+
 // Function to register a user
 export const registerUser = async (userData) => {
   try {

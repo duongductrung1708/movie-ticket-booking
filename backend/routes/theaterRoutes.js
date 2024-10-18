@@ -40,6 +40,7 @@ router.post('/', TheaterController.create);
 router.get('/', TheaterController.getAll);
 router.post('/rooms', uploadFields, TheaterController.createTheater)
 router.get('/rooms', TheaterController.getTheater)
+router.get('/room/:id',TheaterController.getTheaterByRoomId)
 router.get('/:id', TheaterController.getById);
 router.put('/:id', updateFields, TheaterController.update);
 router.delete('/:id', TheaterController.delete);
