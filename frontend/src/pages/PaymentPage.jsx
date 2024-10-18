@@ -170,8 +170,9 @@ const PaymentPage = () => {
     selectedTheaterAddress,
     duration,
     selectedServices,
+    selectedRoom,
   } = location.state || {};
-  console.log(selectedServices.reduce((total, service) => total + service.price * service.number, 0));
+  console.log(selectedSeats);
 
   const navigate = useNavigate();
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -202,7 +203,8 @@ const PaymentPage = () => {
         selectedTheaterAddress,
         duration,
         total,
-        selectedServices
+        selectedServices,
+        selectedRoom,
       },
     });
   };
@@ -321,17 +323,45 @@ const PaymentPage = () => {
                       />
                     </Grid>
                     <Grid item xs={8}>
-                      <Typography variant="h5" fontWeight="bold">
+                      <Typography variant="h3" fontWeight="bold">
                         {movieTitle}
                       </Typography>
                       <Typography>
-                        Show date {selectedDate} | Showtime {selectedTime} |
-                        Theater {selectedTheater} | Screening Room Room1 |
-                        Selected Seats:{" "}
-                        {total}
+                        <strong>Show date:</strong> {selectedDate}
                       </Typography>
                       <Typography>
-                        Payment Method:{" "}
+                        <strong>Showtime:</strong> {selectedTime}
+                      </Typography>
+                      <Typography>
+                        <strong>Theater:</strong> {selectedTheater}
+                      </Typography>
+                      <Typography>
+                        <strong>Room:</strong> {selectedRoom}
+                      </Typography>
+                      <Typography>
+                        <strong>Selected Seats:</strong>{" "}
+                        {selectedSeats.length > 0
+                          ? selectedSeats
+                            .map((seat) => `R${seat.row + 1}C${seat.col + 1}`)
+                            .join(", ")
+                          : ""}
+                      </Typography>
+                      <Typography>
+                        {selectedServices.length > 0
+                          ? <>
+                            <strong>Selected Service:</strong>
+                            {" "}
+                            {selectedServices
+                              .map((service) => {
+                                return service.name + " x " + service.number; // Combines row letter with column number
+                              })
+                              .join(", ")
+                            }
+                          </>
+                          : ""}
+                      </Typography>
+                      <Typography>
+                        <strong>Payment Method:{" "}</strong>
                         {selectedPaymentMethod || "None selected"}
                       </Typography>
                     </Grid>

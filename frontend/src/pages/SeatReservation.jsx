@@ -236,6 +236,7 @@ const SeatReservation = () => {
     selectedTheaterAddress,
     duration,
     seatLayout,
+    selectedRoom,
   } = location.state || {};
 
   const steps = ["Select Seats"];
@@ -246,7 +247,7 @@ const SeatReservation = () => {
   const [seats, setSeats] = useState(seatLayout || []);
   const [selectedSeats, setSelectedSeats] = useState(location.state.selectedSeats || []);
 
-  const [selectedServices, setSelectedService] = useState(location.state.selectedServices||[])
+  const [selectedServices, setSelectedService] = useState(location.state.selectedServices || [])
 
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -335,6 +336,7 @@ const SeatReservation = () => {
         selectedDate,
         selectedTime,
         selectedTheater,
+        selectedRoom,
         seats,
         seatLayout,
         selectedTheaterAddress,
@@ -493,9 +495,39 @@ const SeatReservation = () => {
                 </text>
               </ArcScreen>
               <SeatGrid container spacing={0}>
+                <Grid container item justifyContent="center" spacing={0}>
+                  <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    marginRight="10px"
+                    height="100%" // Adjust this to the specific height you need
+                  >
+                    <Typography variant="h6" color="white">
+                      <strong>A</strong> {/* Row letters (A, B, C, ...) */}
+                    </Typography>
+                  </Box>
+                  {seats[0].map((_, colIndex) => (
+                    <Grid key={`colLabel-${colIndex}`} containeritem justifyContent="center">
+                      <Typography variant="h6" width="50px" textAlign="center"><strong>{colIndex + 1}</strong></Typography> {/* Column numbers (1, 2, 3, ...) */}
+                    </Grid>
+                  ))}
+                </Grid>
                 {seats.map((row, rowIndex) => (
                   <Grid container item key={rowIndex} justifyContent="center">
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      marginRight="10px"
+                      height="100%" // Adjust this to the specific height you need
+                    >
+                      <Typography variant="h6">
+                        <strong>{String.fromCharCode(65 + rowIndex)}</strong> {/* Row letters (A, B, C, ...) */}
+                      </Typography>
+                    </Box>
                     {row.map((seat, colIndex) => (
+
                       <Grid item key={`${rowIndex}-${colIndex}`}>
                         <SeatButton
                           type={seat?.status}
@@ -637,7 +669,7 @@ const SeatReservation = () => {
                 <Content variant="body1">{selectedTheaterAddress}</Content>
               </div>
               <Heading>Screening Room :</Heading>
-              <Content variant="body1">Room 1</Content>
+              <Content variant="body1">{selectedRoom}</Content>
               <Heading>Time :</Heading>
               <Content variant="body1">
                 {selectedTime} on {selectedDate}
@@ -647,18 +679,16 @@ const SeatReservation = () => {
                 <Content variant="body1">
                   {selectedSeats.length > 0
                     ? selectedSeats
-                      .map((seat) => `R${seat.row + 1}C${seat.col + 1}`)
+                      .map((seat) => {
+                        const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+                        return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+                      })
                       .join(", ")
                     : ""}
                 </Content>
               </div>
               <Heading>Total Price :</Heading>
               <Price>
-                {/* {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
-                  .format(selectedSeats.reduce((total, seat) => {
-                    const { row, col } = seat;
-                    return total + seats[row][col].price * 1000;
-                  }, 0))} */}
                 {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
                   .format(total * 1000)}
               </Price>

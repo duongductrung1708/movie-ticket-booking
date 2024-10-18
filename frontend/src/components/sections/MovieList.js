@@ -329,14 +329,16 @@ const MovieList = () => {
           selectedTime: time,
           selectedDate: showtimeDate,
           selectedTheater: theaterResponse.name,
+          selectedRoom: showtime.room_name,
           selectedTheaterAddress: theaterResponse.address + ", " + theaterResponse.city,
           duration: movieDuration,
           seatLayout: seatLayout,
         },
       });
     }
-
   }
+  console.log(showtimes);
+
 
   return (
     <Section id="movie-list">
