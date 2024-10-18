@@ -169,7 +169,9 @@ const PaymentPage = () => {
     seatLayout,
     selectedTheaterAddress,
     duration,
+    selectedServices,
   } = location.state || {};
+  console.log(selectedServices.reduce((total, service) => total + service.price * service.number, 0));
 
   const navigate = useNavigate();
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -179,6 +181,7 @@ const PaymentPage = () => {
   const completeSectionRef = useRef(null);
   const [activeStep, setActiveStep] = useState(0);
   const steps = ["Payment", "Complete"];
+  const [total, setTotal] = useState(0);
 
   const handlePaymentMethodChange = (method) => {
     setSelectedPaymentMethod(method);
@@ -198,6 +201,8 @@ const PaymentPage = () => {
         seatLayout,
         selectedTheaterAddress,
         duration,
+        total,
+        selectedServices
       },
     });
   };
@@ -233,6 +238,15 @@ const PaymentPage = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    const totalService = selectedServices.reduce((total, service) => total + service.price * service.number, 0);
+    const totalSeat = selectedSeats
+      .reduce(
+        (total, seat) =>
+          total + seats[seat.row][seat.col].price,
+        0
+      )
+    setTotal(prev => prev + totalService + totalSeat)
   }, []);
 
   return (
@@ -314,11 +328,7 @@ const PaymentPage = () => {
                         Show date {selectedDate} | Showtime {selectedTime} |
                         Theater {selectedTheater} | Screening Room Room1 |
                         Selected Seats:{" "}
-                        {selectedSeats.length > 0
-                          ? selectedSeats
-                              .map((seat) => `R${seat.row + 1}C${seat.col + 1}`)
-                              .join(", ")
-                          : ""}
+                        {total}
                       </Typography>
                       <Typography>
                         Payment Method:{" "}
@@ -327,14 +337,7 @@ const PaymentPage = () => {
                     </Grid>
                     <Grid item xs={2} style={{ paddingLeft: "2rem" }}>
                       <Typography fontWeight="bold" color="red" fontSize="2rem">
-                        {selectedSeats
-                          .reduce(
-                            (total, seat) =>
-                              total + seats[seat.row][seat.col].price,
-                            0
-                          )
-                          .toFixed(3)}
-                        đ
+                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total * 1000)}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -405,7 +408,7 @@ const PaymentPage = () => {
                 <Btn onClick={handleConfirmPayment}>Confirm Payment</Btn>
               )}
 
-<Btn onClick={handleBackToSeatReservation}>Back to Booking</Btn>
+              <Btn onClick={handleBackToSeatReservation}>Back to Booking</Btn>
 
               {activeStep === 1 && (
                 <Complete ref={completeSectionRef}>
