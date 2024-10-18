@@ -237,7 +237,7 @@ const SeatReservation = () => {
     duration,
     seatLayout,
   } = location.state || {};
-  console.log(seatLayout);
+  console.log(selectedDate);
 
   const steps = ["Select Seats"];
   const totalRows = seatLayout ? seatLayout.length : 0;
