@@ -241,12 +241,12 @@ const SeatReservation = () => {
   const steps = ["Select Seats"];
   const totalRows = seatLayout ? seatLayout.length : 0;
   const totalColumns = seatLayout ? seatLayout[0].length : 0;
-  const [total, setTotal] = useState(0);
+  const [total, setTotal] = useState(location.state.total || 0);
 
   const [seats, setSeats] = useState(seatLayout || []);
-  const [selectedSeats, setSelectedSeats] = useState([]);
+  const [selectedSeats, setSelectedSeats] = useState(location.state.selectedSeats || []);
 
-  const [selectedServices, setSelectedService] = useState([])
+  const [selectedServices, setSelectedService] = useState(location.state.selectedServices||[])
 
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -339,6 +339,7 @@ const SeatReservation = () => {
         seatLayout,
         selectedTheaterAddress,
         duration,
+        selectedServices,
       },
     });
   };
@@ -371,22 +372,6 @@ const SeatReservation = () => {
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
   };
 
-  const handleSelectedService = (service) => {
-    const existedService = selectedServices.find((sv) => sv._id === service._id);
-    if (!existedService) {
-      service.number = 1;
-      setSelectedService((prev) => [...prev, service]);
-    } else {
-      setSelectedService((prev) =>
-        prev.map((s) =>
-          s.id === service.id ? { ...s, number: s.number + 1 } : s
-        )
-      );
-    }
-
-    setTotal(prev => prev + service.price)
-  }
-  console.log(selectedServices);
 
 
   useEffect(() => {
@@ -404,15 +389,34 @@ const SeatReservation = () => {
     fetchServices();
   }, []);
 
+  const handleSelectedService = (service) => {
+    const existedService = selectedServices.find((sv) => sv._id === service._id);
+    if (!existedService) {
+      service.number = 1;
+      setSelectedService((prev) => [...prev, service]);
+    } else {
+      setSelectedService((prev) =>
+        prev.map((s) =>
+          s.id === service.id ? { ...s, number: s.number + 1 } : s
+        )
+      );
+    }
+
+    setTotal(prev => prev + service.price)
+  }
+
   const handleDecreaseQuantity = (service) => {
     setSelectedService((prev) =>
-      prev.map((s) =>
-        s._id === service._id ? { ...s, number: s.number - 1 } :
-          s
-      )
+      prev
+        .map((s) =>
+          s._id === service._id ? { ...s, number: s.number - 1 } : s
+        )
+        .filter(s => s.number > 0) // Remove the service if the number reaches 0
     );
-    setTotal(prev => prev - service.price)
-  }
+
+    // Update the total price by subtracting the service's price
+    setTotal(prev => prev - service.price);
+  };
 
   const handleIncreaseQuantity = (service) => {
     setSelectedService((prev) =>
