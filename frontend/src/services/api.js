@@ -8,6 +8,15 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
+export const getMomoPaymentLink = async (orderInfo, amount) => {
+  try {
+    const response = await api.post("/momo", { orderInfo, amount });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+}
+
 export const getTheaterByRoomId = async (id) => {
   try {
     const response = await api.get("/theaters/room/" + id);

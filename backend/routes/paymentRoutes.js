@@ -5,7 +5,6 @@ const {
   getPayment,
   getPaymentById,
 } = require("../controllers/paymentController");
-// const MomoController = require("../controllers/momoController");
 
 const paymentRouter = express.Router();
 
@@ -20,11 +19,5 @@ paymentRouter.post("/", createPayment);
 
 // Update payment by ID
 paymentRouter.put("/:id", updatePayment);
-
-// Route to create a payment link (MoMo)
-// paymentRouter.post("/create-momo-link", MomoController.createPaymentLink);
-
-// Route to receive data from MoMo IPN (Instant Payment Notification)
-// paymentRouter.post("/receive-momo-data", MomoController.receiveDataFromMomo);
 
 module.exports = paymentRouter;
