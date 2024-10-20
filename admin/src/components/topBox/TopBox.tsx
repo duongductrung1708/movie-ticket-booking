@@ -1,26 +1,37 @@
 import "./topBox.scss"
-import {topDealUsers} from "../../data.ts"
+import { TopMovie } from "../../models/TopMovie.ts"
+import constants from "../../constants/constants";
 
-const TopBox = () => {
-  return (
-    <div className="topBox">
-      <h1>Top Deals</h1>
-      <div className="list">
-        {topDealUsers.map(user=>(
-          <div className="listItem" key={user.id}>
-            <div className="user">
-              <img src={user.img} alt="" />
-              <div className="userTexts">
-                <span className="username">{user.username}</span>
-                <span className="email">{user.email}</span>
-              </div>
-            </div>
-            <span className="amount">${user.amount}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
+interface TopBoxProps {
+  movies: TopMovie[];
+  month: number
 }
 
-export default TopBox
+const TopBox = ({ movies, month }: TopBoxProps) => {
+  return (
+    <div className="topBox">
+      <div>
+        <h1>Top Films In {constants.MONTHS[month-1]}</h1>
+      </div>
+      <div className="list">
+        {Array.isArray(movies) && movies.length > 0 ? (
+          movies.map((data, index) => (
+            <div className="listItem" key={index}>
+              <div className="user">
+                <img src={data.movie.image} />
+                <div className="userTexts">
+                  <h5 className="username">{data.movie.title}</h5>
+                </div>
+              </div>
+              <span className="amount">{data.totalBookings} booking</span>
+            </div>
+          ))
+        ) : (
+          <p>No movies available</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default TopBox;

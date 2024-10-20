@@ -3,7 +3,8 @@
 .topBox {
   h1 {
     margin-bottom: 20px;
-
+    font-size: 24px;
+    
     @include xxl{
       font-size: 24px;
     }
@@ -36,22 +37,13 @@
 
         .userTexts {
           display: flex;
+          justify-content: center;
           flex-direction: column;
           gap: 5px;
 
           .username {
-            font-size: 14px;
+            font-size: 18px;
             font-weight: 500;
-          }
-          .email {
-            font-size: 12px;
-
-            @include xxl{
-              display: none;
-            }
-            @include lg{
-              display: block;
-            }
           }
         }
       }

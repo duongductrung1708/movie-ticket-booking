@@ -16,6 +16,7 @@ const serviceRoutes = require('./routes/serviceRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const bookingDetailRoutes = require('./routes/bookingDetailRoutes');
 const upcomingMovieRoutes = require('./routes/upcomingMovieRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 const path = require('path');
 
 const app = express();
@@ -40,6 +41,7 @@ app.use("/api/users", userRoutes);
 app.use('/api/payments', paymentRouter);
 app.use('/api/showtimes',showtimeRouter)
 app.use('/api/movies', movieRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/genres', genreRoutes);
 app.use('/api/theaters', theaterRoutes);
 app.use('/api/rooms', roomRoutes);
