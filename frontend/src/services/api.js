@@ -8,6 +8,16 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
+export const createBooking = async (userId, showtimeId, seatIds, serviceIds, status) => {
+  try {
+    const response = await api.post('/bookings/create', { userId, showtimeId, seatIds, serviceIds, status });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+
+}
+
 export const getMomoPaymentLink = async (orderInfo, amount) => {
   try {
     const response = await api.post("/momo", { orderInfo, amount });

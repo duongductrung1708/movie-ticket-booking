@@ -21,7 +21,7 @@ import styled from "styled-components";
 import { toast, ToastContainer } from "react-toastify";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
-import { getMomoPaymentLink } from "../services/api";
+import { createBooking, getMomoPaymentLink } from "../services/api";
 
 const Container = styled.div`
   width: 75%;
@@ -173,9 +173,12 @@ const PaymentPage = () => {
     duration,
     selectedServices,
     selectedRoom,
+    showtime,
   } = location.state || {};
 
+
   const navigate = useNavigate();
+  const [user, setUser] = useState()
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [showQRCode, setShowQRCode] = useState(false);
@@ -188,20 +191,22 @@ const PaymentPage = () => {
 
 
   const handleConfirmMomoPayment = async () => {
-    const selectedSeatsFormatted = selectedSeats.length > 0
-      ? selectedSeats
-        .map((seat) => `R${seat.row + 1}C${seat.col + 1}`)
-        .join(", ")
-      : "";
-    const orderInfo = "Booking Ticket Seat:" + selectedSeatsFormatted;
-    try {
+    const userId = JSON.parse(localStorage.getItem("user"))?._id;
+    const seatIds = selectedSeats.map(seat => seatLayout[seat.row][seat.col]._id);
+    const serviceIds = selectedServices.map(service => service._id + "x" + service.number)
+    const orderInfo = userId + "-" + showtime + "-" + seatIds + "-" + serviceIds;
 
-      const responseData = await getMomoPaymentLink(orderInfo, total * 1000);
-      if (responseData.shortLink) {
-        window.location.href = responseData.shortLink;
-      } else {
-        console.error("Momo payment link not found");
-      }
+    try {
+      const booking = await createBooking(showtime, seatIds, serviceIds);
+      console.log(booking);
+      
+      
+      // const responseData = await getMomoPaymentLink(orderInfo, total * 1000);
+      // if (responseData.shortLink) {
+      //   window.location.href = responseData.shortLink;
+      // } else {
+      //   console.error("Momo payment link not found");
+      // }
     } catch (error) {
       console.error("Error fetching Momo payment link:", error);
       toast.error("Error fetching Momo payment link");
@@ -227,6 +232,7 @@ const PaymentPage = () => {
         total,
         selectedServices,
         selectedRoom,
+        showtime,
       },
     });
   };
@@ -272,6 +278,7 @@ const PaymentPage = () => {
       )
     setTotal(prev => prev + totalService + totalSeat)
   }, []);
+
 
   return (
     <Section>
@@ -364,7 +371,10 @@ const PaymentPage = () => {
                         <strong>Selected Seats:</strong>{" "}
                         {selectedSeats.length > 0
                           ? selectedSeats
-                            .map((seat) => `R${seat.row + 1}C${seat.col + 1}`)
+                            .map((seat) => {
+                              const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+                              return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+                            })
                             .join(", ")
                           : ""}
                       </Typography>
@@ -517,8 +527,13 @@ const PaymentPage = () => {
           <Typography variant="body1">
             <strong>Seats:</strong>{" "}
             {selectedSeats.length > 0
-              ? selectedSeats.map((seat) => `R${seat.row + 1}C${seat.col + 1}`).join(", ")
-              : "No seats selected"}
+              ? selectedSeats
+                .map((seat) => {
+                  const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+                  return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+                })
+                .join(", ")
+              : ""}
           </Typography>
 
           {/* Show Date and Time */}

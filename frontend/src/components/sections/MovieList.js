@@ -297,6 +297,8 @@ const MovieList = () => {
   const handleShowtimeClick = async (movie) => {
     try {
       const fetchedShowtimes = await getShowtimesByMovieId(movie._id);
+      console.log(fetchedShowtimes);
+
       setShowtimes(fetchedShowtimes);
       setSelectedMovie(movie);
       setModalOpen(true);
@@ -306,8 +308,6 @@ const MovieList = () => {
   };
 
   const handlSelectShowtime = async (showtime) => {
-    console.log(showtime);
-    // console.log(movies);
 
     const selectedMovie = movies.find((movie) => movie._id === showtime.movie_id._id);
     console.log(selectedMovie);
@@ -324,6 +324,7 @@ const MovieList = () => {
 
       navigate("/seat-reservation", {
         state: {
+          showtime: showtime._id,
           movieTitle: selectedMovie.title,
           movieImage: movieImage,
           selectedTime: time,
@@ -337,6 +338,7 @@ const MovieList = () => {
       });
     }
   }
+
   console.log(showtimes);
 
 
