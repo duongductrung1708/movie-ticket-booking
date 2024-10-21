@@ -24,12 +24,11 @@ exports.getListTopBookingMoviesByMonth = async (req, res) => {
         $gte: startDate,
         $lt: endDate,
       },
-      status: "confirmed"
+      status: "done"
     }).populate({
       path: "showtime_id",
       populate: { path: "movie_id", model: "Movie" },
     });
-
     const movieBookingCount = {};
 
     bookings.forEach((booking) => {
@@ -85,7 +84,7 @@ exports.getTotalValues = async (req, res) => {
         $gte: startDate,
         $lt: endDate,
       },
-      status: "confirmed",
+      status: "done",
     });
 
     const movies = await Movie.countDocuments({
