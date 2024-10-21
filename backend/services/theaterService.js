@@ -81,7 +81,11 @@ const TheaterService = {
             select: "name",
           },
         })
-        .select("movie_id seatLayout date start_time end_time");
+        .populate({
+          path: "room_id",
+          select: "name",
+        })
+        .select("movie_id seatLayout date start_time end_time room_id");
 
       return showtimes;
     } catch (error) {

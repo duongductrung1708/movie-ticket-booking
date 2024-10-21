@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, redirect, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Box,
   Paper,
@@ -21,7 +21,7 @@ import styled from "styled-components";
 import { toast, ToastContainer } from "react-toastify";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
-import { createBooking, deleteBooking, getMomoPaymentLink } from "../services/api";
+import { deleteBooking, getMomoPaymentLink } from "../services/api";
 
 const Container = styled.div`
   width: 75%;
@@ -175,10 +175,9 @@ const PaymentPage = () => {
     selectedRoom,
     showtime,
     booking,
-    bookingDetails
+    bookingDetails,
   } = location.state || {};
   console.log(booking, bookingDetails);
-
 
   const navigate = useNavigate();
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -191,25 +190,27 @@ const PaymentPage = () => {
   const [total, setTotal] = useState(0);
   const [openModal, setOpenModal] = useState(false);
 
-
   const handleConfirmMomoPayment = async () => {
     const userId = JSON.parse(localStorage.getItem("user"))?._id;
     // const seatIds = selectedSeats.map(seat => seatLayout[seat.row][seat.col]._id);
     // const serviceIds = selectedServices.map(service => service._id + "x" + service.number)
-    const seatData = selectedSeats.length > 0
-      ? selectedSeats
-        .map((seat) => {
-          const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
-          return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
-        })
-        .join(", ")
-      : ""
+    const seatData =
+      selectedSeats.length > 0
+        ? selectedSeats
+            .map((seat) => {
+              const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+              return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+            })
+            .join(", ")
+        : "";
     const orderInfo = booking._id;
 
     try {
-      // const booking = await createBooking(showtime, seatIds, serviceIds);
-
-      const responseData = await getMomoPaymentLink(orderInfo, total * 1000, booking._id);
+      const responseData = await getMomoPaymentLink(
+        orderInfo,
+        total * 1000,
+        booking._id
+      );
       if (responseData.shortLink) {
         window.location.href = responseData.shortLink;
       } else {
@@ -219,35 +220,31 @@ const PaymentPage = () => {
       console.error("Error fetching Momo payment link:", error);
       toast.error("Error fetching Momo payment link");
     }
-
-
-    // setShowQRCode(method === "bank");
   };
 
   const handleBackToSeatReservation = async () => {
     try {
       await deleteBooking(booking._id);
-    navigate("/seat-reservation", {
-      state: {
-        movieTitle,
-        movieImage,
-        selectedSeats,
-        selectedDate,
-        selectedTime,
-        selectedTheater,
-        seats,
-        seatLayout,
-        selectedTheaterAddress,
-        duration,
-        total,
-        selectedServices,
-        selectedRoom,
-        showtime,
-      },
-    });
+      navigate("/seat-reservation", {
+        state: {
+          movieTitle,
+          movieImage,
+          selectedSeats,
+          selectedDate,
+          selectedTime,
+          selectedTheater,
+          seats,
+          seatLayout,
+          selectedTheaterAddress,
+          duration,
+          total,
+          selectedServices,
+          selectedRoom,
+          showtime,
+        },
+      });
     } catch (error) {
       console.log(error);
-      
     }
   };
 
@@ -283,16 +280,16 @@ const PaymentPage = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    const totalService = selectedServices.reduce((total, service) => total + service.price * service.number, 0);
-    const totalSeat = selectedSeats
-      .reduce(
-        (total, seat) =>
-          total + seats[seat.row][seat.col].price,
-        0
-      )
-    setTotal(prev => prev + totalService + totalSeat)
+    const totalService = selectedServices.reduce(
+      (total, service) => total + service.price * service.number,
+      0
+    );
+    const totalSeat = selectedSeats.reduce(
+      (total, seat) => total + seats[seat.row][seat.col].price,
+      0
+    );
+    setTotal((prev) => prev + totalService + totalSeat);
   }, []);
-
 
   return (
     <Section>
@@ -385,35 +382,40 @@ const PaymentPage = () => {
                         <strong>Selected Seats:</strong>{" "}
                         {selectedSeats.length > 0
                           ? selectedSeats
-                            .map((seat) => {
-                              const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
-                              return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
-                            })
-                            .join(", ")
+                              .map((seat) => {
+                                const rowLetter = String.fromCharCode(
+                                  65 + seat.row
+                                ); // Converts row index to a letter (A, B, C, etc.)
+                                return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+                              })
+                              .join(", ")
                           : ""}
                       </Typography>
                       <Typography>
-                        {selectedServices.length > 0
-                          ? <>
-                            <strong>Selected Service:</strong>
-                            {" "}
+                        {selectedServices.length > 0 ? (
+                          <>
+                            <strong>Selected Service:</strong>{" "}
                             {selectedServices
                               .map((service) => {
                                 return service.name + " x " + service.number; // Combines row letter with column number
                               })
-                              .join(", ")
-                            }
+                              .join(", ")}
                           </>
-                          : ""}
+                        ) : (
+                          ""
+                        )}
                       </Typography>
                       <Typography>
-                        <strong>Payment Method:{" "}</strong>
+                        <strong>Payment Method: </strong>
                         {selectedPaymentMethod || "None selected"}
                       </Typography>
                     </Grid>
                     <Grid item xs={2} style={{ paddingLeft: "2rem" }}>
                       <Typography fontWeight="bold" color="red" fontSize="2rem">
-                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total * 1000)}
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(total * 1000)}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -542,11 +544,11 @@ const PaymentPage = () => {
             <strong>Seats:</strong>{" "}
             {selectedSeats.length > 0
               ? selectedSeats
-                .map((seat) => {
-                  const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
-                  return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
-                })
-                .join(", ")
+                  .map((seat) => {
+                    const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+                    return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+                  })
+                  .join(", ")
               : ""}
           </Typography>
 
@@ -564,7 +566,11 @@ const PaymentPage = () => {
           </Typography>
 
           {/* Total Price */}
-          <Typography variant="body1" color="red" style={{ marginTop: "1rem", fontWeight: "bold" }}>
+          <Typography
+            variant="body1"
+            color="red"
+            style={{ marginTop: "1rem", fontWeight: "bold" }}
+          >
             <strong>Total:</strong>{" "}
             {new Intl.NumberFormat("vi-VN", {
               style: "currency",
@@ -578,7 +584,11 @@ const PaymentPage = () => {
 
           {/* Buttons */}
           <Box mt={2}>
-            <Button variant="contained" color="primary" onClick={handleConfirmMomoPayment}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleConfirmMomoPayment}
+            >
               Confirm
             </Button>
             <Button
@@ -592,7 +602,6 @@ const PaymentPage = () => {
           </Box>
         </Paper>
       </Modal>
-
     </Section>
   );
 };
