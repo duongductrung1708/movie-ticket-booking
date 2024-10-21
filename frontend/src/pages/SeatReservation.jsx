@@ -22,10 +22,11 @@ import "@fontsource/sora";
 import "../styles/StepperStyles.css";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
-import { getAllServices } from "../services/api";
+import { createBooking, getAllServices } from "../services/api";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
+import { toast } from "react-toastify";
 
 const Container = styled.div`
   width: 75%;
@@ -166,6 +167,9 @@ const Vip = styled.div`
 const Selecting = styled.div`
   color: orange;
 `;
+const Reserved = styled.div`
+  color: yellow;
+`;
 
 const Occupied = styled.div`
   color: gray;
@@ -237,6 +241,7 @@ const SeatReservation = () => {
     duration,
     seatLayout,
     selectedRoom,
+    showtime,
   } = location.state || {};
 
   const steps = ["Select Seats"];
@@ -318,32 +323,55 @@ const SeatReservation = () => {
       setTotal(prev => prev - seat.price)
     }
   };
+  console.log(seats);
 
 
-
-  const handleSelectSeatButton = () => {
+  const handleSelectSeatButton = async () => {
     if (selectedSeats.length === 0) {
       setSnackbarMessage("Please select at least one seat before proceeding.");
       setOpenSnackbar(true);
       return;
     }
 
-    navigate("/payment", {
-      state: {
-        movieTitle,
-        movieImage,
-        selectedSeats,
-        selectedDate,
-        selectedTime,
-        selectedTheater,
-        selectedRoom,
-        seats,
-        seatLayout,
-        selectedTheaterAddress,
-        duration,
-        selectedServices,
-      },
-    });
+    const userId = JSON.parse(localStorage.getItem("user"))?._id;
+    const seatIds = selectedSeats.map(seat => seatLayout[seat.row][seat.col]._id);
+    const serviceIds = selectedServices.map(service => service._id + "*" + service.number)
+    const orderInfo = userId + "-" + showtime + "-" + seatIds + "-" + serviceIds;
+
+    // console.log(orderInfo);
+    let bookingResponse;
+    try {
+      // Assuming createBooking is returning a response, including the booking details
+      bookingResponse = await createBooking(userId, showtime, seatIds, serviceIds, "processing");
+
+      // Log the bookingResponse after successfully creating a booking
+      console.log("Booking Response:", bookingResponse);
+
+
+      navigate("/payment", {
+        state: {
+          movieTitle,
+          movieImage,
+          selectedSeats,
+          selectedDate,
+          selectedTime,
+          selectedTheater,
+          selectedRoom,
+          seats,
+          seatLayout,
+          selectedTheaterAddress,
+          duration,
+          selectedServices,
+          showtime,
+          booking: bookingResponse?.booking,
+          bookingDetails: bookingResponse?.bookingDetails,
+        },
+      });
+
+    } catch (error) {
+      console.error("Error occurred while creating booking:", error);
+      toast.error("Error occurred while creating booking")
+    }
   };
 
   const settings = {
@@ -552,9 +580,14 @@ const SeatReservation = () => {
                             </Selecting>
                           )}
                           {seat?.status === "occupied" && (seat?.type === "vip" || seat?.type === "standard") && (
-                            <Selecting>
+                            <Occupied>
                               <ChairIcon />
-                            </Selecting>
+                            </Occupied>
+                          )}
+                          {seat?.status === "reserved" && (seat?.type === "vip" || seat?.type === "standard") && (
+                            <Reserved>
+                              <ChairIcon />
+                            </Reserved>
                           )}
 
                         </SeatButton>
@@ -569,6 +602,10 @@ const SeatReservation = () => {
                   <ChairIcon />
                   <div>Empty</div>
                 </Empty>
+                <Reserved>
+                  <ChairIcon />
+                  <div>Reserved</div>
+                </Reserved>
                 <Vip>
                   <ChairIcon />
                   <div>Vip</div>

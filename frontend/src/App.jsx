@@ -16,6 +16,7 @@ import { AuthProvider } from './hooks/AuthProvider';
 import { RedirectRoute, ProtectedRoute } from './components/ProtectedRoute';
 import NotFound from "./pages/NotFound";
 import PaymentPage from "./pages/PaymentPage";
+import BookingResult from "./pages/PaymentResult";
 
 function App() {
   return (
@@ -32,7 +33,8 @@ function App() {
         <Route path="/payment" element={<ProtectedRoute element={<PaymentPage />} />} />
         <Route path="/user-profile" element={<ProtectedRoute element={<UserProfile />} />} />
         <Route path="/booking-history" element={<ProtectedRoute element={<BookHistory />} />} />
-        <Route path="*" element={<NotFound/>} />
+        <Route path="/booking-result" element={<ProtectedRoute element={<BookingResult />} />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <ToastContainer
         position="top-right"

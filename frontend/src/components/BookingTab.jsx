@@ -327,7 +327,7 @@ const BookingTab = ({ isOpen, onClose }) => {
     setSelectedCity(e.target.value);
     setFilteredTheaters([]);
     setSelectedTheater("");
-  };
+  };  
 
   const handleShowtimeSelect = (movieTitle, time) => {
     const selectedMovie = movies.find((movie) => movie.title === movieTitle);

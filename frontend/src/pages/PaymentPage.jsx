@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, redirect, useLocation, useNavigate } from "react-router-dom";
 import {
   Box,
   Paper,
@@ -14,12 +14,14 @@ import {
   StepLabel,
   StepContent,
   Button,
+  Modal,
 } from "@mui/material";
 import { QRCodeSVG } from "qrcode.react";
 import styled from "styled-components";
 import { toast, ToastContainer } from "react-toastify";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
+import { createBooking, deleteBooking, getMomoPaymentLink } from "../services/api";
 
 const Container = styled.div`
   width: 75%;
@@ -171,8 +173,12 @@ const PaymentPage = () => {
     duration,
     selectedServices,
     selectedRoom,
+    showtime,
+    booking,
+    bookingDetails
   } = location.state || {};
-  console.log(selectedSeats);
+  console.log(booking, bookingDetails);
+
 
   const navigate = useNavigate();
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -183,13 +189,44 @@ const PaymentPage = () => {
   const [activeStep, setActiveStep] = useState(0);
   const steps = ["Payment", "Complete"];
   const [total, setTotal] = useState(0);
+  const [openModal, setOpenModal] = useState(false);
 
-  const handlePaymentMethodChange = (method) => {
-    setSelectedPaymentMethod(method);
-    setShowQRCode(method === "bank");
+
+  const handleConfirmMomoPayment = async () => {
+    const userId = JSON.parse(localStorage.getItem("user"))?._id;
+    // const seatIds = selectedSeats.map(seat => seatLayout[seat.row][seat.col]._id);
+    // const serviceIds = selectedServices.map(service => service._id + "x" + service.number)
+    const seatData = selectedSeats.length > 0
+      ? selectedSeats
+        .map((seat) => {
+          const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+          return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+        })
+        .join(", ")
+      : ""
+    const orderInfo = booking._id;
+
+    try {
+      // const booking = await createBooking(showtime, seatIds, serviceIds);
+
+      const responseData = await getMomoPaymentLink(orderInfo, total * 1000, booking._id);
+      if (responseData.shortLink) {
+        window.location.href = responseData.shortLink;
+      } else {
+        console.error("Momo payment link not found");
+      }
+    } catch (error) {
+      console.error("Error fetching Momo payment link:", error);
+      toast.error("Error fetching Momo payment link");
+    }
+
+
+    // setShowQRCode(method === "bank");
   };
 
-  const handleBackToSeatReservation = () => {
+  const handleBackToSeatReservation = async () => {
+    try {
+      await deleteBooking(booking._id);
     navigate("/seat-reservation", {
       state: {
         movieTitle,
@@ -205,8 +242,13 @@ const PaymentPage = () => {
         total,
         selectedServices,
         selectedRoom,
+        showtime,
       },
     });
+    } catch (error) {
+      console.log(error);
+      
+    }
   };
 
   const handleConfirmPayment = () => {
@@ -250,6 +292,7 @@ const PaymentPage = () => {
       )
     setTotal(prev => prev + totalService + totalSeat)
   }, []);
+
 
   return (
     <Section>
@@ -342,7 +385,10 @@ const PaymentPage = () => {
                         <strong>Selected Seats:</strong>{" "}
                         {selectedSeats.length > 0
                           ? selectedSeats
-                            .map((seat) => `R${seat.row + 1}C${seat.col + 1}`)
+                            .map((seat) => {
+                              const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+                              return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+                            })
                             .join(", ")
                           : ""}
                       </Typography>
@@ -382,7 +428,6 @@ const PaymentPage = () => {
                         ? "contained"
                         : "outlined"
                     }
-                    onClick={() => handlePaymentMethodChange("counter")}
                   >
                     Pay at Counter
                   </PayCounterBtn>
@@ -392,7 +437,7 @@ const PaymentPage = () => {
                         ? "contained"
                         : "outlined"
                     }
-                    onClick={() => handlePaymentMethodChange("bank")}
+                    onClick={() => setOpenModal(true)}
                   >
                     Pay with Momo Transfer
                   </PayBankBtn>
@@ -470,6 +515,84 @@ const PaymentPage = () => {
       </Container>
       <Footer />
       <ToastContainer />
+      {/* Confirmation Modal */}
+      <Modal open={openModal} onClose={() => setOpenModal(false)}>
+        <Paper
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            padding: "2rem",
+            width: "400px",
+            textAlign: "center",
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            Confirm Payment
+          </Typography>
+
+          {/* Movie Title */}
+          <Typography variant="body1">
+            <strong>Movie:</strong> {movieTitle}
+          </Typography>
+
+          {/* Selected Seats */}
+          <Typography variant="body1">
+            <strong>Seats:</strong>{" "}
+            {selectedSeats.length > 0
+              ? selectedSeats
+                .map((seat) => {
+                  const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+                  return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+                })
+                .join(", ")
+              : ""}
+          </Typography>
+
+          {/* Show Date and Time */}
+          <Typography variant="body1">
+            <strong>Date:</strong> {selectedDate}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Showtime:</strong> {selectedTime}
+          </Typography>
+
+          {/* Theater and Room Info */}
+          <Typography variant="body1">
+            <strong>Theater:</strong> {selectedTheater} ({selectedRoom})
+          </Typography>
+
+          {/* Total Price */}
+          <Typography variant="body1" color="red" style={{ marginTop: "1rem", fontWeight: "bold" }}>
+            <strong>Total:</strong>{" "}
+            {new Intl.NumberFormat("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            }).format(total * 1000)}
+          </Typography>
+
+          <Typography variant="body2" style={{ marginTop: "1rem" }}>
+            Are you sure you want to proceed with Momo payment?
+          </Typography>
+
+          {/* Buttons */}
+          <Box mt={2}>
+            <Button variant="contained" color="primary" onClick={handleConfirmMomoPayment}>
+              Confirm
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => setOpenModal(false)}
+              style={{ marginLeft: "1rem" }}
+            >
+              Cancel
+            </Button>
+          </Box>
+        </Paper>
+      </Modal>
+
     </Section>
   );
 };
