@@ -74,10 +74,43 @@ const Btn = styled.button`
 
 export default function BookingResult() {
     const location = useLocation();
-    
+
+    // Extract query parameters from URL
+    const queryParams = new URLSearchParams(location.search);
+
+    // Get individual parameters
+    const partnerCode = queryParams.get("partnerCode");
+    const orderId = queryParams.get("orderId");
+    const requestId = queryParams.get("requestId");
+    const amount = queryParams.get("amount");
+    const transId = queryParams.get("transId");
+    const message = queryParams.get("message");
+    const payType = queryParams.get("payType");
+    const handleBookingHistory = () => {
+        window.location.href = "/booking-history";
+    }
+
     return (
         <>
-            Result
+            <GlobalStyles />
+            <ThemeProvider theme={light}>
+                <Navigation />
+                <StyledBookingResult>
+                    <h1>Booking Result</h1>
+                    <p><strong>Partner Code:</strong> {partnerCode}</p>
+                    <p><strong>Order ID:</strong> {orderId}</p>
+                    <p><strong>Request ID:</strong> {requestId}</p>
+                    <p><strong>Transaction ID:</strong> {transId}</p>
+                    <p><strong>Amount: </strong>
+                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
+                            .format(amount)}</p>
+                    <p><strong>Message:</strong> {message}</p>
+                    <p><strong>Payment Type:</strong> {payType}</p>
+                    <Btn onClick={handleBookingHistory}>Booking History</Btn>
+                    <p>Your order is ready check your mail and booking history</p>
+                </StyledBookingResult>
+                <Footer />
+            </ThemeProvider>
         </>
     )
 };
