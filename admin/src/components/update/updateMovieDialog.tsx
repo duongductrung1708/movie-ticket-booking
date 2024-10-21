@@ -22,23 +22,23 @@ interface UpdateMovieDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   movieData: {
-    _id: string,
-    title: string,
-    rating: number,
-    image: string,
-    synopsis: string,
-    director: string,
-    country: string,
-    genre: string[],
-    releaseDate: string,
-    duration: string,
-    ageRating: string,
-    cast: string[],
-    status: string,
-    trailer: string,
-    language: string,
-    createdAt : string,
-    updatedAt: string
+    _id: string;
+    title: string;
+    rating: number;
+    image: string | File;
+    synopsis: string;
+    director: string;
+    country: string;
+    genre: string[];
+    releaseDate: string;
+    duration: string;
+    ageRating: string;
+    cast: string[];
+    status: string;
+    trailer: string;
+    language: string;
+    createdAt: string;
+    updatedAt: string;
   };
   setMovies: React.Dispatch<React.SetStateAction<any[]>>;
 }
@@ -50,10 +50,8 @@ const UpdateMovieDialog: React.FC<UpdateMovieDialogProps> = ({
   const [open, setOpen] = React.useState(false);
   const [updatedMovieData, setUpdatedMovieData] = React.useState({
     ...movieData,
-    genre: Array.isArray(movieData.genre) ? movieData.genre : [], 
+    genre: Array.isArray(movieData.genre) ? movieData.genre.map(g => g._id) : [], // Lấy danh sách ID các genre
   });
-
-
   interface Genre {
     _id: string;
     name: string;
@@ -72,6 +70,14 @@ const UpdateMovieDialog: React.FC<UpdateMovieDialogProps> = ({
       [e.target.name]: e.target.value,
     });
   };
+  const handleMovieImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setUpdatedMovieData({
+        ...updatedMovieData,
+        image: e.target.files[0], // Lưu file ảnh vào state
+      });
+    }
+  };
 
   const handleGenreChange = (event: any) => {
     const {
@@ -85,10 +91,39 @@ const UpdateMovieDialog: React.FC<UpdateMovieDialogProps> = ({
 
   const handleUpdateMovie = async () => {
     try {
+      const formData = new FormData();
+
+      formData.append("title", updatedMovieData.title);
+      formData.append("rating", updatedMovieData.rating.toString());
+      formData.append("trailer", updatedMovieData.trailer);
+      formData.append("synopsis", updatedMovieData.synopsis);
+      formData.append("language", updatedMovieData.language);
+      formData.append("director", updatedMovieData.director);
+      formData.append("country", updatedMovieData.country);
+      formData.append("releaseDate", updatedMovieData.releaseDate);
+      formData.append("duration", updatedMovieData.duration);
+      formData.append("ageRating", updatedMovieData.ageRating.toString());
+      formData.append("cast", JSON.stringify(updatedMovieData.cast));
+      formData.append("status", updatedMovieData.status);
+
+      // Nếu người dùng chọn ảnh mới, thêm ảnh vào FormData
+      if (updatedMovieData.image instanceof File) {
+        formData.append("image", updatedMovieData.image);
+      }
+
+      // Gửi thể loại dưới dạng chuỗi JSON
+      formData.append("genres", JSON.stringify(updatedMovieData.genre));
+
       const response = await axiosInstance.put(
         `/movies/${updatedMovieData._id}`,
-        updatedMovieData
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
+
       const updatedMovie = response.data;
 
       setMovies((prevMovies) =>
@@ -140,15 +175,12 @@ const UpdateMovieDialog: React.FC<UpdateMovieDialogProps> = ({
             onChange={handleChange}
           />
 
-          {/* Image */}
-          <TextField
-            margin="dense"
-            name="image"
-            label="Image URL"
-            fullWidth
-            variant="outlined"
-            value={updatedMovieData.image}
-            onChange={handleChange}
+          {/* Image upload */}
+          <input
+            accept="image/*"
+            type="file"
+            onChange={handleMovieImageChange} // Gọi hàm xử lý khi người dùng chọn file
+            style={{ margin: "dense", display: "block", marginBottom: "16px" }}
           />
 
           {/* Trailer */}
@@ -213,22 +245,19 @@ const UpdateMovieDialog: React.FC<UpdateMovieDialogProps> = ({
               labelId="genre-label"
               id="genre"
               multiple
-              value={
-                Array.isArray(updatedMovieData.genre)
-                  ? updatedMovieData.genre
-                  : []
-              } 
+              value={updatedMovieData.genre}
               onChange={handleGenreChange}
               input={<OutlinedInput label="Genres" />}
-              renderValue={(selected) => 
+              renderValue={(selected) =>
                 (selected as string[]) // Chuyển đổi selected thành kiểu string[]
                   .map((id) => genres.find((genre) => genre._id === id)?.name) // Tìm tên genre dựa trên ID
-                  .join(", ")}
+                  .join(", ")
+              }
             >
               {genres.map((genre: any) => (
                 <MenuItem key={genre._id} value={genre._id}>
                   <Checkbox
-                    checked={updatedMovieData.genre.indexOf(genre._id) > -1}
+                    checked={updatedMovieData.genre.includes(genre._id)}
                   />
                   <ListItemText primary={genre.name} />
                 </MenuItem>

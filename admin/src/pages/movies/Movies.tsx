@@ -26,6 +26,7 @@ import AddMovieDialog from "../../components/add/addMovieDialog";
 import DeleteIcon from "@mui/icons-material/Delete";
 import UpdateMovieDialog from "../../components/update/updateMovieDialog";
 import { toast, ToastContainer } from "react-toastify";
+import constants from "../../constants/constants";
 
 function createMovieData(
   _id: string,
@@ -90,7 +91,7 @@ function Row(props: {
         <TableCell align="left">{row.title}</TableCell>
         <TableCell align="left">
           <img
-            src={row.image}
+            src={constants.url + "images/" + row.image}
             alt="movie-poster"
             className="table-image"
             style={{ width: "50px", height: "50px", objectFit: "cover" }}

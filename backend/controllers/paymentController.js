@@ -3,10 +3,15 @@ const Payment = require('../models/Payment')
 //get all payment
 const getPayment = async (req, res) => {
     try {
-        const payment = await Payment.find()
-        res.status(200).json(payment)
+        const payments = await Payment.find()
+            .populate('paymentMethodId') 
+            .populate('bookingId')
+            .exec();
+        console.log(payments);
+        
+        res.status(200).json(payments);
     } catch (error) {
-        res.status(500).json({ message: error.message })
+        res.status(500).json({ error: error.message });
     }
 }
 

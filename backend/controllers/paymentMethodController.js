@@ -13,7 +13,7 @@ const createPaymentMethod = async (req, res) => {
     }
 };
 
-// Lấy tất cả phương thức thanh toán
+
 const getAllPaymentMethods = async (req, res) => {
     try {
         const paymentMethods = await PaymentMethod.find();
