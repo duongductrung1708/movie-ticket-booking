@@ -223,6 +223,7 @@ const Users = () => {
         <Typography variant="h4">Users</Typography>
         <Button
           variant="contained"
+          style={{ fontWeight: "bold" }}
           color="primary"
           onClick={() => handleOpenModal("Create New User")}
         >
