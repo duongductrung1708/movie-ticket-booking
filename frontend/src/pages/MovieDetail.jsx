@@ -356,7 +356,6 @@ const MovieDetail = () => {
 
   const bookingRef = useRef(null);
 
-  // Reset Select State Function
   const resetSelection = () => {
     setSelectedCity("");
     setFilteredTheaters([]);
@@ -556,7 +555,7 @@ const MovieDetail = () => {
         {movie ? (
           <>
             <MovieInfoGrid>
-              <MoviePoster src={movie.image} alt={movie.title} />
+              <MoviePoster src={`http://localhost:8080/api/images/${movie.image}`} alt={movie.title} />
               <VideoWrapper>
                 <StyledYouTube
                   videoId={movie.trailer.split("v=")[1]}

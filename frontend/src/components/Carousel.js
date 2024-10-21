@@ -125,7 +125,7 @@ const Carousel = () => {
       >
         {movies.map((movie, index) => (
           <SwiperSlide key={index}>
-            <img src={movie.image} alt={movie.title} />
+            <img src={`http://localhost:8080/api/images/${movie.image}`} alt={movie.title} />
           </SwiperSlide>
         ))}
       </Swiper>
