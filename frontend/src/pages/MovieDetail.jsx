@@ -434,6 +434,8 @@ const MovieDetail = () => {
                 .join(", ");
               const showtimeDate = dayjs(showtime.date).format("MM/DD/YYYY");
 
+              const room = showtime.room_id.name
+
               if (!uniqueMovies[movieId]) {
                 uniqueMovies[movieId] = {
                   title: movieTitle,
@@ -444,6 +446,7 @@ const MovieDetail = () => {
                   duration: movieDuration,
                   genres: movieGenres,
                   seatLayout: showtimeLayout,
+                  room: room,
                 };
               }
 
@@ -464,6 +467,7 @@ const MovieDetail = () => {
 
   const handleShowtimeSelect = (movieTitle, time) => {
     const selectedMovie = movies.find((movie) => movie.title === movieTitle);
+    console.log(selectedMovie);
 
     if (selectedMovie) {
       const showtimeDate = selectedMovie.date;
@@ -479,6 +483,8 @@ const MovieDetail = () => {
 
       const movieDuration = selectedMovie.duration;
       const movieImage = movie.image || selectedMovie.image;
+
+      const selectedRoom = selectedMovie.room;
 
       const seatLayout = selectedMovie.seatLayout;
       const selectedTheaterDetails = filteredTheaters.find(
@@ -497,6 +503,7 @@ const MovieDetail = () => {
           selectedTheaterAddress: theaterAddress,
           duration: movieDuration,
           seatLayout: seatLayout,
+          selectedRoom: selectedRoom,
         },
       });
     }
