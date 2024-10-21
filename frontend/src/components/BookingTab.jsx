@@ -284,6 +284,8 @@ const BookingTab = ({ isOpen, onClose }) => {
                 .join(", ");
               const showtimeDate = dayjs(showtime.date).format("MM/DD/YYYY");
 
+              const room = showtime.room_id.name
+
               const uniqueKey = `${movieId}-${showtimeDate}`;
 
               if (!groupedMovies[uniqueKey]) {
@@ -297,6 +299,7 @@ const BookingTab = ({ isOpen, onClose }) => {
                   duration: movieDuration,
                   genres: movieGenres,
                   seatLayout: showtimeLayout,
+                  room: room,
                 };
               }
 
@@ -350,6 +353,8 @@ const BookingTab = ({ isOpen, onClose }) => {
       const selectedTheaterDetails = filteredTheaters.find(
         (theater) => theater.name === selectedTheater
       );
+
+      const selectedRoom = selectedMovie.room;
   
       const theaterAddress = selectedTheaterDetails?.address;
   
@@ -363,6 +368,7 @@ const BookingTab = ({ isOpen, onClose }) => {
           selectedTheaterAddress: theaterAddress,
           duration: movieDuration,
           seatLayout: seatLayout,
+          selectedRoom: selectedRoom,
         },
       });
     }
