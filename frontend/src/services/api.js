@@ -25,7 +25,15 @@ export const deleteBooking = async (id) => {
   } catch (error) {
     console.error(error);
   }
+}
 
+export const updateSeatLayout = async (showtimeId, seatIds, status) => {
+  try {
+    const response = await api.put('/showtimes/' + showtimeId + '/seat-layout', { seatIds, status })
+    return response.data;
+  } catch (error) {
+
+  }
 }
 
 export const getMomoPaymentLink = async (orderInfo, amount, bookingId) => {

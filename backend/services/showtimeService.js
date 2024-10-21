@@ -24,8 +24,8 @@ const showtimeService = {
 
             seatArray.forEach((seatStr) => {
                 // Split into column and row (e.g., 3B -> col 3, row 2)
-                const col = parseInt(seatStr.charAt(0)) - 1; // Adjust for 0-based index
-                const row = seatStr.charAt(1).charCodeAt(0) - 'A'.charCodeAt(0); // Convert letter to index (A -> 0, B -> 1, etc.)
+                const col = parseInt(seatStr.charAt(1)) - 1; // Adjust for 0-based index
+                const row = seatStr.charAt(0).charCodeAt(0) - 'A'.charCodeAt(0); // Convert letter to index (A -> 0, B -> 1, etc.)
 
                 // Update the status of the seat to "occupied"
                 if (showtime.seatLayout[row] && showtime.seatLayout[row][col]) {

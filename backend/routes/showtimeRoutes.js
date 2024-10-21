@@ -9,6 +9,7 @@ const {
   deleteShowtime,
   getShowtimeById,
   getShowtimesByMovieId,
+  updateSeatLayoutShowtime,
 } = require("../controllers/showtimeController");
 const showtimeValidation = require("../validation/showtimeValidation");
 
@@ -31,6 +32,9 @@ showtimeRouter.get("/:theaterId", getShowtimeOfTheater);
 
 //create showtime
 showtimeRouter.post("/", showtimeValidation.verifyTime, createShowtime);
+
+//update showtime seatlayout
+showtimeRouter.put("/:id/seat-layout",updateSeatLayoutShowtime)
 
 //update showtime
 showtimeRouter.put('/:id', showtimeValidation.verifyTime, updateShowtime)
