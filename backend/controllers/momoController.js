@@ -7,6 +7,7 @@ const { updateSeatLayout } = require('../services/showtimeService');
 
 var accessKey = 'F8BBA842ECF85';
 var secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
+const publicPort = 'https://ee1b-116-96-47-119.ngrok-free.app'
 
 const momoController = {
   createPayment: async (req, res) => {
@@ -26,7 +27,7 @@ const momoController = {
     var orderInfo = req.body.orderInfo + "-" + paymentResponse._id;
     var partnerCode = 'MOMO';
     var redirectUrl = 'http://localhost:3000/booking-result';
-    var ipnUrl = 'https://ee1b-116-96-47-119.ngrok-free.app/api/momo/callback';
+    var ipnUrl = publicPort + '/api/momo/callback';
     var requestType = "payWithMethod";
     var amount = req.body.amount;
     var orderId = partnerCode + new Date().getTime();
