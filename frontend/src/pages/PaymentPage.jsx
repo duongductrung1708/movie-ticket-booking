@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, redirect, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Box,
   Paper,
@@ -21,7 +21,7 @@ import styled from "styled-components";
 import { toast, ToastContainer } from "react-toastify";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
-import { createBooking, deleteBooking, getMomoPaymentLink } from "../services/api";
+import { deleteBooking, getMomoPaymentLink } from "../services/api";
 
 const Container = styled.div`
   width: 75%;
