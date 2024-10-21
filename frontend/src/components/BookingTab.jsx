@@ -262,33 +262,39 @@ const BookingTab = ({ isOpen, onClose }) => {
         const selectedTheaterDetails = filteredTheaters.find(
           (theater) => theater.name === selectedTheater
         );
-
+  
         if (selectedTheaterDetails) {
           const theaterId = selectedTheaterDetails._id;
-
+  
           try {
             const showtimesData = await getShowtimesByTheater(theaterId);
-
+            const today = dayjs().startOf('day');
+  
+            const filteredShowtimes = showtimesData.filter(showtime => {
+              const showtimeDate = dayjs(showtime.date);
+              return showtimeDate.isSame(today, 'day') || showtimeDate.isAfter(today);
+            });
+  
             const groupedMovies = {};
-
-            showtimesData.forEach((showtime) => {
+  
+            filteredShowtimes.forEach((showtime) => {
               const movieId = showtime.movie_id._id;
               const movieTitle = showtime.movie_id.title;
               const movieImage = showtime.movie_id.image;
               const movieLanguage = showtime.movie_id.language;
               const movieDuration = showtime.movie_id.duration;
               const showtimeLayout = showtime.seatLayout;
-
+  
               const movieGenres = showtime.movie_id.genre
                 .map((genre) => genre.name)
                 .join(", ");
               const showtimeDate = dayjs(showtime.date).format("MM/DD/YYYY");
-
+  
               const room = showtime.room_id.name;
               const showtimeId = showtime._id;
-
+  
               const uniqueKey = `${movieId}-${showtimeDate}`;
-
+  
               if (!groupedMovies[uniqueKey]) {
                 groupedMovies[uniqueKey] = {
                   title: movieTitle,
@@ -304,10 +310,10 @@ const BookingTab = ({ isOpen, onClose }) => {
                   showtimeId: showtimeId,
                 };
               }
-
+  
               groupedMovies[uniqueKey].showtimes.push(showtime.start_time);
             });
-
+  
             const formattedMovies = Object.values(groupedMovies);
             setMovies(formattedMovies);
           } catch (error) {
@@ -318,9 +324,9 @@ const BookingTab = ({ isOpen, onClose }) => {
         }
       }
     };
-
+  
     fetchShowtimes();
-  }, [selectedTheater, filteredTheaters]);
+  }, [selectedTheater, filteredTheaters]);  
 
   const handleOutsideClick = (e) => {
     if (e.target.id === "overlay") {
