@@ -8,6 +8,44 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
+export const createBooking = async (userId, showtimeId, seatIds, serviceIds, status) => {
+  try {
+    const response = await api.post('/bookings/create', { userId, showtimeId, seatIds, serviceIds, status });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+
+}
+
+export const deleteBooking = async (id) => {
+  try {
+    const response = await api.delete('/bookings/' + id);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+
+}
+
+export const getMomoPaymentLink = async (orderInfo, amount, bookingId) => {
+  try {
+    const response = await api.post("/momo", { orderInfo, amount, bookingId });
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+}
+
+export const getTheaterByRoomId = async (id) => {
+  try {
+    const response = await api.get("/theaters/room/" + id);
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+}
+
 // Function to register a user
 export const registerUser = async (userData) => {
   try {

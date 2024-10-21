@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Container, TextField, Typography } from "@mui/material";
+import { Button, Container, Typography } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/starterstyle.css";
 import backgroundImage from "../assets/netflix-junio.jpg";
@@ -35,25 +35,29 @@ const StarterPage = () => {
       }}
     >
       <header className="app-header">
-        <div></div>
         <LogoText>
           <Link style={{ textDecoration: "none", color: "white" }} to="/">
             K. Cinema
           </Link>
         </LogoText>
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
-        <Button
-          variant="contained"
-          color="error"
-          className="sign-in-btn"
-          onClick={() => navigate("/signin")}
-        >
-          Sign In
-        </Button>
-        <div></div>
+        <div className="app-header-btns">
+          <Button
+            variant="contained"
+            color="error"
+            className="sign-in-btn"
+            onClick={() => navigate("/signin")}
+          >
+            Sign In
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            className="sign-up-btn"
+            onClick={() => navigate("/signup")}
+          >
+            Sign Up
+          </Button>
+        </div>
       </header>
 
       <div className="app-content">
@@ -113,34 +117,6 @@ const StarterPage = () => {
         </Typography>
 
         <Container className="email-form" sx={{ textAlign: "center" }}>
-          <TextField
-            id="filled-basic"
-            variant="outlined"
-            label="Your email"
-            className="email-input"
-            color="error"
-            fullWidth
-            focused
-            InputLabelProps={{
-              style: { color: "red", fontSize: "1.3rem" },
-            }}
-            InputProps={{
-              style: { color: "#fff", fontSize: "1.5rem" },
-              sx: {
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#fff",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#fff",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#fff",
-                  },
-                },
-              },
-            }}
-          />
           <Button
             variant="contained"
             color="error"
@@ -149,10 +125,10 @@ const StarterPage = () => {
               fontSize: {
                 xs: "0.5rem",
                 sm: "0.7rem",
-                md: "1rem",
+                md: "1.2rem",
               },
             }}
-            onClick={() => navigate("/signup")}
+            onClick={() => navigate("/home")}
           >
             Get Started ⮞
           </Button>

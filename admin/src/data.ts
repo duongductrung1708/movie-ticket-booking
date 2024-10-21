@@ -9,12 +9,6 @@ export const menu = [
         url: "/",
         icon: "home.svg",
       },
-      {
-        id: 2,
-        title: "Profile",
-        url: "/",
-        icon: "user.svg",
-      },
     ],
   },
   {
@@ -86,30 +80,6 @@ export const menu = [
         title: "Upcoming Movies",
         url: "/upcomingMovies",
         icon: "setting.svg",
-      },
-      {
-        id: 2,
-        title: "Backups",
-        url: "/",
-        icon: "backup.svg",
-      },
-    ],
-  },
-  {
-    id: 5,
-    title: "analytics",
-    listItems: [
-      {
-        id: 1,
-        title: "Charts",
-        url: "/",
-        icon: "chart.svg",
-      },
-      {
-        id: 2,
-        title: "Logs",
-        url: "/",
-        icon: "log.svg",
       },
     ],
   },

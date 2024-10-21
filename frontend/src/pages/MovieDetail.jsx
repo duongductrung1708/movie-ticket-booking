@@ -434,6 +434,9 @@ const MovieDetail = () => {
                 .join(", ");
               const showtimeDate = dayjs(showtime.date).format("MM/DD/YYYY");
 
+              const room = showtime.room_id.name;
+              const showtimeId = showtime._id;
+
               if (!uniqueMovies[movieId]) {
                 uniqueMovies[movieId] = {
                   title: movieTitle,
@@ -444,6 +447,8 @@ const MovieDetail = () => {
                   duration: movieDuration,
                   genres: movieGenres,
                   seatLayout: showtimeLayout,
+                  room: room,
+                  showtimeId: showtimeId,
                 };
               }
 
@@ -464,6 +469,7 @@ const MovieDetail = () => {
 
   const handleShowtimeSelect = (movieTitle, time) => {
     const selectedMovie = movies.find((movie) => movie.title === movieTitle);
+    console.log(selectedMovie);
 
     if (selectedMovie) {
       const showtimeDate = selectedMovie.date;
@@ -480,6 +486,9 @@ const MovieDetail = () => {
       const movieDuration = selectedMovie.duration;
       const movieImage = movie.image || selectedMovie.image;
 
+      const selectedRoom = selectedMovie.room;
+      const showtimeId = selectedMovie.showtimeId;
+
       const seatLayout = selectedMovie.seatLayout;
       const selectedTheaterDetails = filteredTheaters.find(
         (theater) => theater.name === selectedTheater
@@ -489,6 +498,7 @@ const MovieDetail = () => {
 
       navigate("/seat-reservation", {
         state: {
+          showtime: showtimeId,
           movieTitle: selectedMovie.title,
           movieImage: movieImage,
           selectedTime: time,
@@ -497,6 +507,7 @@ const MovieDetail = () => {
           selectedTheaterAddress: theaterAddress,
           duration: movieDuration,
           seatLayout: seatLayout,
+          selectedRoom: selectedRoom,
         },
       });
     }
@@ -716,7 +727,8 @@ const MovieDetail = () => {
                   </LocalizationProvider>
 
                   {/* Reset Button */}
-                  <Button style={{width: "15%", marginTop: "1rem"}}
+                  <Button
+                    style={{ width: "15%", marginTop: "1rem" }}
                     variant="contained"
                     color="warning"
                     onClick={resetSelection}

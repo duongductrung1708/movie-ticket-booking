@@ -15,17 +15,20 @@ const corsOptions = require('./config/corsOptions');
 const serviceRoutes = require('./routes/serviceRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const bookingDetailRoutes = require('./routes/bookingDetailRoutes');
-
+const upcomingMovieRoutes = require('./routes/upcomingMovieRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 const path = require('path');
-const PaymentMethodRoutes = require('./routes/paymentMethodRoutes');
+const momoPaymentRouter = require('./routes/momoPaymentRoutes');
+const cors = require('cors');
 
 const app = express();
 
 // Middleware
 app.use(express.json());
 app.use(logger("dev"));
-app.use(express.urlencoded({ extended: false }));
-app.use(corsOptions);
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+// app.use(corsOptions);
 
 // Connect to MongoDB
 connectDB().then(() => {
@@ -39,8 +42,9 @@ app.use('/api/images', express.static(path.join(__dirname, 'assets')));
 app.use('/api/auth', authRoutes);
 app.use("/api/users", userRoutes);
 app.use('/api/payments', paymentRouter);
-app.use('/api/showtimes',showtimeRouter)
+app.use('/api/showtimes', showtimeRouter)
 app.use('/api/movies', movieRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/genres', genreRoutes);
 app.use('/api/theaters', theaterRoutes);
 app.use('/api/rooms', roomRoutes);
@@ -48,10 +52,9 @@ app.use('/api/seats', seatRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/booking-details', bookingDetailRoutes);
-app.use('/api/paymentMethod', PaymentMethodRoutes);
-
+app.use('/api/upcoming-movie', upcomingMovieRoutes);
+app.use('/api/momo', momoPaymentRouter);
 
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
-

@@ -4,6 +4,7 @@ const TheaterService = require('../services/theaterService');
 const path = require('path')
 const fs = require('fs');
 const { default: mongoose } = require('mongoose');
+const { log } = require('console');
 
 const TheaterController = {
   create: async (req, res) => {
@@ -18,7 +19,7 @@ const TheaterController = {
   getAll: async (req, res) => {
     try {
       console.log(req.params);
-      
+
       const theaters = await TheaterService.getAll();
       res.status(200).json(theaters);
     } catch (error) {
@@ -43,18 +44,18 @@ const TheaterController = {
     try {
       const { id } = req.params;
       const { name, address, city, rooms, removedRooms } = req.body; // `removedRooms` for rooms to be deleted
-  
+
       // Find the theater by ID
       const theater = await Theater.findById(id).populate('rooms');
       if (!theater) {
         return res.status(404).json({ message: 'Theater not found' });
       }
-  
+
       // Update theater fields if they are provided
       theater.name = name || theater.name;
       theater.address = address || theater.address;
       theater.city = city || theater.city;
-  
+
       // Handle the theater image if it is uploaded
       const theaterImageFile = req.files.find((file) => file.fieldname === 'theaterImage');
       if (theaterImageFile) {
@@ -65,24 +66,24 @@ const TheaterController = {
             fs.unlinkSync(oldImagePath);
           }
         }
-  
+
         // Set the new image filename
         theater.image = theaterImageFile.filename;
       }
-  
+
       // If rooms are provided, update or create them
       const roomIds = []; // To hold the ObjectId references for the theater
       if (rooms) {
         const parsedRooms = JSON.parse(rooms);
-  
+
         for (const roomData of parsedRooms) {
           let room;
-  
+
           // Check if the roomData contains a valid ObjectId and find the existing room
           if (roomData.id && mongoose.Types.ObjectId.isValid(roomData.id)) {
             room = await Room.findById(roomData.id);
           }
-  
+
           // If the room doesn't exist or the ID is not valid, create a new room
           if (!room) {
             room = new Room({
@@ -96,7 +97,7 @@ const TheaterController = {
             room.type = roomData.roomType || room.type;
             room.seatLayout = roomData.seatLayout || room.seatLayout;
           }
-  
+
           // Find if an image was uploaded for this specific room based on its ID
           const roomImageFile = req.files.find((file) => file.fieldname === `roomImage_${roomData.id}`);
           if (roomImageFile) {
@@ -107,24 +108,24 @@ const TheaterController = {
                 fs.unlinkSync(oldRoomImagePath);
               }
             }
-  
+
             // Set the new image filename
             room.image = roomImageFile.filename;
           }
-  
+
           // Save the room and collect its ID
           await room.save();
           roomIds.push(room._id);
         }
-  
+
         // Update the theater's rooms with the new or updated room IDs
         theater.rooms = roomIds;
       }
-  
+
       // Handle removed rooms
       if (removedRooms) {
         const parsedRemovedRooms = JSON.parse(removedRooms);
-  
+
         for (const removedRoomId of parsedRemovedRooms) {
           if (mongoose.Types.ObjectId.isValid(removedRoomId)) {
             const roomToRemove = await Room.findById(removedRoomId);
@@ -136,14 +137,14 @@ const TheaterController = {
                   fs.unlinkSync(roomImagePath);
                 }
               }
-  
+
               // Remove the room from the database
               await Room.findOneAndDelete(removedRoomId);
             }
           }
         }
       }
-  
+
       // Save the updated theater
       await theater.save();
       await theater.populate('rooms');
@@ -233,7 +234,7 @@ const TheaterController = {
       await theater.save();
       //populate room
       await theater.populate('rooms');
-      res.status(201).json(theater );
+      res.status(201).json(theater);
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, message: "Server error, please try again later" });
@@ -251,6 +252,21 @@ const TheaterController = {
       }
 
       // Return the theater data, including the populated rooms
+      res.status(200).json(theater);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: 'Server error, please try again later' });
+    }
+  },
+  getTheaterByRoomId: async (req, res) => {
+    try {
+      const roomId = req.params.id;
+      const theater = await Theater.findOne({ rooms: roomId }).populate('rooms');
+      console.log(theater);
+      
+      if (!theater) {
+        return res.status(404).json({ success: false, message: 'Theater not found' })
+      }
       res.status(200).json(theater);
     } catch (error) {
       console.error(error);

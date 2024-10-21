@@ -22,10 +22,11 @@ import "@fontsource/sora";
 import "../styles/StepperStyles.css";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
-import { getAllServices } from "../services/api";
+import { createBooking, getAllServices } from "../services/api";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
+import { toast } from "react-toastify";
 
 const Container = styled.div`
   width: 75%;
@@ -55,16 +56,16 @@ const SeatButton = styled(IconButton)`
     props.type === "empty"
       ? "#45444433 !important"
       : props.type === "vip"
-        ? "blue !important"
-        : props.type === "selected"
-          ? "orange !important"
-          : props.status === "available"
-            ? "#45444433 !important"
-            : props.status === "reserved"
-              ? "orange !important"
-              : props.status === "occupied"
-                ? "red !important"
-                : "gray !important"};
+      ? "blue !important"
+      : props.type === "selected"
+      ? "orange !important"
+      : props.status === "available"
+      ? "#45444433 !important"
+      : props.status === "reserved"
+      ? "orange !important"
+      : props.status === "occupied"
+      ? "red !important"
+      : "gray !important"};
   border-radius: 5px;
   width: 50px;
   height: 50px;
@@ -74,19 +75,19 @@ const SeatButton = styled(IconButton)`
 
   &:hover {
     background-color: ${(props) =>
-    props.type === "empty"
-      ? "#d0d0d0 !important"
-      : props.type === "vip"
+      props.type === "empty"
+        ? "#d0d0d0 !important"
+        : props.type === "vip"
         ? "#ffb300 !important"
         : props.type === "selected"
-          ? "#45444433 !important"
-          : props.status === "available"
-            ? "#d0d0d0 !important"
-            : props.status === "reserved"
-              ? "#ffb300 !important"
-              : props.status === "occupied"
-                ? "#ff8a8a !important"
-                : "#ff8a8a !important"};
+        ? "#45444433 !important"
+        : props.status === "available"
+        ? "#d0d0d0 !important"
+        : props.status === "reserved"
+        ? "#ffb300 !important"
+        : props.status === "occupied"
+        ? "#ff8a8a !important"
+        : "#ff8a8a !important"};
   }
 `;
 
@@ -140,7 +141,7 @@ const Content = styled.div`
 const Price = styled.div`
   font-family: "Sora", sans-serif;
   font-weight: bold;
-  font-size: 1.5rem;
+  font-size: 1rem;
   color: red;
 `;
 
@@ -165,6 +166,9 @@ const Vip = styled.div`
 
 const Selecting = styled.div`
   color: orange;
+`;
+const Reserved = styled.div`
+  color: yellow;
 `;
 
 const Occupied = styled.div`
@@ -236,16 +240,24 @@ const SeatReservation = () => {
     selectedTheaterAddress,
     duration,
     seatLayout,
+    selectedRoom,
+    showtime,
   } = location.state || {};
-  console.log(seatLayout);
 
   const steps = ["Select Seats"];
   const totalRows = seatLayout ? seatLayout.length : 0;
   const totalColumns = seatLayout ? seatLayout[0].length : 0;
+  const [total, setTotal] = useState(location.state.total || 0);
 
   const [seats, setSeats] = useState(seatLayout || []);
+  const [selectedSeats, setSelectedSeats] = useState(
+    location.state.selectedSeats || []
+  );
 
-  const [selectedSeats, setSelectedSeats] = useState([]);
+  const [selectedServices, setSelectedService] = useState(
+    location.state.selectedServices || []
+  );
+
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
@@ -278,6 +290,14 @@ const SeatReservation = () => {
 
   const handleSeatSelect = (rowIndex, colIndex) => {
     const seat = seats[rowIndex][colIndex];
+
+    if (!seat) {
+      console.error(
+        `Seat at row ${rowIndex} and column ${colIndex} is undefined or null.`
+      );
+      return;
+    }
+
     if (seat.status === "available") {
       if (selectedSeats.length >= 8) {
         setSnackbarMessage("You can select a maximum of 8 seats.");
@@ -292,6 +312,7 @@ const SeatReservation = () => {
       };
       setSeats(newSeats);
       setSelectedSeats([...selectedSeats, { row: rowIndex, col: colIndex }]);
+      setTotal((prev) => prev + seat.price);
     } else if (seat.status === "selected") {
       const newSeats = [...seats];
       newSeats[rowIndex][colIndex] = {
@@ -305,30 +326,61 @@ const SeatReservation = () => {
             selectedSeat.row !== rowIndex || selectedSeat.col !== colIndex
         )
       );
+      setTotal((prev) => prev - seat.price);
     }
   };
+  console.log(seats);
 
-  const handleSelectSeatButton = () => {
+  const handleSelectSeatButton = async () => {
     if (selectedSeats.length === 0) {
       setSnackbarMessage("Please select at least one seat before proceeding.");
       setOpenSnackbar(true);
       return;
     }
 
-    navigate("/payment", {
-      state: {
-        movieTitle,
-        movieImage,
-        selectedSeats,
-        selectedDate,
-        selectedTime,
-        selectedTheater,
-        seats,
-        seatLayout,
-        selectedTheaterAddress,
-        duration,
-      },
-    });
+    const userId = JSON.parse(localStorage.getItem("user"))?._id;
+    const seatIds = selectedSeats.map(
+      (seat) => seatLayout[seat.row][seat.col]._id
+    );
+    const serviceIds = selectedServices.map(
+      (service) => service._id + "*" + service.number
+    );
+
+    let bookingResponse;
+    try {
+      bookingResponse = await createBooking(
+        userId,
+        showtime,
+        seatIds,
+        serviceIds,
+        "processing"
+      );
+
+      console.log("Booking Response:", bookingResponse);
+
+      navigate("/payment", {
+        state: {
+          movieTitle,
+          movieImage,
+          selectedSeats,
+          selectedDate,
+          selectedTime,
+          selectedTheater,
+          selectedRoom,
+          seats,
+          seatLayout,
+          selectedTheaterAddress,
+          duration,
+          selectedServices,
+          showtime,
+          booking: bookingResponse?.booking,
+          bookingDetails: bookingResponse?.bookingDetails,
+        },
+      });
+    } catch (error) {
+      console.error("Error occurred while creating booking:", error);
+      toast.error("Error occurred while creating booking");
+    }
   };
 
   const settings = {
@@ -373,6 +425,45 @@ const SeatReservation = () => {
 
     fetchServices();
   }, []);
+
+  const handleSelectedService = (service) => {
+    const existedService = selectedServices.find(
+      (sv) => sv._id === service._id
+    );
+    if (!existedService) {
+      service.number = 1;
+      setSelectedService((prev) => [...prev, service]);
+    } else {
+      setSelectedService((prev) =>
+        prev.map((s) =>
+          s.id === service.id ? { ...s, number: s.number + 1 } : s
+        )
+      );
+    }
+
+    setTotal((prev) => prev + service.price);
+  };
+
+  const handleDecreaseQuantity = (service) => {
+    setSelectedService((prev) =>
+      prev
+        .map((s) =>
+          s._id === service._id ? { ...s, number: s.number - 1 } : s
+        )
+        .filter((s) => s.number > 0)
+    );
+
+    setTotal((prev) => prev - service.price);
+  };
+
+  const handleIncreaseQuantity = (service) => {
+    setSelectedService((prev) =>
+      prev.map((s) =>
+        s._id === service._id ? { ...s, number: s.number + 1 } : s
+      )
+    );
+    setTotal((prev) => prev + service.price);
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -438,38 +529,85 @@ const SeatReservation = () => {
                 </text>
               </ArcScreen>
               <SeatGrid container spacing={0}>
+                <Grid container item justifyContent="center" spacing={0}>
+                  <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    marginRight="10px"
+                    height="100%"
+                  >
+                    <Typography variant="h6" color="white">
+                      <strong>A</strong> {/* Row letters (A, B, C, ...) */}
+                    </Typography>
+                  </Box>
+                  {seats[0].map((_, colIndex) => (
+                    <Grid
+                      key={`colLabel-${colIndex}`}
+                      containeritem
+                      justifyContent="center"
+                    >
+                      <Typography variant="h6" width="50px" textAlign="center">
+                        <strong>{colIndex + 1}</strong>
+                      </Typography>{" "}
+                      {/* Column numbers (1, 2, 3, ...) */}
+                    </Grid>
+                  ))}
+                </Grid>
                 {seats.map((row, rowIndex) => (
                   <Grid container item key={rowIndex} justifyContent="center">
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      marginRight="10px"
+                      height="100%"
+                    >
+                      <Typography variant="h6">
+                        <strong>{String.fromCharCode(65 + rowIndex)}</strong>{" "}
+                        {/* Row letters (A, B, C, ...) */}
+                      </Typography>
+                    </Box>
                     {row.map((seat, colIndex) => (
                       <Grid item key={`${rowIndex}-${colIndex}`}>
                         <SeatButton
                           type={seat?.status}
                           onClick={() => handleSeatSelect(rowIndex, colIndex)}
-                          disabled={
-                            seat?.status === "unavailable"
-                          }
+                          disabled={seat?.status === "unavailable"}
                         >
-                          {seat?.status === "available" && seat?.type === "standard" && (
-                            <Empty>
-                              <ChairIcon />
-                            </Empty>
-                          )}
-                          {seat?.status === "available" && seat?.type === "vip" && (
-                            <Vip>
-                              <ChairIcon />
-                            </Vip>
-                          )}
-                          {seat?.status === "selected" && (seat?.type === "vip" || seat?.type === "standard") && (
-                            <Selecting>
-                              <ChairIcon />
-                            </Selecting>
-                          )}
-                          {seat?.status === "occupied" && (seat?.type === "vip" || seat?.type === "standard") && (
-                            <Selecting>
-                              <ChairIcon />
-                            </Selecting>
-                          )}
-
+                          {seat?.status === "available" &&
+                            seat?.type === "standard" && (
+                              <Empty>
+                                <ChairIcon />
+                              </Empty>
+                            )}
+                          {seat?.status === "available" &&
+                            seat?.type === "vip" && (
+                              <Vip>
+                                <ChairIcon />
+                              </Vip>
+                            )}
+                          {seat?.status === "selected" &&
+                            (seat?.type === "vip" ||
+                              seat?.type === "standard") && (
+                              <Selecting>
+                                <ChairIcon />
+                              </Selecting>
+                            )}
+                          {seat?.status === "occupied" &&
+                            (seat?.type === "vip" ||
+                              seat?.type === "standard") && (
+                              <Occupied>
+                                <ChairIcon />
+                              </Occupied>
+                            )}
+                          {seat?.status === "reserved" &&
+                            (seat?.type === "vip" ||
+                              seat?.type === "standard") && (
+                              <Reserved>
+                                <ChairIcon />
+                              </Reserved>
+                            )}
                         </SeatButton>
                       </Grid>
                     ))}
@@ -482,6 +620,10 @@ const SeatReservation = () => {
                   <ChairIcon />
                   <div>Empty</div>
                 </Empty>
+                <Reserved>
+                  <ChairIcon />
+                  <div>Reserved</div>
+                </Reserved>
                 <Vip>
                   <ChairIcon />
                   <div>Vip</div>
@@ -496,24 +638,60 @@ const SeatReservation = () => {
                 </Occupied>
               </SeatType>
 
-              <Slider {...settings} style={{marginTop: "3rem"}}>
-                {services.map((service, index) => (
-                  <Box key={index} style={{ padding: "1rem" }}>
-                    <img
-                      src={service.image}
-                      alt={service.name}
-                      style={{ width: "80%", borderRadius: "8px" }}
-                    />
-                    <Heading>{service.name}</Heading>
-                    <Content variant="body1">{service.description}</Content>
-                    <Price>
-                      <strong>Price:</strong> {service.price}đ
-                    </Price>
-                    <Button variant="contained" color="primary">
-                      Add to Cart
-                    </Button>
-                  </Box>
-                ))}
+              <Slider {...settings} style={{ marginTop: "3rem" }}>
+                {services.map((service) => {
+                  const selected = selectedServices.find(
+                    (s) => s._id === service._id
+                  );
+
+                  return (
+                    <Box key={service.id} style={{ padding: "1rem" }}>
+                      <img
+                        src={service.image}
+                        alt={service.name}
+                        style={{ width: "80%", borderRadius: "8px" }}
+                      />
+                      <Heading>{service.name}</Heading>
+                      <Content variant="body1">{service.description}</Content>
+                      <Price>
+                        <strong>Price:</strong>{" "}
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(service.price * 1000)}
+                      </Price>
+                      {selected && selected.number > 0 ? (
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <Button
+                            variant="contained"
+                            color="secondary"
+                            onClick={() => handleDecreaseQuantity(service)}
+                          >
+                            -
+                          </Button>
+                          <span style={{ margin: "0 1rem" }}>
+                            {selected.number}
+                          </span>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleIncreaseQuantity(service)}
+                          >
+                            +
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleSelectedService(service)}
+                        >
+                          Add to Cart
+                        </Button>
+                      )}
+                    </Box>
+                  );
+                })}
               </Slider>
 
               <Btn onClick={handleSelectSeatButton}>Confirm Selection</Btn>
@@ -550,7 +728,7 @@ const SeatReservation = () => {
                 <Content variant="body1">{selectedTheaterAddress}</Content>
               </div>
               <Heading>Screening Room :</Heading>
-              <Content variant="body1">Room 1</Content>
+              <Content variant="body1">{selectedRoom}</Content>
               <Heading>Time :</Heading>
               <Content variant="body1">
                 {selectedTime} on {selectedDate}
@@ -560,20 +738,20 @@ const SeatReservation = () => {
                 <Content variant="body1">
                   {selectedSeats.length > 0
                     ? selectedSeats
-                        .map((seat) => `R${seat.row + 1}C${seat.col + 1}`)
+                        .map((seat) => {
+                          const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+                          return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+                        })
                         .join(", ")
                     : ""}
                 </Content>
               </div>
               <Heading>Total Price :</Heading>
               <Price>
-                {selectedSeats
-                  .reduce((total, seat) => {
-                    const { row, col } = seat;
-                    return total + seats[row][col].price;
-                  }, 0)
-                  .toFixed(3)}
-                đ
+                {new Intl.NumberFormat("vi-VN", {
+                  style: "currency",
+                  currency: "VND",
+                }).format(total * 1000)}
               </Price>
             </MovieInfo>
           </Grid>

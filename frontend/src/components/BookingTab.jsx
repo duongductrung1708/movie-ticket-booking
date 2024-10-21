@@ -284,6 +284,9 @@ const BookingTab = ({ isOpen, onClose }) => {
                 .join(", ");
               const showtimeDate = dayjs(showtime.date).format("MM/DD/YYYY");
 
+              const room = showtime.room_id.name;
+              const showtimeId = showtime._id;
+
               const uniqueKey = `${movieId}-${showtimeDate}`;
 
               if (!groupedMovies[uniqueKey]) {
@@ -297,6 +300,8 @@ const BookingTab = ({ isOpen, onClose }) => {
                   duration: movieDuration,
                   genres: movieGenres,
                   seatLayout: showtimeLayout,
+                  room: room,
+                  showtimeId: showtimeId,
                 };
               }
 
@@ -331,30 +336,34 @@ const BookingTab = ({ isOpen, onClose }) => {
 
   const handleShowtimeSelect = (movieTitle, time) => {
     const selectedMovie = movies.find((movie) => movie.title === movieTitle);
-  
+
     if (selectedMovie) {
       const showtimeDate = selectedMovie.date;
-  
+
       if (!selectedDate) {
         setSelectedDate(dayjs(showtimeDate, "MM/DD/YYYY"));
       }
-  
+
       setSelectedShowtimes((prevShowtimes) => ({
         ...prevShowtimes,
         [movieTitle]: time,
       }));
-  
+
       const movieDuration = selectedMovie.duration;
       const movieImage = selectedMovie.image;
       const seatLayout = selectedMovie.seatLayout;
       const selectedTheaterDetails = filteredTheaters.find(
         (theater) => theater.name === selectedTheater
       );
-  
+
+      const selectedRoom = selectedMovie.room;
+      const showtimeId = selectedMovie.showtimeId;
+
       const theaterAddress = selectedTheaterDetails?.address;
-  
+
       navigate("/seat-reservation", {
         state: {
+          showtime: showtimeId,
           movieTitle: selectedMovie.title,
           movieImage: movieImage,
           selectedTime: time,
@@ -363,10 +372,11 @@ const BookingTab = ({ isOpen, onClose }) => {
           selectedTheaterAddress: theaterAddress,
           duration: movieDuration,
           seatLayout: seatLayout,
+          selectedRoom: selectedRoom,
         },
       });
     }
-  };  
+  };
 
   const filteredMovies = selectedDate
     ? movies.filter((movie) => movie.date === selectedDate.format("MM/DD/YYYY"))
