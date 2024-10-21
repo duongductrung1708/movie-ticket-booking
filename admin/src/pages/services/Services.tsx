@@ -190,6 +190,7 @@ export default function Services() {
           <Typography variant="h4">Services</Typography>
           <Button
             variant="contained"
+            style={{ fontWeight: "bold" }}
             color="primary"
             onClick={() => setOpen(true)}
             className="add-service"

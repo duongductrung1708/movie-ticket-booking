@@ -18,7 +18,7 @@ import AddTheaterDialog from "../../components/add/AddTheaterDialog";
 import axiosInstance from "../../config/axiosConfig";
 import constants from "../../constants/constants";
 import DisplayRoomDetail from "../../components/display/DisplayRoomDetail";
-import { Backdrop, Button, CircularProgress } from "@mui/material";
+import { Backdrop, Button, CircularProgress, Typography } from "@mui/material";
 import UpdateTheaterDialog from "../../components/update/UpdateTheater";
 
 function createTheaterData(
@@ -79,7 +79,10 @@ function Row(props: {
         <TableCell align="left">{row.city}</TableCell>
         <TableCell align="left">{row.rooms?.length}</TableCell>
         <TableCell align="left">
-          <UpdateTheaterDialog theaterData={row} setTheaters={handleUpdateTheater}/>
+          <UpdateTheaterDialog
+            theaterData={row}
+            setTheaters={handleUpdateTheater}
+          />
         </TableCell>
       </TableRow>
       <TableRow>
@@ -155,7 +158,7 @@ export default function Theaters() {
   // Function to update an existing theater in the list
   const handleUpdateTheater = (updatedTheater: any) => {
     console.log(updatedTheater);
-    
+
     setRows((prevRows) =>
       prevRows.map((theater) =>
         theater._id === updatedTheater._id ? updatedTheater : theater
@@ -164,16 +167,24 @@ export default function Theaters() {
   };
   return (
     <>
-      <div className="info">
-        <h1>Theaters</h1>
-        <button
-          onClick={() => {
-            setOpen(true);
-          }}
-          className="add-theater"
+      <div>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={2}
         >
-          Add Theaters
-        </button>
+          <Typography variant="h4">Theaters</Typography>
+          <Button
+            variant="contained"
+            style={{ fontWeight: "bold" }}
+            color="primary"
+            onClick={() => setOpen(true)}
+            className="add-service"
+          >
+            Add Theater
+          </Button>
+        </Box>
       </div>
       <TableContainer component={Paper}>
         <Table aria-label="collapsible table">
@@ -190,7 +201,11 @@ export default function Theaters() {
           </TableHead>
           <TableBody>
             {rows.map((row, index) => (
-              <Row key={index} row={row} handleUpdateTheater={handleUpdateTheater}/>
+              <Row
+                key={index}
+                row={row}
+                handleUpdateTheater={handleUpdateTheater}
+              />
             ))}
           </TableBody>
         </Table>

@@ -151,6 +151,7 @@ export default function Genres() {
           <Typography variant="h4">Genres</Typography>
           <Button
             variant="contained"
+            style={{ fontWeight: "bold" }}
             color="primary"
             onClick={() => setOpen(true)}
             className="add-genre"
