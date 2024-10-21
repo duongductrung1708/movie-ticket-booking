@@ -190,10 +190,9 @@ const PaymentPage = () => {
   const [total, setTotal] = useState(0);
   const [openModal, setOpenModal] = useState(false);
 
+  const userRole = JSON.parse(localStorage.getItem("user"))?.role;
+
   const handleConfirmMomoPayment = async () => {
-    const userId = JSON.parse(localStorage.getItem("user"))?._id;
-    // const seatIds = selectedSeats.map(seat => seatLayout[seat.row][seat.col]._id);
-    // const serviceIds = selectedServices.map(service => service._id + "x" + service.number)
     const seatData =
       selectedSeats.length > 0
         ? selectedSeats
@@ -424,15 +423,18 @@ const PaymentPage = () => {
 
               {activeStep === 0 && (
                 <PaymentMethod>
-                  <PayCounterBtn
-                    variant={
-                      selectedPaymentMethod === "counter"
-                        ? "contained"
-                        : "outlined"
-                    }
-                  >
-                    Pay at Counter
-                  </PayCounterBtn>
+                  {userRole === "66ffe8db0fffedcac8a5561f" && (
+                    <PayCounterBtn
+                      variant={
+                        selectedPaymentMethod === "counter"
+                          ? "contained"
+                          : "outlined"
+                      }
+                      onClick={() => setSelectedPaymentMethod("counter")}
+                    >
+                      Pay at Counter
+                    </PayCounterBtn>
+                  )}
                   <PayBankBtn
                     variant={
                       selectedPaymentMethod === "bank"

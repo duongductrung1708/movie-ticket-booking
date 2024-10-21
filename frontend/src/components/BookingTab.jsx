@@ -482,6 +482,7 @@ const BookingTab = ({ isOpen, onClose }) => {
                 value={selectedDate}
                 onChange={(newValue) => setSelectedDate(newValue)}
                 format="MM/DD/YYYY"
+                minDate={dayjs()}
                 sx={{
                   width: "40%",
                   ".MuiInputBase-input": { color: "white" },

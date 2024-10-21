@@ -6,6 +6,7 @@ const User = require("../models/User");
 const Role = require("../models/Role");
 const sendEmail = require("../utils/sendEmail");
 const generateToken = require("../utils/generateToken");
+const { format } = require('date-fns');
 
 // @desc     Register user
 // @access   Public
@@ -394,12 +395,19 @@ exports.loginUser = async (req, res) => {
       return res.status(500).json({ msg: "Customer role not found" });
     }
 
+    const userRole = await Role.findById(user.role);
+    if (!userRole) {
+      return res.status(500).json({ msg: "User role not found" });
+    }
+
     if (isAdmin) {
       const adminRole = await Role.findOne({ name: "admin" });
       if (user.role.toString() !== adminRole._id.toString()) {
         return res.status(403).json({ msg: "Access denied: Not an admin" });
       }
     }
+
+    const formattedDob = new Date(user.dob).toISOString().split('T')[0];
 
     const accessToken = jwt.sign(
       {
@@ -408,11 +416,11 @@ exports.loginUser = async (req, res) => {
         email: user.email,
         isVerified: user.isVerified,
         date: user.date,
-        birthdate: user.dob,
+        birthdate: formattedDob,
         phone: user.phoneNumber,
         address: user.address,
         gender: user.gender,
-        role: customerRole._id,
+        role: userRole.name,
       },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
