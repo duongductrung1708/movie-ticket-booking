@@ -352,7 +352,7 @@ const PaymentPage = () => {
                   <Grid container spacing={4}>
                     <Grid item xs={2}>
                       <img
-                        src={movieImage}
+                        src={`http://localhost:8080/api/images/${movieImage}`}
                         alt={movieTitle}
                         style={{
                           width: "100%",

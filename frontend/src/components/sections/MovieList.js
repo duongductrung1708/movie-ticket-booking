@@ -7,7 +7,7 @@ import {
   getMovies,
   getShowtimesByMovieId,
   getTheaterByRoomId,
-} from "../../services/api"; // Import the getMovies function
+} from "../../services/api";
 import dayjs from "dayjs";
 
 const Section = styled.section`
@@ -243,7 +243,7 @@ const MovieListItem = React.forwardRef(({ movie, onShowtimeClick }, ref) => {
 
   return (
     <MovieItem ref={ref}>
-      <MovieImage src={movie.image} alt={movie.title} />
+      <MovieImage src={`http://localhost:8080/api/images/${movie.image}`} alt={movie.title} />
       <MovieInfo>
         <MovieTitle>{movie.title}</MovieTitle>
         <MovieRating>Rating: {movie.rating} / 10</MovieRating>
@@ -274,16 +274,32 @@ const MovieList = () => {
   gsap.registerPlugin(ScrollTrigger);
 
   useEffect(() => {
-    const fetchMovies = async () => {
+    const fetchMoviesWithValidShowtimes = async () => {
       try {
         const movieData = await getMovies();
-        setMovies(movieData);
+        const today = dayjs();
+
+        const filteredMovies = await Promise.all(
+          movieData.map(async (movie) => {
+            const movieShowtimes = await getShowtimesByMovieId(movie._id);
+            const validShowtimes = movieShowtimes.filter(showtime =>
+              dayjs(showtime.date).isAfter(today) || dayjs(showtime.date).isSame(today, 'day')
+            );
+
+            if (validShowtimes.length > 0) {
+              return { ...movie, validShowtimes };
+            }
+            return null;
+          })
+        );
+
+        setMovies(filteredMovies.filter(movie => movie !== null));
       } catch (error) {
         console.error("Failed to fetch movies:", error);
       }
     };
 
-    fetchMovies();
+    fetchMoviesWithValidShowtimes();
   }, []);
 
   const filteredMovies = movies.filter((movie) =>
@@ -297,33 +313,23 @@ const MovieList = () => {
   };
 
   const handleShowtimeClick = async (movie) => {
-    try {
-      const fetchedShowtimes = await getShowtimesByMovieId(movie._id);
-      console.log(fetchedShowtimes);
-
-      setShowtimes(fetchedShowtimes);
-      setSelectedMovie(movie);
-      setModalOpen(true);
-    } catch (error) {
-      console.error("Failed to fetch showtimes:", error);
-    }
+    setShowtimes(movie.validShowtimes);
+    setSelectedMovie(movie);
+    setModalOpen(true);
   };
 
   const handlSelectShowtime = async (showtime) => {
     const selectedMovie = movies.find(
       (movie) => movie._id === showtime.movie_id._id
     );
-    console.log(selectedMovie);
 
     if (selectedMovie) {
       const showtimeDate = showtime.date;
-
       const movieDuration = selectedMovie.duration;
       const movieImage = selectedMovie.image;
       const seatLayout = showtime.seatLayout;
       const time = showtime.start_time;
       const theaterResponse = await getTheaterByRoomId(showtime.room_id);
-      console.log(theaterResponse);
 
       navigate("/seat-reservation", {
         state: {
@@ -342,8 +348,6 @@ const MovieList = () => {
       });
     }
   };
-
-  console.log(showtimes);
 
   return (
     <Section id="movie-list">
