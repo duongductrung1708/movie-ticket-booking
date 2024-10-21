@@ -15,23 +15,36 @@ const bookingService = {
 
         return newBooking;
     },
+    updateBooking: async (bookingId, status) => {
+        const booking = await Booking.findById(bookingId);
+        if (!booking) {
+            throw new Error("Booking not found");
+        }
+        booking.status = status;
+        await booking.save();
+        console.log("Booking",booking);
+        return booking;
+    }
+    ,
     createBookingDetails: async (bookingId, services) => {
-        const savedDetail = []
-        console.log(bookingId);
         try {
-            services.map(async (service) => {
-                // Create a new booking detail object
-                const bookingDetail = new BookingDetail({
-                    booking_id: bookingId,
-                    service_id: service._id, // Assuming service has an id property
-                    quantity: service.quantity, // Assuming service has a quantity property
-                });
-                // Save the booking detail to the database
-                savedDetail.push(await bookingDetail.save());
-            })
-            console.log("Create Booking Details", savedDetail);
+            // Map over services array and return an array of promises
+            const savedDetails = await Promise.all(
+                services.map(async (service) => {
+                    // Create a new booking detail object
+                    const bookingDetail = new BookingDetail({
+                        booking_id: bookingId,
+                        service_id: service._id, // Assuming service has an id property
+                        quantity: service.quantity, // Assuming service has a quantity property
+                    });
+                    // Save the booking detail to the database
+                    return await bookingDetail.save();
+                })
+            );
 
-            return savedDetail; // Return the saved detail
+            console.log("Create Booking Details", savedDetails);
+
+            return savedDetails; // Return all the saved booking details
         } catch (error) {
             console.error('Error creating booking details:', error);
             throw new Error('Failed to create booking details'); // Handle the error appropriately

@@ -21,7 +21,7 @@ import styled from "styled-components";
 import { toast, ToastContainer } from "react-toastify";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
-import { createBooking, getMomoPaymentLink } from "../services/api";
+import { createBooking, deleteBooking, getMomoPaymentLink } from "../services/api";
 
 const Container = styled.div`
   width: 75%;
@@ -174,11 +174,13 @@ const PaymentPage = () => {
     selectedServices,
     selectedRoom,
     showtime,
+    booking,
+    bookingDetails
   } = location.state || {};
+  console.log(booking, bookingDetails);
 
 
   const navigate = useNavigate();
-  const [user, setUser] = useState()
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [showQRCode, setShowQRCode] = useState(false);
@@ -192,21 +194,27 @@ const PaymentPage = () => {
 
   const handleConfirmMomoPayment = async () => {
     const userId = JSON.parse(localStorage.getItem("user"))?._id;
-    const seatIds = selectedSeats.map(seat => seatLayout[seat.row][seat.col]._id);
-    const serviceIds = selectedServices.map(service => service._id + "x" + service.number)
-    const orderInfo = userId + "-" + showtime + "-" + seatIds + "-" + serviceIds;
+    // const seatIds = selectedSeats.map(seat => seatLayout[seat.row][seat.col]._id);
+    // const serviceIds = selectedServices.map(service => service._id + "x" + service.number)
+    const seatData = selectedSeats.length > 0
+      ? selectedSeats
+        .map((seat) => {
+          const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+          return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+        })
+        .join(", ")
+      : ""
+    const orderInfo = booking._id;
 
     try {
-      const booking = await createBooking(showtime, seatIds, serviceIds);
-      console.log(booking);
-      
-      
-      // const responseData = await getMomoPaymentLink(orderInfo, total * 1000);
-      // if (responseData.shortLink) {
-      //   window.location.href = responseData.shortLink;
-      // } else {
-      //   console.error("Momo payment link not found");
-      // }
+      // const booking = await createBooking(showtime, seatIds, serviceIds);
+
+      const responseData = await getMomoPaymentLink(orderInfo, total * 1000, booking._id);
+      if (responseData.shortLink) {
+        window.location.href = responseData.shortLink;
+      } else {
+        console.error("Momo payment link not found");
+      }
     } catch (error) {
       console.error("Error fetching Momo payment link:", error);
       toast.error("Error fetching Momo payment link");
@@ -216,7 +224,9 @@ const PaymentPage = () => {
     // setShowQRCode(method === "bank");
   };
 
-  const handleBackToSeatReservation = () => {
+  const handleBackToSeatReservation = async () => {
+    try {
+      await deleteBooking(booking._id);
     navigate("/seat-reservation", {
       state: {
         movieTitle,
@@ -235,6 +245,10 @@ const PaymentPage = () => {
         showtime,
       },
     });
+    } catch (error) {
+      console.log(error);
+      
+    }
   };
 
   const handleConfirmPayment = () => {

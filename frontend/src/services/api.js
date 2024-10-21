@@ -18,9 +18,19 @@ export const createBooking = async (userId, showtimeId, seatIds, serviceIds, sta
 
 }
 
-export const getMomoPaymentLink = async (orderInfo, amount) => {
+export const deleteBooking = async (id) => {
   try {
-    const response = await api.post("/momo", { orderInfo, amount });
+    const response = await api.delete('/bookings/' + id);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+
+}
+
+export const getMomoPaymentLink = async (orderInfo, amount, bookingId) => {
+  try {
+    const response = await api.post("/momo", { orderInfo, amount, bookingId });
     return response.data;
   } catch (error) {
     throw error.response ? error.response.data : error.message;

@@ -9,6 +9,41 @@ const showtimeService = {
         const showtime = await Showtime.findById(showtimeId)
         return showtime
     },
+    updateSeatLayout: async (showtimeId, seat) => {
+        try {
+            // Find the showtime by ID
+            const showtime = await Showtime.findById(showtimeId);
+
+            // Check if showtime exists
+            if (!showtime) {
+                throw new Error("Showtime not found");
+            }
+
+            // Parse the seat string, assuming it's in the format "3B,4C"
+            const seatArray = seat.split(',');
+
+            seatArray.forEach((seatStr) => {
+                // Split into column and row (e.g., 3B -> col 3, row 2)
+                const col = parseInt(seatStr.charAt(0)) - 1; // Adjust for 0-based index
+                const row = seatStr.charAt(1).charCodeAt(0) - 'A'.charCodeAt(0); // Convert letter to index (A -> 0, B -> 1, etc.)
+
+                // Update the status of the seat to "occupied"
+                if (showtime.seatLayout[row] && showtime.seatLayout[row][col]) {
+                    showtime.seatLayout[row][col].status = "occupied";
+                } else {
+                    throw new Error(`Invalid seat position: ${seatStr}`);
+                }
+            });
+
+            // Save the updated showtime
+            await showtime.save();
+            console.log("SeatLayout", showtime.seatLayout);
+            return { success: true, message: "Seat layout updated successfully" };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    },
+
     updateSeatLayoutShowtime: async (showtimeId, seatIds, status) => {
         const showtime = await Showtime.findById(showtimeId)
         //update seat layout
@@ -31,7 +66,7 @@ const showtimeService = {
 
         // Function to convert seat coordinates to label
         const seatLabel = (row, col) => `${row + 1}${String.fromCharCode(65 + col)}`;
-        
+
         const seatMap = {};
         const labels = [];
 
@@ -51,7 +86,7 @@ const showtimeService = {
         });
 
         return labels;
-    }
+    },
 }
 
 module.exports = showtimeService;

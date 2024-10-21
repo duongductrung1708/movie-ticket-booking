@@ -1,5 +1,8 @@
 const axios = require('axios');
 const crypto = require('crypto');
+const { createPayment, updatePayment } = require('../services/paymentService');
+const { updateBooking } = require('../services/bookingService');
+const { updateSeatLayout } = require('../services/showtimeService');
 
 
 var accessKey = 'F8BBA842ECF85';
@@ -7,12 +10,23 @@ var secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
 
 const momoController = {
   createPayment: async (req, res) => {
+    let paymentResponse;
+    try {
+      const { orderInfo, amount, bookingId } = req.body;
+      paymentResponse = await createPayment(amount, bookingId, "momo", "pending")
+      console.log(paymentResponse);
+    } catch (error) {
+      console.log("Payment: ", error);
+
+    }
+
+
     //https://developers.momo.vn/#/docs/en/aiov2/?id=payment-method
     //parameters body {orderInfo,amount, items}
-    var orderInfo = req.body.orderInfo;
+    var orderInfo = req.body.orderInfo + "-" + paymentResponse._id;
     var partnerCode = 'MOMO';
     var redirectUrl = 'http://localhost:3000/booking-result';
-    var ipnUrl = 'https://69b9-116-96-47-119.ngrok-free.app/api/momo/callback';
+    var ipnUrl = 'https://ee1b-116-96-47-119.ngrok-free.app/api/momo/callback';
     var requestType = "payWithMethod";
     var amount = req.body.amount;
     var orderId = partnerCode + new Date().getTime();
@@ -26,14 +40,14 @@ const momoController = {
     //accessKey=$accessKey&amount=$amount&extraData=$extraData&ipnUrl=$ipnUrl&orderId=$orderId&orderInfo=$orderInfo&partnerCode=$partnerCode&redirectUrl=$redirectUrl&requestId=$requestId&requestType=$requestType
     var rawSignature = "accessKey=" + accessKey + "&amount=" + amount + "&extraData=" + extraData + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId + "&orderInfo=" + orderInfo + "&partnerCode=" + partnerCode + "&redirectUrl=" + redirectUrl + "&requestId=" + requestId + "&requestType=" + requestType;
     //puts raw signature
-    console.log("--------------------RAW SIGNATURE----------------")
-    console.log(rawSignature)
+    // console.log("--------------------RAW SIGNATURE----------------")
+    // console.log(rawSignature)
     //signature
     var signature = crypto.createHmac('sha256', secretKey)
       .update(rawSignature)
       .digest('hex');
-    console.log("--------------------SIGNATURE----------------")
-    console.log(signature)
+    // console.log("--------------------SIGNATURE----------------")
+    // console.log(signature)
 
     //json object send to MoMo endpoint
     const requestBody = JSON.stringify({
@@ -79,8 +93,12 @@ const momoController = {
   getPaymentCallBack: async (req, res) => {
     console.log("CALLBACKK");
     console.log(req.body);
-    
-    return res.status(200).json(req.body)
+    if (req.body.message == "Successful.") {
+      const [bookingId, paymentId] = req.body.orderInfo.split('-');
+      const booking = await updateBooking(bookingId, "done");
+      await updatePayment(paymentId, "success")
+      await updateSeatLayout(booking.showtime_id, booking.seat)
+    }
   },
   getTransactionStatus: async (req, res) => {
     const { orderId } = req.body;
