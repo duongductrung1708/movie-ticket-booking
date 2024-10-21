@@ -65,7 +65,7 @@ const showtimeService = {
     convertSeatFormat: (seatIds, seatLayout) => {
 
         // Function to convert seat coordinates to label
-        const seatLabel = (row, col) => `${row + 1}${String.fromCharCode(65 + col)}`;
+        const seatLabel = (row, col) => `${String.fromCharCode(65 + row)}${col + 1}`;
 
         const seatMap = {};
         const labels = [];

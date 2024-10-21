@@ -1,54 +1,37 @@
-import { Breadcrumbs, Paper, Typography, Link as MuiLink } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import styled from "styled-components";
-import Footer from "../components/Footer";
+import GlobalStyles from "../styles/GlobalStyles";
+import light from "../styles/Themes";
+import { ThemeProvider } from "styled-components";
 import Navigation from "../components/Navigation";
+import Footer from "../components/Footer";
 
-const Container = styled.div`
-  width: 75%;
-  min-height: 80vh;
-  margin: 0 auto;
-  margin-bottom: 10rem;
+const StyledBookingResult = styled.div`
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 50px;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
 
-  @media (max-width: 64em) {
-    width: 85%;
+  h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+    font-size: 28px;
   }
-  @media (max-width: 48em) {
-    width: 100%;
+
+  p {
+    margin: 10px 0;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #555;
+
+    strong {
+      color: #333;
+    }
   }
-`;
-
-const Section = styled.section`
-  min-height: ${(props) => `calc(100vh - ${props.theme.navHeight})`};
-  width: 100vw;
-  position: relative;
-  background-color: ${(props) => props.theme.body};
-`;
-
-const BreadcrumbContainer = styled.div`
-  margin-bottom: 1rem;
-  margin-top: 5rem;
-`;
-
-const StyledBreadcrumbs = styled(Breadcrumbs)`
-  background-color: ${(props) => props.theme.body};
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-`;
-
-const BreadcrumbLink = styled(MuiLink)`
-  font-family: "Sora", sans-serif !important;
-  color: orange !important;
-  text-decoration: none !important;
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
-const Complete = styled.div`
-  margin-top: 10rem;
 `;
 
 const Btn = styled.button`
@@ -90,51 +73,44 @@ const Btn = styled.button`
 `;
 
 export default function BookingResult() {
-  const navigate = useNavigate();
+    const location = useLocation();
 
-  const handleBookingHistoryClick = () => {
-    navigate("/booking-history");
-  };
+    // Extract query parameters from URL
+    const queryParams = new URLSearchParams(location.search);
 
-  return (
-    <Section>
-      <Navigation />
-      <Container>
-        <BreadcrumbContainer>
-          <StyledBreadcrumbs aria-label="breadcrumb">
-            <BreadcrumbLink component={Link} to="/home">
-              Home
-            </BreadcrumbLink>
-            <Typography color="textPrimary">Succeed</Typography>
-          </StyledBreadcrumbs>
-        </BreadcrumbContainer>
-        <Complete>
-          <Paper square elevation={0} sx={{ p: 3, textAlign: "center" }}>
-            <Typography
-              fontFamily="Akaya Telivigala, cursive"
-              fontWeight="bold"
-              fontSize="2rem"
-            >
-              <div>Thank you for using our service.</div>
-              <div>Please check your email for the transaction results.</div>
-              <div>Have a nice day, see you at the theater.</div>
-              <div>
-                If you want to check your transaction history, click the button
-                below.
-              </div>
-            </Typography>
-            <Btn
-              variant="contained"
-              color="primary"
-              sx={{ marginTop: 2 }}
-              onClick={handleBookingHistoryClick}
-            >
-              Booking History
-            </Btn>
-          </Paper>
-        </Complete>
-      </Container>
-      <Footer />
-    </Section>
-  );
-}
+    // Get individual parameters
+    const partnerCode = queryParams.get("partnerCode");
+    const orderId = queryParams.get("orderId");
+    const requestId = queryParams.get("requestId");
+    const amount = queryParams.get("amount");
+    const transId = queryParams.get("transId");
+    const message = queryParams.get("message");
+    const payType = queryParams.get("payType");
+    const handleBookingHistory = () => {
+        window.location.href = "/booking-history";
+    }
+
+    return (
+        <>
+            <GlobalStyles />
+            <ThemeProvider theme={light}>
+                <Navigation />
+                <StyledBookingResult>
+                    <h1>Booking Result</h1>
+                    <p><strong>Partner Code:</strong> {partnerCode}</p>
+                    <p><strong>Order ID:</strong> {orderId}</p>
+                    <p><strong>Request ID:</strong> {requestId}</p>
+                    <p><strong>Transaction ID:</strong> {transId}</p>
+                    <p><strong>Amount: </strong>
+                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
+                            .format(amount)}</p>
+                    <p><strong>Message:</strong> {message}</p>
+                    <p><strong>Payment Type:</strong> {payType}</p>
+                    <Btn onClick={handleBookingHistory}>Booking History</Btn>
+                    <p>Your order is ready check your mail and booking history</p>
+                </StyledBookingResult>
+                <Footer />
+            </ThemeProvider>
+        </>
+    )
+};
