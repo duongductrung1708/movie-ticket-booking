@@ -434,7 +434,8 @@ const MovieDetail = () => {
                 .join(", ");
               const showtimeDate = dayjs(showtime.date).format("MM/DD/YYYY");
 
-              const room = showtime.room_id.name
+              const room = showtime.room_id.name;
+              const showtimeId = showtime._id;
 
               if (!uniqueMovies[movieId]) {
                 uniqueMovies[movieId] = {
@@ -447,6 +448,7 @@ const MovieDetail = () => {
                   genres: movieGenres,
                   seatLayout: showtimeLayout,
                   room: room,
+                  showtimeId: showtimeId,
                 };
               }
 
@@ -485,6 +487,7 @@ const MovieDetail = () => {
       const movieImage = movie.image || selectedMovie.image;
 
       const selectedRoom = selectedMovie.room;
+      const showtimeId = selectedMovie.showtimeId;
 
       const seatLayout = selectedMovie.seatLayout;
       const selectedTheaterDetails = filteredTheaters.find(
@@ -495,6 +498,7 @@ const MovieDetail = () => {
 
       navigate("/seat-reservation", {
         state: {
+          showtime: showtimeId,
           movieTitle: selectedMovie.title,
           movieImage: movieImage,
           selectedTime: time,
@@ -723,7 +727,8 @@ const MovieDetail = () => {
                   </LocalizationProvider>
 
                   {/* Reset Button */}
-                  <Button style={{width: "15%", marginTop: "1rem"}}
+                  <Button
+                    style={{ width: "15%", marginTop: "1rem" }}
                     variant="contained"
                     color="warning"
                     onClick={resetSelection}

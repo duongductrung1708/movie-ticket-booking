@@ -3,7 +3,11 @@ import styled from "styled-components";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useNavigate } from "react-router-dom";
-import { getMovies, getShowtimesByMovieId, getTheaterByRoomId } from "../../services/api"; // Import the getMovies function
+import {
+  getMovies,
+  getShowtimesByMovieId,
+  getTheaterByRoomId,
+} from "../../services/api"; // Import the getMovies function
 import dayjs from "dayjs";
 
 const Section = styled.section`
@@ -206,7 +210,6 @@ const ShowtimeCard = styled.div`
   margin: 10px 0;
 `;
 
-
 const Modal = styled.div`
   position: fixed;
   top: 50%;
@@ -253,7 +256,6 @@ const MovieListItem = React.forwardRef(({ movie, onShowtimeClick }, ref) => {
             Showtimes
           </ShowtimeButton>
         </div>
-
       </MovieInfo>
     </MovieItem>
   );
@@ -308,8 +310,9 @@ const MovieList = () => {
   };
 
   const handlSelectShowtime = async (showtime) => {
-
-    const selectedMovie = movies.find((movie) => movie._id === showtime.movie_id._id);
+    const selectedMovie = movies.find(
+      (movie) => movie._id === showtime.movie_id._id
+    );
     console.log(selectedMovie);
 
     if (selectedMovie) {
@@ -331,16 +334,16 @@ const MovieList = () => {
           selectedDate: showtimeDate,
           selectedTheater: theaterResponse.name,
           selectedRoom: showtime.room_name,
-          selectedTheaterAddress: theaterResponse.address + ", " + theaterResponse.city,
+          selectedTheaterAddress:
+            theaterResponse.address + ", " + theaterResponse.city,
           duration: movieDuration,
           seatLayout: seatLayout,
         },
       });
     }
-  }
+  };
 
   console.log(showtimes);
-
 
   return (
     <Section id="movie-list">
@@ -378,11 +381,13 @@ const MovieList = () => {
         <h2>{selectedMovie?.title} Showtimes</h2>
         <ShowtimeContainer>
           {showtimes.map((showtime, index) => (
-            <ShowtimeCard key={index} >
+            <ShowtimeCard key={index}>
               {dayjs(showtime.date).format("MM/DD/YYYY")} at{" "}
-              <ShowtimeButton onClick={() => {
-                handlSelectShowtime(showtime)
-              }} >
+              <ShowtimeButton
+                onClick={() => {
+                  handlSelectShowtime(showtime);
+                }}
+              >
                 {showtime.start_time}
               </ShowtimeButton>
             </ShowtimeCard>
