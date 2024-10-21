@@ -43,24 +43,33 @@ exports.createMovie = async (req, res) => {
     const {
       title,
       rating,
-      image,
       trailer,
       synopsis,
       language,
       director,
       country,
-      genre,
       releaseDate,
       duration,
       ageRating,
       cast,
     } = req.body;
 
-    const genreExists = await Genre.findById(genre);
-    if (!genreExists) {
-      return res.status(404).json({ error: "Genre not found" });
+    const image = req.file ? req.file.filename : null; // Lấy file ảnh nếu có
+
+    // Lấy mảng các genres từ body request
+    const genres = JSON.parse(req.body.genres)
+
+    if (!genres || genres.length === 0) {
+      return res.status(400).json({ error: "Genres are required" });
     }
 
+    // Kiểm tra từng genre có tồn tại hay không
+    const foundGenres = await Genre.find({ _id: { $in: genres } });
+    if (foundGenres.length !== genres.length) {
+      return res.status(404).json({ error: "One or more genres not found" });
+    }
+
+    // Tạo phim mới với thông tin và các thể loại đã xác minh
     const newMovie = new Movie({
       title,
       rating,
@@ -70,16 +79,18 @@ exports.createMovie = async (req, res) => {
       language,
       director,
       country,
-      genre,
+      genre: genres, // Lưu mảng các thể loại
       releaseDate,
       duration,
       ageRating,
       cast,
     });
 
+    // Lưu phim mới vào cơ sở dữ liệu
     const savedMovie = await newMovie.save();
     res.status(201).json(savedMovie);
   } catch (error) {
+    console.error("Error creating movie:", error);
     res.status(500).json({ error: "Failed to create movie" });
   }
 };
@@ -90,59 +101,58 @@ exports.updateMovie = async (req, res) => {
     const {
       title,
       rating,
-      image,
       trailer,
       synopsis,
       language,
       director,
       country,
-      genre,
       releaseDate,
       duration,
       ageRating,
-      cast,
+      status,
     } = req.body;
 
-    const updateFields = {};
+    // Kiểm tra và giải mã genres và cast nếu chúng tồn tại
+    const genres = req.body.genres ? JSON.parse(req.body.genres) : [];
+    const castArray = req.body.cast ? JSON.parse(req.body.cast) : [];
 
-    if (title) updateFields.title = title;
-    if (rating) updateFields.rating = rating;
-    if (image) updateFields.image = image;
-    if (trailer) updateFields.trailer = trailer;
-    if (synopsis) updateFields.synopsis = synopsis;
-    if (language) updateFields.language = language;
-    if (director) updateFields.director = director;
-    if (country) updateFields.country = country;
-    if (genre) {
-      const genreExists = await Genre.findById(genre);
-      if (!genreExists) {
-        return res.status(404).json({ error: "Genre not found" });
-      }
-      updateFields.genre = genre;
-    }
-    if (releaseDate) updateFields.releaseDate = releaseDate;
-    if (duration) updateFields.duration = duration;
-    if (ageRating) updateFields.ageRating = ageRating;
-    if (cast) updateFields.cast = cast;
+    // Kiểm tra nếu có ảnh mới được upload
+    const image = req.file ? req.file.filename : req.body.image; // Giữ lại ảnh cũ nếu không có ảnh mới
 
-    if (Object.keys(updateFields).length === 0) {
-      return res
-        .status(400)
-        .json({ error: "At least one field is required to update" });
-    }
-
+    // Cập nhật phim
     const updatedMovie = await Movie.findByIdAndUpdate(
       req.params.id,
-      updateFields,
+      {
+        title,
+        rating,
+        image,
+        trailer,
+        synopsis,
+        language,
+        director,
+        country,
+        genre: genres, // Mảng thể loại
+        releaseDate,
+        duration,
+        ageRating,
+        cast: castArray, // Mảng diễn viên
+        status,
+      },
       { new: true }
     );
-    if (!updatedMovie) return res.status(404).json({ msg: "Movie not found" });
 
-    res.status(200).json(updatedMovie);
+    if (!updatedMovie) {
+      return res.status(404).json({ error: "Movie not found" });
+    }
+
+    res.json(updatedMovie);
   } catch (error) {
+    console.error("Error updating movie:", error);
     res.status(500).json({ error: "Failed to update movie" });
   }
 };
+
+  
 
 // Delete a movie
 exports.deleteMovie = async (req, res) => {
