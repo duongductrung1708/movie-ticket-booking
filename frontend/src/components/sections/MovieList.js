@@ -85,6 +85,8 @@ const MovieItem = styled.div`
   border-radius: 20px;
   overflow: hidden;
   text-align: center;
+  height: 100%;
+  justify-content: space-between;
 
   @media (max-width: 30em) {
     width: 70vw;
@@ -117,13 +119,14 @@ const MovieRating = styled.span`
 `;
 
 const Button = styled.button`
+  display: block;
+  margin-top: 0.5rem;
   padding: 0.5rem 1rem;
   background-color: ${(props) => props.theme.text};
   color: ${(props) => props.theme.body};
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  margin-top: 0.5rem;
   transition: background-color 0.3s ease;
 
   &:hover {
