@@ -1,19 +1,29 @@
-const Booking = require('../models/Booking');
-const mongoose = require('mongoose');
-const { getShowtimeById, updateSeatLayoutShowtime, convertSeatFormat } = require('../services/showtimeService');
-const { createBooking, createBookingDetails, deleteBookingDetails } = require('../services/bookingService');
+const Booking = require("../models/Booking");
+const mongoose = require("mongoose");
+const {
+  getShowtimeById,
+  updateSeatLayoutShowtime,
+  convertSeatFormat,
+} = require("../services/showtimeService");
+const {
+  createBooking,
+  createBookingDetails,
+  deleteBookingDetails,
+} = require("../services/bookingService");
+const sendEmail = require("../utils/sendEmail");
+const User = require("../models/User");
 
 // Create a new booking
 exports.createBooking = async (req, res) => {
   try {
     const newBooking = new Booking({
       _id: new mongoose.Types.ObjectId(), // Tạo ID mới cho mỗi booking
-      ...req.body
+      ...req.body,
     });
     await newBooking.save();
     res.status(201).json(newBooking);
   } catch (error) {
-    res.status(500).json({ message: 'Error creating booking', error });
+    res.status(500).json({ message: "Error creating booking", error });
   }
 };
 
@@ -25,7 +35,6 @@ exports.createBookingData = async (req, res) => {
     const { userId, showtimeId, seatIds, serviceIds, status } = req.body;
 
     const showtime = await getShowtimeById(showtimeId);
-    console.log(serviceIds);
 
     // Update seatLayout status
     await updateSeatLayoutShowtime(showtimeId, seatIds, "reserved");
@@ -34,17 +43,93 @@ exports.createBookingData = async (req, res) => {
     const seat = convertSeatFormat(seatIds, showtime.seatLayout);
 
     // Create a booking
-    bookingResponse = await createBooking(userId, showtimeId, showtime.room_id.toString(), seat.toString(), status);
+    bookingResponse = await createBooking(
+      userId,
+      showtimeId,
+      showtime.room_id.toString(),
+      seat.toString(),
+      status
+    );
 
     // Create booking details
-    const services = serviceIds.map(item => {
-      const [_id, quantity] = item.split('*'); // Split the string into id and quantity
+    const services = serviceIds.map((item) => {
+      const [_id, quantity] = item.split("*"); // Split the string into id and quantity
       return { _id, quantity: Number(quantity) }; // Return an object with id and quantity as a number
     });
 
-    bookingDetailsResponse = await createBookingDetails(bookingResponse._id, services);
+    bookingDetailsResponse = await createBookingDetails(
+      bookingResponse._id,
+      services
+    );
 
-    return res.json({ booking: bookingResponse, bookingDetails: bookingDetailsResponse });
+    const bookingDetailsUrl = `${process.env.FRONT_END_URL}/booking/${bookingResponse._id}`
+
+    //send email booking
+    const emailTemplate = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            max-width: 400px;
+            margin: auto;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .qr-code {
+            margin: 20px 0;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Booking Confirmation</h2>
+        <p>🎉 <strong>Success!</strong> You've successfully booked your film tickets!</p>
+        <p>Please click on the QR code below or scan it to know more details about your booking:</p>
+        <div class="qr-code">
+            <a href="${bookingDetailsUrl}" target="_blank">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?data=${bookingDetailsUrl}&amp;size=100x100" alt="QR Code" title="Scan to see booking details">
+            </a>
+        </div>
+        <a href="${bookingDetailsUrl}" class="button">View Booking Details</a>
+    </div>
+</body>
+</html>
+`;
+
+    const user = await User.findById(userId);
+
+    await sendEmail(
+      user.email,
+      "Booking Movie Success",
+      emailTemplate
+    );
+
+    return res.json({
+      booking: bookingResponse,
+      bookingDetails: bookingDetailsResponse,
+    });
   } catch (error) {
     console.error("Error occurred: ", error.message);
     const { showtimeId, seatIds } = req.body;
@@ -62,9 +147,14 @@ exports.createBookingData = async (req, res) => {
     }
 
     // Return error response
-    return res.status(500).json({ message: "An error occurred, reverting seat status.", error: error.message });
+    return res
+      .status(500)
+      .json({
+        message: "An error occurred, reverting seat status.",
+        error: error.message,
+      });
   }
-}
+};
 
 // Get all bookings
 exports.getAllBookings = async (req, res) => {
@@ -72,17 +162,21 @@ exports.getAllBookings = async (req, res) => {
     const bookings = await Booking.find();
     res.status(200).json(bookings);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching bookings', error });
+    res.status(500).json({ message: "Error fetching bookings", error });
   }
 };
 
 // Update booking by ID
 exports.updateBooking = async (req, res) => {
   try {
-    const updatedBooking = await Booking.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
     res.status(200).json(updatedBooking);
   } catch (error) {
-    res.status(500).json({ message: 'Error updating booking', error });
+    res.status(500).json({ message: "Error updating booking", error });
   }
 };
 
@@ -90,8 +184,8 @@ exports.updateBooking = async (req, res) => {
 exports.deleteBooking = async (req, res) => {
   try {
     await Booking.findByIdAndDelete(req.params.id);
-    res.status(204).json({ message: 'Booking deleted successfully' });
+    res.status(204).json({ message: "Booking deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting booking', error });
+    res.status(500).json({ message: "Error deleting booking", error });
   }
 };
