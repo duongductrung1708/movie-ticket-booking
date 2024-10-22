@@ -1,5 +1,7 @@
 const Booking = require("../models/Booking");
 const mongoose = require("mongoose");
+
+const { setBookingTimeout } = require('../services/timeoutManager');
 const {
   getShowtimeById,
   updateSeatLayoutShowtime,
@@ -9,6 +11,7 @@ const {
   createBooking,
   createBookingDetails,
   deleteBookingDetails,
+  deleteBooking,
 } = require("../services/bookingService");
 const sendEmail = require("../utils/sendEmail");
 const User = require("../models/User");
@@ -49,6 +52,20 @@ exports.createBookingData = async (req, res) => {
       showtime.room_id.toString(),
       seat.toString(),
       status
+    );
+
+    setBookingTimeout(
+      bookingResponse._id,
+      async () => {
+        console.log(`Booking Timeout.`);
+        const booking = await Booking.findById(bookingResponse._id);
+        if (booking && booking.status === "processing") {
+          await updateSeatLayoutShowtime(showtimeId, seatIds, "available");
+          await deleteBooking(bookingResponse._id);
+          console.log(`Booking ${bookingResponse._id} canceled due to timeout.`);
+        }
+      },
+      10*10*1000
     );
 
     // Create booking details

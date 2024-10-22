@@ -3,11 +3,12 @@ const crypto = require('crypto');
 const { createPayment, updatePayment } = require('../services/paymentService');
 const { updateBooking } = require('../services/bookingService');
 const { updateSeatLayout } = require('../services/showtimeService');
-
+// paymentController.js
+const { clearBookingTimeout } = require('../services/timeoutManager');
 
 var accessKey = 'F8BBA842ECF85';
 var secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
-const publicPort = 'https://5cbe-116-96-47-119.ngrok-free.app'
+const publicPort = 'https://3ad8-116-96-47-119.ngrok-free.app'
 
 const momoController = {
   createPayment: async (req, res) => {
@@ -96,6 +97,10 @@ const momoController = {
     console.log(req.body);
     if (req.body.message == "Successful.") {
       const [bookingId, paymentId] = req.body.orderInfo.split('-');
+
+      // Clear the booking timeout as payment is successful
+      clearBookingTimeout(bookingId);
+
       const booking = await updateBooking(bookingId, "done");
       await updatePayment(paymentId, "success")
       await updateSeatLayout(booking.showtime_id, booking.seat)

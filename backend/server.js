@@ -21,6 +21,9 @@ const path = require('path');
 const momoPaymentRouter = require('./routes/momoPaymentRoutes');
 const cors = require('cors');
 
+
+const WebSocket = require('ws');
+
 const app = express();
 
 // Middleware
@@ -56,5 +59,29 @@ app.use('/api/upcoming-movie', upcomingMovieRoutes);
 app.use('/api/momo', momoPaymentRouter);
 
 // Start server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT ;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+
+// Initialize WebSocket server (on a different port)
+const wss = new WebSocket.Server({ port: 5000 });
+
+wss.on('connection', (ws) => {
+  console.log('A new client connected');
+
+  // Send a welcome message to the client
+  ws.send('Welcome to the standalone WebSocket server!');
+
+  // Handle incoming messages from the client
+  ws.on('message', (message) => {
+    console.log('Received:', message);
+    // Echo the message back to the client
+    ws.send(`Server received: ${message}`);
+  });
+
+  // Handle client disconnection
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
+});
+
+console.log('WebSocket server is running on ws://localhost:5000');
