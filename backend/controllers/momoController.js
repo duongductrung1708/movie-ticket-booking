@@ -7,7 +7,7 @@ const { updateSeatLayout } = require('../services/showtimeService');
 
 var accessKey = 'F8BBA842ECF85';
 var secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
-const publicPort = 'https://a8b7-118-70-211-232.ngrok-free.app'
+const publicPort = 'https://5cbe-116-96-47-119.ngrok-free.app'
 
 const momoController = {
   createPayment: async (req, res) => {

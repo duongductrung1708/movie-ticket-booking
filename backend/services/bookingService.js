@@ -15,6 +15,17 @@ const bookingService = {
 
         return newBooking;
     },
+    getBookingByUserId: async (userId) => {
+        const booking = await Booking.find({ user_id: userId }).populate({ path: "showtime_id" }).populate({ path: "room_id" });
+        console.log("Booking of user", booking);
+
+        return booking;
+    },
+    getBookingDetailByBookingId: async (bookingId) => {
+        const bookingDetails = await BookingDetail.find({ booking_id: bookingId }).populate({ path: "service_id" })
+        console.log("Booking Details of user", bookingDetails);
+        return bookingDetails;
+    },
     updateBooking: async (bookingId, status) => {
         const booking = await Booking.findById(bookingId);
         if (!booking) {
@@ -22,7 +33,7 @@ const bookingService = {
         }
         booking.status = status;
         await booking.save();
-        console.log("Booking",booking);
+        console.log("Booking", booking);
         return booking;
     }
     ,
@@ -68,6 +79,7 @@ const bookingService = {
             throw new Error('Failed to delete booking details'); // Handle the error appropriately
         }
     },
+
 }
 
 module.exports = bookingService;
