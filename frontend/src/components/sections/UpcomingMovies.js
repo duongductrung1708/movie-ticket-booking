@@ -120,9 +120,28 @@ const Button = styled.button`
   border: none;
   border-radius: 10px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 
   &:hover {
     background-color: gray;
+  }
+
+  @media (max-width: 1024px) {
+    font-size: 1rem;
+    padding: 0.7rem 1.2rem;
+    margin: 0.5rem 1rem 1rem;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0.8rem 1rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 1rem 1rem;
   }
 `;
 
