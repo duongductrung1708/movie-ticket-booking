@@ -223,6 +223,7 @@ export default function UpcomingMovies() {
           <Typography variant="h4">Upcoming Movies</Typography>
           <Button
             variant="contained"
+            style={{ fontWeight: "bold" }}
             color="primary"
             onClick={() => {
               setOpen(true);

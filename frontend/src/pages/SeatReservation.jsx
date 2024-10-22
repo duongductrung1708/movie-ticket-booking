@@ -700,7 +700,7 @@ const SeatReservation = () => {
             <MovieInfo>
               <div>
                 <img
-                  src={movieImage}
+                  src={`http://localhost:8080/api/images/${movieImage}`}
                   alt={`${movieTitle} poster`}
                   style={{
                     width: "100%",

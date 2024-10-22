@@ -159,7 +159,11 @@ const UpdateUpcomingMovieDialog: React.FC<UpdateUpcomingMovieDialogProps> = ({
             label="Cast (comma-separated)"
             fullWidth
             variant="outlined"
-            value={updatedMovieData.cast.join(", ")}
+            value={
+              Array.isArray(updatedMovieData.cast)
+                ? updatedMovieData.cast.join(", ")
+                : updatedMovieData.cast || ""
+            }
             onChange={handleChange}
           />
           <TextField
@@ -259,7 +263,7 @@ const UpdateUpcomingMovieDialog: React.FC<UpdateUpcomingMovieDialogProps> = ({
           <Button onClick={handleUpdateMovie}>Update Movie</Button>
         </DialogActions>
       </Dialog>
-      
+
       {/* Toast container */}
       <ToastContainer />
     </>

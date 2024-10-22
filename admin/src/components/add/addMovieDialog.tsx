@@ -50,7 +50,7 @@ const AddMovieDialog: React.FC<AddMovieDialogProps> = ({
   }
 
   const [genres, setGenres] = React.useState<Genre[]>([]); // Lưu danh sách thể loại từ API
-
+  const [movieImage, setMovieImage] = React.useState<File | null>(null);
   React.useEffect(() => {
     // Fetch genres từ API
     axiosInstance.get("/genres").then(({ data }) => {
@@ -73,13 +73,12 @@ const AddMovieDialog: React.FC<AddMovieDialogProps> = ({
     });
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]; // Lấy file đầu tiên mà người dùng chọn
-    if (file) {
-      setMovieData({ ...movieData, image: file }); // Lưu file ảnh vào state
+  
+  const handleMovieImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setMovieImage(e.target.files[0]);
     }
   };
-
   const handleAddMovie = async () => {
     try {
       const formData = new FormData();
@@ -96,12 +95,11 @@ const AddMovieDialog: React.FC<AddMovieDialogProps> = ({
       formData.append("releaseDate", movieData.releaseDate);
   
       // Thêm file ảnh vào formData
-      if (movieData.image) {
-        formData.append("image", movieData.image); // 'image' là tên field được sử dụng ở backend
+      if (movieImage) {
+        formData.append("image", movieImage);
       }
   
-      formData.append("genre", JSON.stringify(movieData.genre));
-  
+      formData.append("genres", JSON.stringify(movieData.genre));
       // Gửi dữ liệu và ảnh lên backend
       const response = await axiosInstance.post("/movies", formData, {
         headers: {
@@ -164,7 +162,7 @@ const AddMovieDialog: React.FC<AddMovieDialogProps> = ({
           <input
             accept="image/*"
             type="file"
-            onChange={handleImageUpload} // Hàm xử lý khi người dùng chọn file
+            onChange={handleMovieImageChange } // Hàm xử lý khi người dùng chọn file
             style={{ margin: "dense", display: "block", marginBottom: "16px" }}
           />
           <TextField

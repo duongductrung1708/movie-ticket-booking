@@ -21,11 +21,13 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Typography,
 } from "@mui/material";
 import AddMovieDialog from "../../components/add/addMovieDialog";
 import DeleteIcon from "@mui/icons-material/Delete";
 import UpdateMovieDialog from "../../components/update/updateMovieDialog";
 import { toast, ToastContainer } from "react-toastify";
+import constants from "../../constants/constants";
 
 function createMovieData(
   _id: string,
@@ -44,7 +46,7 @@ function createMovieData(
   trailer: string,
   language: string,
   createdAt: string,
-  updatedAt: string,
+  updatedAt: string
 ) {
   return {
     _id,
@@ -90,7 +92,7 @@ function Row(props: {
         <TableCell align="left">{row.title}</TableCell>
         <TableCell align="left">
           <img
-            src={row.image}
+            src={constants.url + "images/" + row.image}
             alt="movie-poster"
             className="table-image"
             style={{ width: "50px", height: "50px", objectFit: "cover" }}
@@ -220,16 +222,24 @@ export default function Movies() {
 
   return (
     <>
-      <div className="info">
-        <h1>Movies</h1>
-        <button
-          onClick={() => {
-            setOpen(true);
-          }}
-          className="add-movie"
+      <div>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={2}
         >
-          Add Movie
-        </button>
+          <Typography variant="h4">Movies</Typography>
+          <Button
+            variant="contained"
+            style={{ fontWeight: "bold" }}
+            color="primary"
+            onClick={() => setOpen(true)}
+            className="add-service"
+          >
+            Add Movie
+          </Button>
+        </Box>
       </div>
       <TableContainer
         component={Paper}

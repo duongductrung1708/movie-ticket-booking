@@ -356,7 +356,6 @@ const MovieDetail = () => {
 
   const bookingRef = useRef(null);
 
-  // Reset Select State Function
   const resetSelection = () => {
     setSelectedCity("");
     setFilteredTheaters([]);
@@ -403,40 +402,53 @@ const MovieDetail = () => {
         const selectedTheaterDetails = filteredTheaters.find(
           (theater) => theater.name === selectedTheater
         );
-
+    
         if (selectedTheaterDetails) {
           const theaterId = selectedTheaterDetails._id;
-
+    
           try {
             const showtimesData = await getShowtimesByTheater(theaterId);
-
+    
+            console.log("Showtimes Data: ", showtimesData);
+    
             const filteredShowtimes = showtimesData.filter((showtime) => {
+              const showtimeDate = dayjs(showtime.date);
+              const currentDate = dayjs();
+    
               if (selectedDate) {
                 return (
-                  dayjs(showtime.date).isSame(selectedDate, "day") &&
+                  showtimeDate.isSame(selectedDate, "day") &&
                   showtime.movie_id._id === movie._id
                 );
               }
-              return showtime.movie_id._id === movie._id;
+    
+              return (
+                (showtimeDate.isAfter(currentDate, "day") || 
+                 showtimeDate.isSame(currentDate, "day")) &&
+                showtime.movie_id._id === movie._id
+              );
             });
-
+    
+            console.log("Filtered Showtimes: ", filteredShowtimes);
+    
             const uniqueMovies = {};
-
+    
             filteredShowtimes.forEach((showtime) => {
               const movieId = showtime.movie_id._id;
               const movieTitle = showtime.movie_id.title;
               const movieLanguage = showtime.movie_id.language;
               const movieDuration = showtime.movie_id.duration;
               const showtimeLayout = showtime.seatLayout;
-
+    
               const movieGenres = showtime.movie_id.genre
                 .map((genre) => genre.name)
                 .join(", ");
+    
               const showtimeDate = dayjs(showtime.date).format("MM/DD/YYYY");
-
+    
               const room = showtime.room_id.name;
               const showtimeId = showtime._id;
-
+    
               if (!uniqueMovies[movieId]) {
                 uniqueMovies[movieId] = {
                   title: movieTitle,
@@ -451,15 +463,20 @@ const MovieDetail = () => {
                   showtimeId: showtimeId,
                 };
               }
-
+    
               uniqueMovies[movieId].showtimes.push(showtime.start_time);
             });
-
+    
             const formattedMovies = Object.values(uniqueMovies);
+    
+            console.log("Formatted Movies: ", formattedMovies);
+    
             setMovies(formattedMovies);
           } catch (error) {
             console.error("Error fetching showtimes:", error);
           }
+        } else {
+          setMovies([]);
         }
       }
     };
@@ -556,7 +573,7 @@ const MovieDetail = () => {
         {movie ? (
           <>
             <MovieInfoGrid>
-              <MoviePoster src={movie.image} alt={movie.title} />
+              <MoviePoster src={`http://localhost:8080/api/images/${movie.image}`} alt={movie.title} />
               <VideoWrapper>
                 <StyledYouTube
                   videoId={movie.trailer.split("v=")[1]}
@@ -698,6 +715,7 @@ const MovieDetail = () => {
                       value={selectedDate}
                       onChange={(newValue) => setSelectedDate(newValue)}
                       format="MM/DD/YYYY"
+                      minDate={dayjs()}
                       sx={{
                         width: "40%",
                         ".MuiInputBase-input": { color: "orange" },
@@ -726,7 +744,6 @@ const MovieDetail = () => {
                     />
                   </LocalizationProvider>
 
-                  {/* Reset Button */}
                   <Button
                     style={{ width: "15%", marginTop: "1rem" }}
                     variant="contained"
