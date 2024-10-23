@@ -1,0 +1,73 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+.booking-details-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #f9f9f9;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.booking-title{
+    font-size: 24px;
+}
+
+.ticket-info {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+}
+
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.event-logo {
+    width: 250px;
+    height: auto;
+}
+
+.event-details {
+    margin-left: 20px;
+}
+
+.event-title {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.ticket-details, .payment-info, .services-info {
+    margin-top: 20px;
+}
+
+.qr-code {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.qr-image {
+    width: 150px;
+    height: 150px;
+}
+
+.terms, .contact-info {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    text-align: right;
+}
+
+.terms ul {
+    list-style: none;
+    padding-left: 0;
+}

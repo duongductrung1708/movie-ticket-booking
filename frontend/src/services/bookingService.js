@@ -15,3 +15,12 @@ export const getBookingHistory = async (userId) => {
         console.error(error);
     }
 }
+
+export const getBookingById = async (id)=>{
+    try {
+        const response = await api.get("/bookings/" + id);
+        return response.data
+    } catch (error) {
+        console.error(error);
+    }
+}
