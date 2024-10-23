@@ -11,11 +11,12 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { loginUser } from "../../../services/api";
+import { loginUser, loginWithGoogle } from "../../../services/api";
 import { useAuth } from "../../../hooks/AuthProvider";
 import "../../../styles/signInPage.css";
 import backgroundImage from "../../../assets/netflix-junio.jpg";
 import styled from "styled-components";
+import { GoogleLogin } from "@react-oauth/google";
 
 const LogoText = styled.h1`
   font-family: "Akaya Telivigala", cursive;
@@ -70,6 +71,34 @@ const SignInPage = () => {
     }
   };
 
+  const handleGoogleLogin = async (credentialResponse) => {
+    try {
+        const token = credentialResponse.credential;
+        const userData = await loginWithGoogle(token);
+
+        console.log("User Data from Google:", userData);
+
+        if (!userData) {
+            throw new Error("No user data received from Google login");
+        }
+
+        const { accessToken, ...rest } = userData;
+
+        if (accessToken) {
+            localStorage.setItem("user", JSON.stringify(userData));
+        } else {
+            throw new Error("Access token is missing");
+        }
+
+        toast.success("Google Login successful!");
+        login(userData);
+        navigate("/home");
+    } catch (error) {
+        console.error("Google Login error:", error);
+        toast.error("Google login failed. Please try again.");
+    }
+};
+
   return (
     <div
       className="signin-bg"
@@ -100,7 +129,6 @@ const SignInPage = () => {
           <Typography variant="h3" className="signin-title" gutterBottom>
             Sign in
           </Typography>
-
           <Box
             component="form"
             noValidate
@@ -195,16 +223,25 @@ const SignInPage = () => {
               Sign In
             </Button>
           </Box>
-
           <Typography variant="body1" className="signup-link">
             Don't have an account?{" "}
-            <Button
-              className="signup-btn"
-              onClick={() => navigate("/signup")}
-            >
+            <Button className="signup-btn" onClick={() => navigate("/signup")}>
               Sign up
             </Button>
           </Typography>
+          <Box>
+            <Typography variant="body2" color="white" align="center">
+              Or
+            </Typography>
+          </Box>
+          <Box mt={2}>
+            <GoogleLogin
+              onSuccess={handleGoogleLogin}
+              onError={() => {
+                console.log("Google Login Failed");
+              }}
+            />
+          </Box>
         </Box>
       </Container>
     </div>

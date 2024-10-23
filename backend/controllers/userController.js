@@ -277,6 +277,23 @@ const changePassword = async (req, res) => {
   }
 };
 
+//find or create a new user from google account
+async function findOrCreateUserFromGoogle(googleUser) {
+  const { email, name } = googleUser;
+
+  let user = await User.findOne({ email });
+
+  if (!user) {
+    user = new User({
+      username: name,
+      email,
+    });
+    await user.save();
+  }
+
+  return user;
+}
+
 module.exports = {
   createUser,
   getUsers,
@@ -284,4 +301,5 @@ module.exports = {
   updateUser,
   deleteUser,
   changePassword,
+  findOrCreateUserFromGoogle
 };
