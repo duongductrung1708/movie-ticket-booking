@@ -14,22 +14,14 @@ import { toast } from "react-toastify";
 import "../../styles/signIn.css";
 import backgroundImage from "../../assets/netflix-junio.jpg";
 import styled from "styled-components";
-import { useAuth } from "../../context/AuthProvider"; // Import the useAuth hook
+import { useAuth } from "../../context/AuthProvider";
 import { handleLogin } from "../../services/authService";
 import { ToastContainer } from "react-toastify";
 
-interface LogoTextProps {
-  theme: {
-    fontxxx1: string;
-    fontxx1: string;
-    text: string;
-  };
-}
-
-const LogoText = styled.h1<LogoTextProps>`
+const LogoText = styled.h1`
   font-family: "Akaya Telivigala", cursive;
-  font-size: ${(props) => props.theme.fontxxx1};
-  color: ${(props) => props.theme.text};
+  font-size: 4em;
+  color: #202020;
   transition: all 0.2s ease;
   cursor: pointer;
 
@@ -38,15 +30,14 @@ const LogoText = styled.h1<LogoTextProps>`
   }
 
   @media (max-width: 64em) {
-    font-size: ${(props) => props.theme.fontxx1};
+    font-size: 3em;
   }
 `;
 
 const SignInPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth(); // Access login function from context
+  const { login } = useAuth();
 
-  // Define types for state variables
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -67,9 +58,9 @@ const SignInPage: React.FC = () => {
         email,
         password,
         isAdmin: true,
-      }); // login expects a LoginForm
+      });
       toast.success("Login successful!");
-      login(userData); // Assuming login stores the user
+      login(userData);
       navigate("/");
     } catch (error: any) {
       console.error("Login error:", error);
@@ -86,7 +77,7 @@ const SignInPage: React.FC = () => {
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        minHeight: "96vh",
+        minHeight: "100vh",
       }}
     >
       <Container maxWidth="lg" className="signin-container">
