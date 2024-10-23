@@ -77,7 +77,7 @@ const SignInPage = () => {
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        minHeight: "96vh",
+        minHeight: "100vh",
       }}
     >
       <Container maxWidth="lg" className="signin-container">
