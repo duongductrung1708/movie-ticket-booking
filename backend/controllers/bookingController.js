@@ -273,6 +273,7 @@ exports.getBookingById = async (req, res) => {
           movie: {
             _id: '$movie._id',
             title: '$movie.title',
+            image: '$movie.image'
           },
           amount: "$payment.amount",
           paymentMethod: "$paymentMethod.name",
