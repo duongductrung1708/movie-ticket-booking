@@ -1,75 +1,45 @@
-Movie Ticket Booking
-An online movie ticket booking application that allows users to browse movies, select showtimes, and purchase tickets seamlessly.
+![MasterHead](https://user-images.githubusercontent.com/74038190/225813708-98b745f2-7d22-48cf-9150-083f1b00d6c9.gif)
+<h1 align="center">Movie Ticket Booking 🎬</h1>
+<h3 align="center">An online movie ticket booking application</h3>
+<img align="right" alt="Booking" width="400" src="https://cdn.dribbble.com/users/1162077/screenshots/3848914/programmer.gif">
 
-Table of Contents
-Features
-Technologies Used
-Installation
-Usage
-API Documentation
-Contributing
-License
-Features
-User registration and authentication
-Browse and search for movies
-View movie details and showtimes
-Book tickets for selected movies
-Admin panel for managing movies, genres, and bookings
-Email notifications for bookings
-Responsive design for mobile and desktop users
-Technologies Used
-Frontend: React, Material-UI, Styled Components
-Backend: Node.js, Express, MongoDB
-Authentication: JWT (JSON Web Tokens)
-Deployment: Heroku / Vercel
-Installation
-Prerequisites
+<p align="left"> <img src="https://komarev.com/ghpvc/?username=duongductrung1708&label=Profile%20views&color=0e75b6&style=flat" alt="duongductrung1708" /> </p>
+
+- 🔭 This project allows users to browse movies, select showtimes, and purchase tickets seamlessly.
+
+<h3 align="left">Table of Contents</h3>
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Installation](#installation)
+- [Usage](#usage)
+- [API Documentation](#api-documentation)
+- [Contributing](#contributing)
+- [License](#license)
+
+<h3 align="left">Features</h3>
+- User registration and authentication
+- Browse and search for movies
+- View movie details and showtimes
+- Book tickets for selected movies
+- Admin panel for managing movies, genres, and bookings
+- Email notifications for bookings
+- Responsive design for mobile and desktop users
+
+<h3 align="left">Technologies Used</h3>
+- Frontend: React, Material-UI, Styled Components
+- Backend: Node.js, Express, MongoDB
+- Authentication: JWT (JSON Web Tokens)
+- Deployment: Heroku / Vercel
+
+<h3 align="left">Installation</h3>
+
+<h4>Prerequisites</h4>
 Make sure you have the following installed:
+- Node.js
+- npm or yarn
+- MongoDB (for local development)
 
-Node.js
-npm or yarn
-MongoDB (for local development)
-Clone the Repository
-
+<h4>Clone the Repository</h4>
+```bash
 git clone https://github.com/duongductrung1708/movie-ticket-booking.git
 cd movie-ticket-booking
-Backend Setup
-Navigate to the backend directory:
-
-cd backend
-Install dependencies:
-
-npm install
-Create a .env file and configure your environment variables (e.g., MongoDB URI, JWT secret).
-
-Start the server:
-
-npm run dev
-Frontend Setup
-Navigate to the frontend directory:
-
-cd frontend
-Install dependencies:
-
-npm install
-Start the React application:
-
-npm start
-Usage
-Open your browser and go to http://localhost:3000 (or the appropriate URL if deployed).
-Sign up or log in to your account.
-Browse the available movies and select showtimes.
-Proceed to book tickets and complete your purchase.
-API Documentation
-API Endpoints (Link to your API documentation, if available)
-Authentication, movie management, booking functionalities, etc.
-Contributing
-Contributions are welcome! Please follow these steps to contribute:
-
-Fork the repository.
-Create a new branch (git checkout -b feature/YourFeature).
-Make your changes and commit them (git commit -m 'Add some feature').
-Push to the branch (git push origin feature/YourFeature).
-Open a pull request.
-License
-This project is licensed under the MIT License - see the LICENSE file for details.
