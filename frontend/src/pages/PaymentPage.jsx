@@ -21,7 +21,7 @@ import styled from "styled-components";
 import { toast, ToastContainer } from "react-toastify";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
-import { deleteBooking, getMomoPaymentLink } from "../services/api";
+import { deleteBooking, getMomoPaymentLink, updateSeatLayout } from "../services/api";
 
 const Container = styled.div`
   width: 75%;
@@ -177,7 +177,6 @@ const PaymentPage = () => {
     booking,
     bookingDetails,
   } = location.state || {};
-  console.log(booking, bookingDetails);
 
   const navigate = useNavigate();
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -196,11 +195,11 @@ const PaymentPage = () => {
     const seatData =
       selectedSeats.length > 0
         ? selectedSeats
-            .map((seat) => {
-              const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
-              return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
-            })
-            .join(", ")
+          .map((seat) => {
+            const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+            return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+          })
+          .join(", ")
         : "";
     const orderInfo = booking._id;
 
@@ -223,6 +222,10 @@ const PaymentPage = () => {
 
   const handleBackToSeatReservation = async () => {
     try {
+      const seatIds = selectedSeats.map(
+        (seat) => seatLayout[seat.row][seat.col]._id
+      );
+      await updateSeatLayout(showtime, seatIds, "available")
       await deleteBooking(booking._id);
       navigate("/seat-reservation", {
         state: {
@@ -381,13 +384,13 @@ const PaymentPage = () => {
                         <strong>Selected Seats:</strong>{" "}
                         {selectedSeats.length > 0
                           ? selectedSeats
-                              .map((seat) => {
-                                const rowLetter = String.fromCharCode(
-                                  65 + seat.row
-                                ); // Converts row index to a letter (A, B, C, etc.)
-                                return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
-                              })
-                              .join(", ")
+                            .map((seat) => {
+                              const rowLetter = String.fromCharCode(
+                                65 + seat.row
+                              ); // Converts row index to a letter (A, B, C, etc.)
+                              return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+                            })
+                            .join(", ")
                           : ""}
                       </Typography>
                       <Typography>
@@ -546,11 +549,11 @@ const PaymentPage = () => {
             <strong>Seats:</strong>{" "}
             {selectedSeats.length > 0
               ? selectedSeats
-                  .map((seat) => {
-                    const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
-                    return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
-                  })
-                  .join(", ")
+                .map((seat) => {
+                  const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+                  return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+                })
+                .join(", ")
               : ""}
           </Typography>
 

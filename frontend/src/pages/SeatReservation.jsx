@@ -329,7 +329,6 @@ const SeatReservation = () => {
       setTotal((prev) => prev - seat.price);
     }
   };
-  console.log(seats);
 
   const handleSelectSeatButton = async () => {
     if (selectedSeats.length === 0) {

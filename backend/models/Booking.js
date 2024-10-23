@@ -25,6 +25,9 @@ const bookingSchema = new mongoose.Schema({
     type: String, required: true,
     enum: ["processing", "cancle", "done"],
   },
+  customer_info:{
+    type: Object,
+  }
 });
 
 module.exports = mongoose.model("Booking", bookingSchema);

@@ -3,11 +3,15 @@ const crypto = require('crypto');
 const { createPayment, updatePayment } = require('../services/paymentService');
 const { updateBooking } = require('../services/bookingService');
 const { updateSeatLayout } = require('../services/showtimeService');
-
+// paymentController.js
+const { clearBookingTimeout } = require('../services/timeoutManager');
+const User = require('../models/User');
+const Booking = require('../models/Booking');
+const sendEmail = require('../utils/sendEmail');
 
 var accessKey = 'F8BBA842ECF85';
 var secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
-const publicPort = 'https://ee1b-116-96-47-119.ngrok-free.app'
+const publicPort = 'https://3a5b-116-96-47-119.ngrok-free.app'
 
 const momoController = {
   createPayment: async (req, res) => {
@@ -96,9 +100,75 @@ const momoController = {
     console.log(req.body);
     if (req.body.message == "Successful.") {
       const [bookingId, paymentId] = req.body.orderInfo.split('-');
+
+      // Clear the booking timeout as payment is successful
+      clearBookingTimeout(bookingId);
+
       const booking = await updateBooking(bookingId, "done");
       await updatePayment(paymentId, "success")
       await updateSeatLayout(booking.showtime_id, booking.seat)
+      const bookingDetailsUrl = `${process.env.FRONT_END_URL}/booking/${bookingId}`
+
+      //send email booking
+      const emailTemplate = `<!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Booking Confirmation</title>
+      <style>
+          body {
+              font-family: Arial, sans-serif;
+              text-align: center;
+              padding: 20px;
+          }
+          .container {
+              border: 1px solid #ddd;
+              padding: 20px;
+              max-width: 400px;
+              margin: auto;
+              box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+          }
+          .qr-code {
+              margin: 20px 0;
+          }
+          .button {
+              background-color: #4CAF50;
+              color: white;
+              padding: 10px 20px;
+              text-align: center;
+              text-decoration: none;
+              display: inline-block;
+              font-size: 16px;
+              border-radius: 5px;
+          }
+          .button:hover {
+              background-color: #45a049;
+          }
+      </style>
+  </head>
+  <body>
+      <div class="container">
+          <h2>Booking Confirmation</h2>
+          <p>🎉 <strong>Success!</strong> You've successfully booked your film tickets!</p>
+          <p>Please click on the QR code below or scan it to know more details about your booking:</p>
+          <div class="qr-code">
+              <a href="${bookingDetailsUrl}" target="_blank">
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?data=${bookingDetailsUrl}&amp;size=100x100" alt="QR Code" title="Scan to see booking details">
+              </a>
+          </div>
+          <a href="${bookingDetailsUrl}" class="button">View Booking Details</a>
+      </div>
+  </body>
+  </html>
+  `;
+      const user = await User.findById(booking.user_id);
+
+      await sendEmail(
+        user.email,
+        "Booking Movie Success",
+        emailTemplate
+      );
     }
   },
   getTransactionStatus: async (req, res) => {

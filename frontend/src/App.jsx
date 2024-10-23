@@ -17,6 +17,7 @@ import { RedirectRoute, ProtectedRoute } from './components/ProtectedRoute';
 import NotFound from "./pages/NotFound";
 import PaymentPage from "./pages/PaymentPage";
 import BookingResult from "./pages/PaymentResult";
+import BookingDetails from "./pages/BookingDetails";
 
 function App() {
   return (
@@ -34,6 +35,8 @@ function App() {
         <Route path="/user-profile" element={<ProtectedRoute element={<UserProfile />} />} />
         <Route path="/booking-history" element={<ProtectedRoute element={<BookHistory />} />} />
         <Route path="/booking-result" element={<ProtectedRoute element={<BookingResult />} />} />
+        <Route path="/booking/:id" element={<BookingDetails />} />
+        <Route path="/404" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <ToastContainer

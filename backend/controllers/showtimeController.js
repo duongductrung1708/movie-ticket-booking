@@ -355,7 +355,7 @@ const createShowtime = async (req, res) => {
   }
 };
 
-// Update showtime
+// Update showtime admin
 const updateShowtime = async (req, res) => {
   try {
     const showtimeId = req.params.id; // Create a Date object
@@ -430,6 +430,20 @@ const updateShowtime = async (req, res) => {
   }
 };
 
+//update Seat Layout frontend 
+const updateSeatLayoutShowtime = async (req, res) => {
+  const showtimeId = req.params.id;
+  const { seatIds, status } = req.body;
+  try {
+    const showtime = await showtimeService.updateSeatLayoutShowtime(showtimeId, seatIds, status);
+    return res.status(200).json(showtime);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
+}
+
+
 const deleteShowtime = async (req, res) => {
   try {
     const id = req.params.id;
@@ -492,4 +506,5 @@ module.exports = {
   deleteShowtime,
   getShowtimeById,
   getShowtimesByMovieId,
+  updateSeatLayoutShowtime,
 };
