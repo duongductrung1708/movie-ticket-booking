@@ -9,6 +9,10 @@ const {
   forgotPassword,
 } = require("../controllers/authController");
 
+const { verifyGoogleToken } = require('../utils/googleAuth');
+const { findOrCreateUserFromGoogle } = require('../controllers/userController');
+const { generateToken } = require('../utils/generateToken');
+
 const router = express.Router();
 
 // @route    POST api/auth/register
@@ -80,5 +84,27 @@ router.post(
   ],
   resetPassword
 );
+
+// @route    POST api/auth/google-login
+// @desc     Login with google
+// @access   Public
+router.post("/google-login", async (req, res) => {
+  const { token } = req.body;
+
+  console.log('Received token:', token);
+
+  const googleUser = await verifyGoogleToken(token);
+
+  if (!googleUser) {
+    return res.status(401).json({ message: "Invalid Google token" });
+  }
+
+  const user = await findOrCreateUserFromGoogle(googleUser);
+
+  res.json({
+    accessToken: generateToken(user),
+    ...user
+});
+});
 
 module.exports = router;

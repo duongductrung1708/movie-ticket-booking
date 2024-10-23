@@ -99,7 +99,7 @@ export const logoutUser = async () => {
 export const updateUser = async (updatedData) => {
   try {
     const userData = JSON.parse(localStorage.getItem('user'));
-    const userId = userData?._id;
+    const userId = userData?._id || userData?._doc?._id;
     const token = userData?.accessToken;
     if (!userId || !token) {
       throw new Error("UserId or Token not found in localStorage");
@@ -121,7 +121,7 @@ export const updateUser = async (updatedData) => {
 export const getUser = async () => {
   try {
     const userData = JSON.parse(localStorage.getItem('user'));
-    const userId = userData?._id;
+    const userId = userData?._id || userData?._doc?._id;
     const token = userData?.accessToken;
     if (!userId || !token) {
       throw new Error("UserId or Token not found in localStorage");
@@ -265,3 +265,13 @@ export const getShowtimesByMovieId = async (movieId) => {
     throw error.response ? error.response.data : error.message;
   }
 };
+
+export const loginWithGoogle = async (token) => {
+  try {
+    const response = await api.post("/auth/google-login", { token });
+    localStorage.setItem('user', JSON.stringify(response.data));
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
