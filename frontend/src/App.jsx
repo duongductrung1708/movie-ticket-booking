@@ -36,6 +36,7 @@ function App() {
         <Route path="/booking-history" element={<ProtectedRoute element={<BookHistory />} />} />
         <Route path="/booking-result" element={<ProtectedRoute element={<BookingResult />} />} />
         <Route path="/booking/:id" element={<BookingDetails />} />
+        <Route path="/404" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <ToastContainer

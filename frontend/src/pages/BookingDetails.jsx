@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import '../styles/bookingDetails.css'; // Assuming you have a CSS file for styling
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -6,17 +6,22 @@ import { getBookingById } from "../services/bookingService";
 
 export default function BookingDetails() {
     const id = useParams().id;
-
+    const navigate = useNavigate()
     const [bookingData, setBookingData] = useState(null)
     useEffect(() => {
         const fetchBooking = async () => {
             try {
                 const booking = await getBookingById(id)
-                console.log(booking);
-                setBookingData(booking[0])
+                if (!booking || Object.keys(booking).length === 0) {
+                    toast.error('Booking not found');
+                    navigate("/404"); // Navigate to the Not Found page
+                } else {
+                    setBookingData(booking[0]);
+                }
             } catch (error) {
                 console.error(error);
-                toast.error("Error")
+                toast.error("Booking not found")
+                navigate("/404")
             }
         }
         fetchBooking()
