@@ -34,6 +34,37 @@ const LogoText = styled.h1`
   }
 `;
 
+const StyledGoogleButton = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+
+  .google-btn {
+    background-color: #4285f4;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: #357ae8;
+    }
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
+  }
+`;
+
 const SignInPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -73,31 +104,31 @@ const SignInPage = () => {
 
   const handleGoogleLogin = async (credentialResponse) => {
     try {
-        const token = credentialResponse.credential;
-        const userData = await loginWithGoogle(token);
+      const token = credentialResponse.credential;
+      const userData = await loginWithGoogle(token);
 
-        console.log("User Data from Google:", userData);
+      console.log("User Data from Google:", userData);
 
-        if (!userData) {
-            throw new Error("No user data received from Google login");
-        }
+      if (!userData) {
+        throw new Error("No user data received from Google login");
+      }
 
-        const { accessToken, ...rest } = userData;
+      const { accessToken } = userData;
 
-        if (accessToken) {
-            localStorage.setItem("user", JSON.stringify(userData));
-        } else {
-            throw new Error("Access token is missing");
-        }
+      if (accessToken) {
+        localStorage.setItem("user", JSON.stringify(userData));
+      } else {
+        throw new Error("Access token is missing");
+      }
 
-        toast.success("Google Login successful!");
-        login(userData);
-        navigate("/home");
+      toast.success("Google Login successful!");
+      login(userData);
+      navigate("/home");
     } catch (error) {
-        console.error("Google Login error:", error);
-        toast.error("Google login failed. Please try again.");
+      console.error("Google Login error:", error);
+      toast.error("Google login failed. Please try again.");
     }
-};
+  };
 
   return (
     <div
@@ -235,12 +266,25 @@ const SignInPage = () => {
             </Typography>
           </Box>
           <Box mt={2}>
-            <GoogleLogin
-              onSuccess={handleGoogleLogin}
-              onError={() => {
-                console.log("Google Login Failed");
-              }}
-            />
+            <StyledGoogleButton>
+              <GoogleLogin
+                onSuccess={handleGoogleLogin}
+                onError={() => console.log("Google Login Failed")}
+                render={(renderProps) => (
+                  <button
+                    className="google-btn"
+                    onClick={renderProps.onClick}
+                    disabled={renderProps.disabled}
+                  >
+                    <img
+                      src="https://www.gstatic.com/images/branding/product/1x/gsa_ios_48dp.png"
+                      alt="Google logo"
+                    />
+                    Continue with Google
+                  </button>
+                )}
+              />
+            </StyledGoogleButton>
           </Box>
         </Box>
       </Container>

@@ -8,33 +8,45 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
-export const createBooking = async (userId, showtimeId, seatIds, serviceIds, status) => {
+export const createBooking = async (
+  userId,
+  showtimeId,
+  seatIds,
+  serviceIds,
+  status
+) => {
   try {
-    const response = await api.post('/bookings/create', { userId, showtimeId, seatIds, serviceIds, status });
+    const response = await api.post("/bookings/create", {
+      userId,
+      showtimeId,
+      seatIds,
+      serviceIds,
+      status,
+    });
     return response.data;
   } catch (error) {
     console.error(error);
   }
-
-}
+};
 
 export const deleteBooking = async (id) => {
   try {
-    const response = await api.delete('/bookings/' + id);
+    const response = await api.delete("/bookings/" + id);
     return response.data;
   } catch (error) {
     console.error(error);
   }
-}
+};
 
 export const updateSeatLayout = async (showtimeId, seatIds, status) => {
   try {
-    const response = await api.put('/showtimes/' + showtimeId + '/seat-layout', { seatIds, status })
+    const response = await api.put(
+      "/showtimes/" + showtimeId + "/seat-layout",
+      { seatIds, status }
+    );
     return response.data;
-  } catch (error) {
-
-  }
-}
+  } catch (error) {}
+};
 
 export const getMomoPaymentLink = async (orderInfo, amount, bookingId) => {
   try {
@@ -43,7 +55,7 @@ export const getMomoPaymentLink = async (orderInfo, amount, bookingId) => {
   } catch (error) {
     throw error.response ? error.response.data : error.message;
   }
-}
+};
 
 export const getTheaterByRoomId = async (id) => {
   try {
@@ -52,7 +64,7 @@ export const getTheaterByRoomId = async (id) => {
   } catch (error) {
     throw error.response ? error.response.data : error.message;
   }
-}
+};
 
 // Function to register a user
 export const registerUser = async (userData) => {
@@ -68,7 +80,7 @@ export const registerUser = async (userData) => {
 export const loginUser = async (credentials) => {
   try {
     const response = await api.post("/auth/login", credentials);
-    localStorage.setItem('user', JSON.stringify(response.data));
+    localStorage.setItem("user", JSON.stringify(response.data));
     return response.data;
   } catch (error) {
     throw error.response ? error.response.data : error.message;
@@ -89,7 +101,7 @@ export const verifyEmail = async (token) => {
 export const logoutUser = async () => {
   try {
     await api.post("/auth/logout");
-    localStorage.removeItem('user');
+    localStorage.removeItem("user");
   } catch (error) {
     throw error.response ? error.response.data : error.message;
   }
@@ -98,7 +110,7 @@ export const logoutUser = async () => {
 // Function to update user information
 export const updateUser = async (updatedData) => {
   try {
-    const userData = JSON.parse(localStorage.getItem('user'));
+    const userData = JSON.parse(localStorage.getItem("user"));
     const userId = userData?._id || userData?._doc?._id;
     const token = userData?.accessToken;
     if (!userId || !token) {
@@ -107,7 +119,7 @@ export const updateUser = async (updatedData) => {
 
     const response = await api.put(`/users/${userId}`, updatedData, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
@@ -120,7 +132,7 @@ export const updateUser = async (updatedData) => {
 // Function to get user details by user ID
 export const getUser = async () => {
   try {
-    const userData = JSON.parse(localStorage.getItem('user'));
+    const userData = JSON.parse(localStorage.getItem("user"));
     const userId = userData?._id || userData?._doc?._id;
     const token = userData?.accessToken;
     if (!userId || !token) {
@@ -129,7 +141,7 @@ export const getUser = async () => {
 
     const response = await api.get(`/users/${userId}`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -143,7 +155,7 @@ export const getUser = async () => {
 // Function to change the user's password
 export const changePassword = async (oldPassword, newPassword) => {
   try {
-    const userData = JSON.parse(localStorage.getItem('user'));
+    const userData = JSON.parse(localStorage.getItem("user"));
     const userId = userData?._id;
     const token = userData?.accessToken;
 
@@ -151,14 +163,18 @@ export const changePassword = async (oldPassword, newPassword) => {
       throw new Error("UserId or Token not found in localStorage");
     }
 
-    const response = await api.post(`/users/change-password/${userId}`, {
-      oldPassword,
-      newPassword,
-    }, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
+    const response = await api.post(
+      `/users/change-password/${userId}`,
+      {
+        oldPassword,
+        newPassword,
       },
-    });
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     return response.data;
   } catch (error) {
@@ -181,7 +197,11 @@ export const sendForgotPasswordOTP = async (email) => {
 // Function to reset password with OTP
 export const resetPasswordWithOTP = async (email, otp, newPassword) => {
   try {
-    const response = await api.post("/auth/reset-password", { email, otp, newPassword });
+    const response = await api.post("/auth/reset-password", {
+      email,
+      otp,
+      newPassword,
+    });
     return response.data;
   } catch (error) {
     console.error("Reset password error:", error);
@@ -266,12 +286,14 @@ export const getShowtimesByMovieId = async (movieId) => {
   }
 };
 
+// Function to login with google
 export const loginWithGoogle = async (token) => {
   try {
     const response = await api.post("/auth/google-login", { token });
-    localStorage.setItem('user', JSON.stringify(response.data));
+    localStorage.setItem("user", JSON.stringify(response.data));
+    return response.data;
   } catch (error) {
+    console.error("Error in Google login:", error);
     throw error.response ? error.response.data : error.message;
   }
 };
-
