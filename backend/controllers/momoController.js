@@ -12,6 +12,7 @@ const sendEmail = require('../utils/sendEmail');
 var accessKey = 'F8BBA842ECF85';
 var secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
 const publicPort = 'https://3a5b-116-96-47-119.ngrok-free.app'
+// const publicPort = 'https://2475-2001-ee0-40c1-5d82-6189-13b5-9db6-72b4.ngrok-free.app'
 
 const momoController = {
   createPayment: async (req, res) => {
