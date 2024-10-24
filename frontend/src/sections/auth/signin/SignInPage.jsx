@@ -261,7 +261,12 @@ const SignInPage = () => {
             </Button>
           </Typography>
           <Box>
-            <Typography variant="body2" color="white" align="center">
+            <Typography
+              variant="body2"
+              color="white"
+              align="center"
+              style={{ fontWeight: "bold" }}
+            >
               Or
             </Typography>
           </Box>
@@ -271,7 +276,7 @@ const SignInPage = () => {
                 onSuccess={handleGoogleLogin}
                 onError={() => console.log("Google Login Failed")}
                 render={(renderProps) => (
-                  <button
+                  <Button
                     className="google-btn"
                     onClick={renderProps.onClick}
                     disabled={renderProps.disabled}
@@ -281,7 +286,7 @@ const SignInPage = () => {
                       alt="Google logo"
                     />
                     Continue with Google
-                  </button>
+                  </Button>
                 )}
               />
             </StyledGoogleButton>
