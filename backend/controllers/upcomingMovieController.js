@@ -80,6 +80,7 @@ exports.createUpcomingMovie = async (req, res) => {
 };
 
 // Update an existing upcoming movie
+// Update an existing upcoming movie
 exports.updateUpcomingMovie = async (req, res) => {
   try {
     const {
@@ -107,9 +108,12 @@ exports.updateUpcomingMovie = async (req, res) => {
     if (synopsis) updateFields.synopsis = synopsis;
     if (trailer_url) updateFields.trailer_url = trailer_url;
     if (poster_image) updateFields.poster_image = poster_image;
-    if (genre) {
-      const genreExists = await Genre.findById(genre);
-      if (!genreExists) return res.status(404).json({ error: "Genre not found" });
+
+    if (genre && Array.isArray(genre)) {
+      const validGenres = await Genre.find({ _id: { $in: genre } });
+      if (validGenres.length !== genre.length) {
+        return res.status(404).json({ error: "One or more genres not found" });
+      }
       updateFields.genre = genre;
     }
 
@@ -123,6 +127,7 @@ exports.updateUpcomingMovie = async (req, res) => {
 
     res.status(200).json(updatedMovie);
   } catch (error) {
+    console.error("Error updating movie:", error);
     res.status(500).json({ error: "Failed to update upcoming movie" });
   }
 };

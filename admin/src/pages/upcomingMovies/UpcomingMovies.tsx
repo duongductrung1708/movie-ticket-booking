@@ -32,7 +32,7 @@ function createUpcomingMovieData(
   _id: string,
   title: string,
   poster_image: string,
-  genre: { name: string }[],
+  genre: string[],
   language: string,
   release_date: string,
   duration: string,
@@ -48,7 +48,7 @@ function createUpcomingMovieData(
     _id,
     title,
     poster_image,
-    genre: genre.map((g) => g.name),
+    genre,
     language,
     release_date,
     duration,
@@ -124,7 +124,9 @@ function Row(props: {
               </p>
               <p>
                 <strong>Genres:</strong>{" "}
-                {Array.isArray(row.genre) ? row.genre.join(", ") : "N/A"}
+                {Array.isArray(row.genre)
+                  ? row.genre.map((g: any) => g.name).join(", ")
+                  : "N/A"}
               </p>
               <p>
                 <strong>Cast:</strong>{" "}
