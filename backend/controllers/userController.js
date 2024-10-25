@@ -193,6 +193,48 @@ const updateUser = async (req, res) => {
     gender,
   } = req.body;
 
+  try {
+    const existRole = await Role.findOne({ name: role });
+    if (!existRole) {
+      return res.status(400).json({ msg: "Role not found" });
+    }
+    const updatedData = {
+      username,
+      email,
+      phoneNumber,
+      dob,
+      role: existRole._id,
+      address,
+      city,
+      district,
+      gender,
+    };
+    const user = await User.findByIdAndUpdate(id, updatedData, { new: true });
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    res.status(200).json({ msg: "User updated successfully", user });
+  } catch (err) {
+    res.status(500).json({ msg: "Error updating user", error: err.message });
+  }
+};
+
+// Update user information
+const updateUserFE = async (req, res) => {
+  const { id } = req.params;
+  const {
+    username,
+    email,
+    phoneNumber,
+    dob,
+    role,
+    address,
+    city,
+    district,
+    gender,
+  } = req.body;
+
   console.log("Update User Request Body:", req.body);
 
   if (!username || !email || !phoneNumber) {
@@ -326,6 +368,7 @@ module.exports = {
   getUsers,
   getUser,
   updateUser,
+  updateUserFE,
   deleteUser,
   changePassword,
   findOrCreateUserFromGoogle

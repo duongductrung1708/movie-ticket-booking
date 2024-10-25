@@ -117,7 +117,7 @@ export const updateUser = async (updatedData) => {
       throw new Error("UserId or Token not found in localStorage");
     }
 
-    const response = await api.put(`/users/${userId}`, updatedData, {
+    const response = await api.put(`/users/fe/${userId}`, updatedData, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
