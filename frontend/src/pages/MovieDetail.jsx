@@ -96,7 +96,7 @@ const MoviePoster = styled.img`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 `;
 
-const MovieSynopsis = styled.p`
+const MovieSynopsis = styled.div`
   font-family: "Sora", sans-serif;
   font-size: 1.2rem;
   margin-top: 1rem;
@@ -809,24 +809,25 @@ const MovieDetail = () => {
                 <Avatar alt="Remy Sharp" src={imgLink} />
               </Grid>
               <Grid justifyContent="left" item xs zeroMinWidth>
+                <h4
+                  style={{
+                    margin: 0,
+                    textAlign: "left",
+                    paddingRight: "0.5rem",
+                  }}
+                >
+                  Duong Duc Trung
+                </h4>
                 <div style={{ alignItems: "center", display: "flex" }}>
-                  <h4
-                    style={{
-                      margin: 0,
-                      textAlign: "left",
-                      paddingRight: "0.5rem",
-                    }}
-                  >
-                    Duong Duc Trung
-                  </h4>
-                  <Rating name="read-only" value={value} readOnly />
+                  <Rating name="read-only" value={value} readOnly />{" "}
+                  <div style={{ marginLeft: "0.2rem" }}>10/25/2024</div>
                 </div>
-                <p style={{ textAlign: "left" }}>
+                <div style={{ textAlign: "left" }}>
                   Phim rất hay, các bạn nên xem
-                </p>
-                <p style={{ textAlign: "left", color: "gray" }}>
+                </div>
+                <div style={{ textAlign: "left", color: "gray" }}>
                   posted 1 minute ago
-                </p>
+                </div>
               </Grid>
             </Grid>
           </Paper>
@@ -836,24 +837,25 @@ const MovieDetail = () => {
                 <Avatar alt="Remy Sharp" src={imgLink} />
               </Grid>
               <Grid justifyContent="left" item xs zeroMinWidth>
+                <h4
+                  style={{
+                    margin: 0,
+                    textAlign: "left",
+                    paddingRight: "0.5rem",
+                  }}
+                >
+                  Kieu Thanh Binh
+                </h4>
                 <div style={{ alignItems: "center", display: "flex" }}>
-                  <h4
-                    style={{
-                      margin: 0,
-                      textAlign: "left",
-                      paddingRight: "0.5rem",
-                    }}
-                  >
-                    Kieu Thanh Binh
-                  </h4>
-                  <Rating name="read-only" value={value} readOnly />
+                  <Rating name="read-only" value={value} readOnly />{" "}
+                  <div style={{ marginLeft: "0.2rem" }}>10/25/2024</div>
                 </div>
-                <p style={{ textAlign: "left" }}>
+                <div style={{ textAlign: "left" }}>
                   Không từ nào có thể diễn tả, quá hay
-                </p>
-                <p style={{ textAlign: "left", color: "gray" }}>
+                </div>
+                <div style={{ textAlign: "left", color: "gray" }}>
                   posted 1 hour ago
-                </p>
+                </div>
               </Grid>
             </Grid>
           </Paper>
