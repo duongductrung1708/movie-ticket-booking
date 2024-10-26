@@ -7,6 +7,7 @@ import {
   Box,
   IconButton,
   InputAdornment,
+  Divider,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,6 +18,7 @@ import "../../../styles/signInPage.css";
 import backgroundImage from "../../../assets/netflix-junio.jpg";
 import styled from "styled-components";
 import { GoogleLogin } from "@react-oauth/google";
+import GoogleIcon from "@mui/icons-material/Google";
 
 const LogoText = styled.h1`
   font-family: "Akaya Telivigala", cursive;
@@ -65,6 +67,14 @@ const StyledGoogleButton = styled.div`
   }
 `;
 
+const Linkhover = styled.div`
+  display: inline-block;
+  margin: 0.2rem;
+  &:hover {
+    border-bottom: 1px solid orange;
+  }
+`;
+
 const SignInPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -95,9 +105,9 @@ const SignInPage = () => {
       login(userData);
       navigate("/home");
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login error:", error.msg);
       toast.error(
-        error.response?.data?.message || "Login failed. Please try again."
+        error.msg || "Email or password does not match."
       );
     }
   };
@@ -195,6 +205,20 @@ const SignInPage = () => {
                 onChange: (e) => setEmail(e.target.value),
               }}
             />
+            <Typography variant="body2" color="secondary" align="right">
+              <Linkhover>
+                <Link
+                  component="button"
+                  type="button"
+                  to="/forgot-password"
+                  variant="body2"
+                  sx={{ alignSelf: "baseline" }}
+                  style={{ textDecoration: "none", color: "orange" }}
+                >
+                  Forgot your password?
+                </Link>
+              </Linkhover>
+            </Typography>
             <TextField
               fullWidth
               id="password"
@@ -236,14 +260,6 @@ const SignInPage = () => {
                 onChange: (e) => setPassword(e.target.value),
               }}
             />
-            <Typography variant="body2" color="secondary" align="right">
-              <Link
-                to="/forgot-password"
-                style={{ textDecoration: "none", color: "orange" }}
-              >
-                Forgot Password?
-              </Link>
-            </Typography>
             <Button
               type="submit"
               fullWidth
@@ -256,20 +272,13 @@ const SignInPage = () => {
           </Box>
           <Typography variant="body1" className="signup-link">
             Don't have an account?{" "}
-            <Button className="signup-btn" onClick={() => navigate("/signup")}>
-              Sign up
-            </Button>
+            <Linkhover>
+              <Link to="/signup" variant="body2" sx={{ alignSelf: "center" }}>
+                Sign up
+              </Link>
+            </Linkhover>
           </Typography>
-          <Box>
-            <Typography
-              variant="body2"
-              color="white"
-              align="center"
-              style={{ fontWeight: "bold" }}
-            >
-              Or
-            </Typography>
-          </Box>
+          <Divider style={{ color: "white" }}>or</Divider>
           <Box mt={2}>
             <StyledGoogleButton>
               <GoogleLogin
@@ -277,15 +286,13 @@ const SignInPage = () => {
                 onError={() => console.log("Google Login Failed")}
                 render={(renderProps) => (
                   <Button
-                    className="google-btn"
+                    fullWidth
+                    variant="outlined"
                     onClick={renderProps.onClick}
                     disabled={renderProps.disabled}
+                    startIcon={<GoogleIcon />}
                   >
-                    <img
-                      src="https://www.gstatic.com/images/branding/product/1x/gsa_ios_48dp.png"
-                      alt="Google logo"
-                    />
-                    Continue with Google
+                    Sign in with Google
                   </Button>
                 )}
               />

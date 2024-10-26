@@ -135,8 +135,8 @@ const ChangePassword = () => {
       setNewPassword("");
       setConfirmPassword("");
     } catch (error) {
-      toast.error("Failed to change password. Please try again.");
-      console.error("Error changing password:", error);
+      toast.error(error.msg || "Failed to change password. Please try again.");
+      console.error("Error changing password:", error.msg);
     }
   };
 
