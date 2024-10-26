@@ -67,52 +67,30 @@ const ForgotPasswordPage = () => {
 
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
-    if (email.trim() === "") {
-      toast.error("Please enter a valid email address.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-    } else {
-      setLoading(true);
-      try {
-        await sendForgotPasswordOTP(email);
-        toast.success(`OTP sent to ${email}`, {
-          position: "top-right",
-          autoClose: 3000,
-        });
-        setStep(2);
-        setOtpSent(true);
-        setResendCooldown(true);
-        // Start a 30-second cooldown
-        setTimeout(() => setResendCooldown(false), 30000);
-      } catch (error) {
-        toast.error(error.message, {
-          position: "top-right",
-          autoClose: 3000,
-        });
-      } finally {
-        setLoading(false);
-      }
+    try {
+      await sendForgotPasswordOTP(email);
+      toast.success(`OTP sent to ${email}`);
+      setStep(2);
+      setOtpSent(true);
+      setResendCooldown(true);
+      setTimeout(() => setResendCooldown(false), 30000);
+    } catch (error) {
+      toast.error(error.msg || "An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleResendOTP = async () => {
-    if (!otpSent || resendCooldown) return; // Only allow resend if OTP was sent and cooldown has passed
+    if (!otpSent || resendCooldown) return;
     setLoading(true);
     try {
       await sendForgotPasswordOTP(email);
-      toast.success(`OTP resent to ${email}`, {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.success(`OTP resent to ${email}`);
       setResendCooldown(true);
-      // Reset cooldown after 30 seconds
       setTimeout(() => setResendCooldown(false), 30000);
     } catch (error) {
-      toast.error(error.message, {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error(error.msg || "An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -126,34 +104,21 @@ const ForgotPasswordPage = () => {
   const handleResetSubmit = async (e) => {
     e.preventDefault();
     if (otp.trim() === "" || newPassword.trim() === "") {
-      toast.error("Please enter OTP and new password.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error("Please enter OTP and new password.");
       return;
     }
     if (!validatePassword(newPassword)) {
       toast.error(
-        "Password must be at least 8 characters long, contain at least 1 uppercase letter, 1 number, and 1 special character.",
-        {
-          position: "top-right",
-          autoClose: 3000,
-        }
+        "Password must be at least 8 characters long, contain at least 1 uppercase letter, 1 number, and 1 special character."
       );
       return;
     }
     try {
       await resetPasswordWithOTP(email, otp, newPassword);
-      toast.success("Password reset successful.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.success("Password reset successful.");
       navigate("/signin");
     } catch (error) {
-      toast.error(error.message, {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error(error.msg || "An error occurred. Please try again.");
     }
   };
 

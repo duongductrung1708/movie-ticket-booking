@@ -378,7 +378,7 @@ exports.loginUser = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ msg: "Invalid credentials" });
+      return res.status(400).json({ msg: "User not found" });
     }
 
     if (!user.isVerified) {
@@ -387,7 +387,7 @@ exports.loginUser = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ msg: "Invalid credentials" });
+      return res.status(400).json({ msg: "Email or password does not match" });
     }
 
     const customerRole = await Role.findOne({ name: "customer" });
@@ -477,7 +477,6 @@ exports.forgotPassword = async (req, res) => {
              <p>This OTP is valid for 5 minutes.</p>`,
     };
 
-    // Send email
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Error sending OTP:", error);
