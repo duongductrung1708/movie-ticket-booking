@@ -12,6 +12,10 @@ import {
   Select,
   MenuItem,
   Button,
+  Avatar,
+  Grid,
+  Paper,
+  Rating,
 } from "@mui/material";
 import YouTube from "react-youtube";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -92,7 +96,7 @@ const MoviePoster = styled.img`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 `;
 
-const MovieSynopsis = styled.p`
+const MovieSynopsis = styled.div`
   font-family: "Sora", sans-serif;
   font-size: 1.2rem;
   margin-top: 1rem;
@@ -356,6 +360,10 @@ const MovieDetail = () => {
 
   const bookingRef = useRef(null);
 
+  const imgLink =
+    "https://img.hoidap247.com/picture/question/20200508/large_1588936738888.jpg";
+  const [value, setValue] = React.useState(2);
+
   const resetSelection = () => {
     setSelectedCity("");
     setFilteredTheaters([]);
@@ -402,53 +410,53 @@ const MovieDetail = () => {
         const selectedTheaterDetails = filteredTheaters.find(
           (theater) => theater.name === selectedTheater
         );
-    
+
         if (selectedTheaterDetails) {
           const theaterId = selectedTheaterDetails._id;
-    
+
           try {
             const showtimesData = await getShowtimesByTheater(theaterId);
-    
+
             console.log("Showtimes Data: ", showtimesData);
-    
+
             const filteredShowtimes = showtimesData.filter((showtime) => {
               const showtimeDate = dayjs(showtime.date);
               const currentDate = dayjs();
-    
+
               if (selectedDate) {
                 return (
                   showtimeDate.isSame(selectedDate, "day") &&
                   showtime.movie_id._id === movie._id
                 );
               }
-    
+
               return (
-                (showtimeDate.isAfter(currentDate, "day") || 
-                 showtimeDate.isSame(currentDate, "day")) &&
+                (showtimeDate.isAfter(currentDate, "day") ||
+                  showtimeDate.isSame(currentDate, "day")) &&
                 showtime.movie_id._id === movie._id
               );
             });
-    
+
             console.log("Filtered Showtimes: ", filteredShowtimes);
-    
+
             const uniqueMovies = {};
-    
+
             filteredShowtimes.forEach((showtime) => {
               const movieId = showtime.movie_id._id;
               const movieTitle = showtime.movie_id.title;
               const movieLanguage = showtime.movie_id.language;
               const movieDuration = showtime.movie_id.duration;
               const showtimeLayout = showtime.seatLayout;
-    
+
               const movieGenres = showtime.movie_id.genre
                 .map((genre) => genre.name)
                 .join(", ");
-    
+
               const showtimeDate = dayjs(showtime.date).format("MM/DD/YYYY");
-    
+
               const room = showtime.room_id.name;
               const showtimeId = showtime._id;
-    
+
               if (!uniqueMovies[movieId]) {
                 uniqueMovies[movieId] = {
                   title: movieTitle,
@@ -463,14 +471,14 @@ const MovieDetail = () => {
                   showtimeId: showtimeId,
                 };
               }
-    
+
               uniqueMovies[movieId].showtimes.push(showtime.start_time);
             });
-    
+
             const formattedMovies = Object.values(uniqueMovies);
-    
+
             console.log("Formatted Movies: ", formattedMovies);
-    
+
             setMovies(formattedMovies);
           } catch (error) {
             console.error("Error fetching showtimes:", error);
@@ -573,7 +581,10 @@ const MovieDetail = () => {
         {movie ? (
           <>
             <MovieInfoGrid>
-              <MoviePoster src={`http://localhost:8080/api/images/${movie.image}`} alt={movie.title} />
+              <MoviePoster
+                src={`http://localhost:8080/api/images/${movie.image}`}
+                alt={movie.title}
+              />
               <VideoWrapper>
                 <StyledYouTube
                   videoId={movie.trailer.split("v=")[1]}
@@ -789,6 +800,66 @@ const MovieDetail = () => {
         ) : (
           <Typography variant="h5">Movie not found</Typography>
         )}
+        {/* Comments */}
+        <div style={{ marginTop: 100 }}>
+          <Heading>Comments</Heading>
+          <Paper style={{ padding: "40px 20px" }}>
+            <Grid container wrap="nowrap" spacing={2}>
+              <Grid item>
+                <Avatar alt="Remy Sharp" src={imgLink} />
+              </Grid>
+              <Grid justifyContent="left" item xs zeroMinWidth>
+                <h4
+                  style={{
+                    margin: 0,
+                    textAlign: "left",
+                    paddingRight: "0.5rem",
+                  }}
+                >
+                  Duong Duc Trung
+                </h4>
+                <div style={{ alignItems: "center", display: "flex" }}>
+                  <Rating name="read-only" value={value} readOnly />{" "}
+                  <div style={{ marginLeft: "0.2rem" }}>10/25/2024</div>
+                </div>
+                <div style={{ textAlign: "left" }}>
+                  Phim rất hay, các bạn nên xem
+                </div>
+                <div style={{ textAlign: "left", color: "gray" }}>
+                  posted 1 minute ago
+                </div>
+              </Grid>
+            </Grid>
+          </Paper>
+          <Paper style={{ padding: "40px 20px", marginTop: "0.5rem" }}>
+            <Grid container wrap="nowrap" spacing={2}>
+              <Grid item>
+                <Avatar alt="Remy Sharp" src={imgLink} />
+              </Grid>
+              <Grid justifyContent="left" item xs zeroMinWidth>
+                <h4
+                  style={{
+                    margin: 0,
+                    textAlign: "left",
+                    paddingRight: "0.5rem",
+                  }}
+                >
+                  Kieu Thanh Binh
+                </h4>
+                <div style={{ alignItems: "center", display: "flex" }}>
+                  <Rating name="read-only" value={value} readOnly />{" "}
+                  <div style={{ marginLeft: "0.2rem" }}>10/25/2024</div>
+                </div>
+                <div style={{ textAlign: "left" }}>
+                  Không từ nào có thể diễn tả, quá hay
+                </div>
+                <div style={{ textAlign: "left", color: "gray" }}>
+                  posted 1 hour ago
+                </div>
+              </Grid>
+            </Grid>
+          </Paper>
+        </div>
       </Container>
       <Footer />
     </Section>

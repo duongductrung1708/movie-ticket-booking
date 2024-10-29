@@ -35,11 +35,18 @@ const StarterPage = () => {
       }}
     >
       <header className="app-header">
+        <div></div>
         <LogoText>
           <Link style={{ textDecoration: "none", color: "white" }} to="/">
             K. Cinema
           </Link>
         </LogoText>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
         <div className="app-header-btns">
           <Button
             variant="contained"

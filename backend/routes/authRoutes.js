@@ -9,6 +9,10 @@ const {
   forgotPassword,
 } = require("../controllers/authController");
 
+const { verifyGoogleToken } = require("../utils/googleAuth");
+const { findOrCreateUserFromGoogle } = require("../controllers/userController");
+const { generateToken } = require("../utils/generateToken");
+
 const router = express.Router();
 
 // @route    POST api/auth/register
@@ -80,5 +84,48 @@ router.post(
   ],
   resetPassword
 );
+
+// @route    POST api/auth/google-login
+// @desc     Login with Google
+// @access   Public
+router.post("/google-login", async (req, res) => {
+  const { token } = req.body;
+
+  console.log("Received token:", token);
+
+  try {
+    const googleUser = await verifyGoogleToken(token);
+
+    if (!googleUser) {
+      return res.status(401).json({ message: "Invalid Google token" });
+    }
+
+    const user = await findOrCreateUserFromGoogle(googleUser);
+    console.log("User from findOrCreateUserFromGoogle:", user);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found or could not be created" });
+    }
+
+    const userData = {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      dob: user.dob,
+      role: user.role ? user.role._id : null,
+      address: user.address,
+      city: user.city,
+      district: user.district,
+      gender: user.gender,
+      accessToken: generateToken(user),
+    };
+
+    return res.json(userData);
+  } catch (error) {
+    console.error("Google login error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
 
 module.exports = router;

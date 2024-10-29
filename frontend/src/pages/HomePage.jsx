@@ -50,7 +50,7 @@ const BookTicketButton = styled.button`
     height: 70px;
     font-size: 1rem;
     clip-path: polygon(0 0, 100% 0, 0% 200%);
-    
+
     &:hover {
       width: 170px;
     }
@@ -60,7 +60,7 @@ const BookTicketButton = styled.button`
     width: 50px;
     height: 70px;
     font-size: 0.8rem;
-    
+
     &:hover {
       width: 120px;
     }
@@ -70,7 +70,7 @@ const BookTicketButton = styled.button`
     width: 40px;
     height: 70px;
     font-size: 0.7rem;
-    
+
     &:hover {
       width: 100px;
     }
@@ -147,7 +147,7 @@ const HomePage = () => {
         <Footer />
         <ScrollToTop />
         <BookTicketButton
-          show={showButton && !isBookingTabOpen}
+          show={showButton && !isBookingTabOpen ? "true" : undefined}
           onClick={() => setIsBookingTabOpen(true)}
         >
           <Text className="text">Book Here</Text>

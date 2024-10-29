@@ -7,6 +7,7 @@ const {
   updateUser,
   deleteUser,
   changePassword,
+  updateUserFE,
 } = require("../controllers/userController");
 const middleware = require("../middleware/auth");
 
@@ -23,6 +24,8 @@ router.get("/:id", middleware.verifyToken, getUser);
 
 // Update user information (requires authentication middleware)
 router.put("/:id", middleware.verifyToken, updateUser);
+
+router.put("/fe/:id", middleware.verifyToken, updateUserFE);
 
 // Delete a user (requires authentication middleware)
 router.delete("/:id", middleware.verifyToken, deleteUser);
