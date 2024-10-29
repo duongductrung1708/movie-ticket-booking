@@ -5,7 +5,7 @@ const showtimeValidation = {
     verifyTime: async (req, res, next) => {
         try {
             const { startTime, endTime, date, roomId } = req.body;
-            
+
             const formatTime = (time) => {
                 const [hour, minute] = time.split(":").map(Number); // Split time and convert to numbers
                 const formattedHour = hour < 10 ? `0${hour}` : `${hour}`; // Add leading zero to hour if needed
@@ -58,8 +58,49 @@ const showtimeValidation = {
 
             res.status(500).send({ message: err.message });
         }
-    }
+    },
+
+    verifyConflictShowtime: async (req, res, next) => {
+        try {
+            // console.log(req.body);
+    
+            // Get the input data from the request body
+            const { roomId, startTime, endTime, dates } = req.body;
+    
+            // Convert dates to Date objects for querying
+            const dateObjects = dates.map(date => new Date(date));
+    
+            // Query to find any conflicting showtimes
+            const conflicts = await Showtime.find({
+                room_id: roomId,
+                date: { $in: dateObjects },
+                $or: [
+                    {
+                        // Check if existing showtimes overlap with the requested time range
+                        start_time: { $lt: endTime },
+                        end_time: { $gt: startTime }
+                    }
+                ]
+            });
+    
+            // If conflicts exist, return them; otherwise, confirm no conflicts
+            if (conflicts.length > 0) {
+                return res.status(409).json({
+                    message: "Conflict found with existing showtimes.",
+                    conflicts: conflicts
+                });
+            } else {
+                next();
+            }
+        } catch (error) {
+            // Handle any potential errors
+            console.error("Error checking for conflicts:", error);
+            return res.status(500).json({ message: "Internal server error." });
+        }
+    },
 
 }
+
+
 
 module.exports = showtimeValidation;

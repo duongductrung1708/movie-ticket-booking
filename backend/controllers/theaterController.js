@@ -4,9 +4,50 @@ const TheaterService = require('../services/theaterService');
 const path = require('path')
 const fs = require('fs');
 const { default: mongoose } = require('mongoose');
-const { log } = require('console');
-
+const Showtime = require('../models/Showtime');
 const TheaterController = {
+
+  getSchedule: async (req, res) => {
+    const theaterId = req.params.id;
+  
+    try {
+      // Find the theater by its ID and populate the rooms
+      const theater = await Theater.findById(theaterId).populate('rooms');
+  
+      if (!theater) {
+        return res.status(404).json({ message: 'Theater not found' });
+      }
+  
+      // Extract room IDs from the theater
+      const roomIds = theater.rooms.map(room => room._id);
+  
+      // Find all showtimes associated with the rooms of this theater and populate movie info
+      const showtimes = await Showtime.find({ room_id: { $in: roomIds } })
+        .populate('movie_id') // Populate movie details
+        .populate('room_id');  // Optionally populate room details
+  
+      // Check if there are showtimes
+      if (!showtimes.length) {
+        return res.status(404).json({ message: 'No showtimes found for this theater' });
+      }
+  
+      // Format the response data
+      const formattedShowtimes = showtimes.map(showtime => ({
+        showtimeId: showtime._id,
+        movieTitle: showtime.movie_id.title,
+        roomName: showtime.room_id.name,
+        date: showtime.date,
+        startTime: showtime.start_time,
+        endTime: showtime.end_time,
+      }));
+  
+      // Return the showtimes with movie info
+      return res.json({ theaterId, showtimes: formattedShowtimes });
+    } catch (error) {
+      console.error('Error retrieving showtimes:', error);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  },  
   create: async (req, res) => {
     try {
       const theater = await TheaterService.create(req.body);

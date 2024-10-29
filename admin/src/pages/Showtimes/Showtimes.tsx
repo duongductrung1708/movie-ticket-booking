@@ -5,6 +5,7 @@ import { GridColDef } from "@mui/x-data-grid";
 import {
   deleteShowtime,
   getPaginatedShowtimes,
+  isBookedShowtime,
 } from "../../services/showtimeService";
 import constants from "../../constants/constants";
 import { dateFormat } from "../../services/formatService";
@@ -12,6 +13,7 @@ import AddShowtimeDialog from "../../components/add/AddShowTimeDialog";
 import ConfirmModal from "../../components/modal/ConfirmModal";
 import { toast } from "react-toastify";
 import UpdateShowtimeDialog from "../../components/update/UpdateShowTimeDialog";
+import ConfirmDeleteShowtimeModal from "../../components/display/ConfirmDeleteShowtimeModal";
 
 const columns: GridColDef[] = [
   {
@@ -49,6 +51,7 @@ const Showtimes = () => {
   const [totalShowtime, setTotalShowtime] = useState(0);
   const [selectedShowtime, setSelectedShowtime] = useState<any>(null);
   const [isUpdate, setIsUpdate] = useState<boolean>(false);
+  const [openShowtimeDetails, setOpenShowtimeDetails] = useState(false);
 
   useEffect(() => {
     const fetchShowtime = async () => {
@@ -58,42 +61,43 @@ const Showtimes = () => {
           limit: constants.PAGE_SIZE,
           searchValue: searchQuery,
         });
+        console.log(response);
 
-        let showtimes = response.data.showtimes.map((st: any) => {
-          let date = dateFormat(st.date);
-          return {
-            _id: st._id,
-            movie: st.movie.title,
-            theater: st.theater.name,
-            room: st.room.name,
-            date: dateFormat(st.date),
-            time: `${st.start_time} - ${st.end_time}`,
-          };
-        });
-        console.log(response.data.showtimes[0].date);
-        
-        console.log(dateFormat(response.data.showtimes[0].date));
+        const formattedShowtimes = response.data.showtimes.map((st: any) => ({
+          _id: st._id,
+          movie: st.movie.title,
+          theater: st.theater.name,
+          room: st.room.name,
+          date: dateFormat(st.date),
+          time: `${st.start_time} - ${st.end_time}`,
+          seatLayout: st.seatLayout,
+        }));
 
-        setShowtimes(showtimes);
+        setShowtimes(formattedShowtimes);
         setTotalShowtime(response.data.totalCount);
       } catch (error) {
         console.error("Failed to fetch showtimes:", error);
       }
     };
     fetchShowtime();
-  }, [currentPage, searchQuery]); // Added dependencies here
+  }, [currentPage, searchQuery]);
 
   const handleTableAction = (actionType: string, id: string) => {
     const showtime = showtimes.find((st) => st?._id === id) ?? null;
-    if (actionType == "delete") {
+    if (actionType === "delete") {
       setSelectedShowtime(showtime);
       setOpenConfirm(true);
     }
     if (actionType === "view") {
       if (showtime) {
         setSelectedShowtime(showtime);
+        console.log(showtime);
+        setOpenShowtimeDetails(true);
         setIsUpdate(true);
       }
+    }
+    if (actionType === "edit") {
+      setSelectedShowtime(showtime);
     }
   };
 
@@ -105,14 +109,21 @@ const Showtimes = () => {
   const handleConfirmDelete = async () => {
     if (selectedShowtime) {
       try {
-        await deleteShowtime(selectedShowtime._id);
-        setShowtimes(showtimes.filter((st) => st._id !== selectedShowtime._id));
-        setOpenConfirm(false);
-        setSelectedShowtime(null);
-        toast.success("Delete showtime success");
+        const response = await isBookedShowtime(selectedShowtime._id);
+        if (response.data.booked) {
+          toast.error("Cannot delete. Showtime is booked or reserved!");
+        } else {
+          await deleteShowtime(selectedShowtime._id);
+          setShowtimes(
+            showtimes.filter((st) => st._id !== selectedShowtime._id)
+          );
+          setOpenConfirm(false);
+          setSelectedShowtime(null);
+          toast.success("Showtime deleted successfully");
+        }
       } catch (error) {
-        toast.error("Delete user failed");
-        console.error("Failed to delete user:", error);
+        toast.error("Failed to delete showtime");
+        console.error("Error deleting showtime:", error);
       }
     }
   };
@@ -137,15 +148,15 @@ const Showtimes = () => {
         onPageChange={(page) => setCurrentPage(page)}
         currentPage={currentPage}
         onAction={handleTableAction}
-        onSearch={setSearchQuery} // Added onSearch for handling search
+        onSearch={setSearchQuery}
       />
       {selectedShowtime && (
-        <ConfirmModal
+        <ConfirmDeleteShowtimeModal
           open={openConfirm}
           onClose={handleCloseConfirm}
           onConfirm={handleConfirmDelete}
-          title="Confirm Delete"
-          message={`Are you sure you want to delete showtime ${selectedShowtime?.time} at ${selectedShowtime?.date} of ${selectedShowtime?.room} Theater ${selectedShowtime?.theater}`}
+          seatLayout={selectedShowtime?.seatLayout} // Assuming seatLayout is part of showtime data
+          message={`Are you sure you want to delete showtime ${selectedShowtime?.time} on ${selectedShowtime?.date} at ${selectedShowtime?.room} in Theater ${selectedShowtime?.theater}?`}
         />
       )}
       {isUpdate && (

@@ -312,6 +312,8 @@ exports.getBookingById = async (req, res) => {
 
 exports.getBookingByUserId = async (req, res) => {
   const userId = req.params.id;
+  console.log("Get History");
+  
   try {
     console.log(userId);
 
@@ -429,6 +431,8 @@ exports.getBookingByUserId = async (req, res) => {
         }
       }
     ]);
+    console.log(bookingHistory);
+    
     return res.json(bookingHistory);
   } catch (error) {
     console.error('Error fetching booking history:', error);

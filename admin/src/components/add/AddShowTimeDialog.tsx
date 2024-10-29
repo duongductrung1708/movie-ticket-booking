@@ -1,5 +1,4 @@
-import * as React from "react";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import Dialog from "@mui/material/Dialog";
@@ -11,22 +10,18 @@ import CloseIcon from "@mui/icons-material/Close";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Autocomplete from "@mui/material/Autocomplete";
-import Grid from "@mui/material/Grid";
-import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import DatePicker from "react-multi-date-picker";
 import { getMovies } from "../../services/movieService";
-import { getTheaters } from "../../services/theaterService";
+import { getTheaters, getSchedule } from "../../services/theaterService";
 import { getRoomByTheaterId } from "../../services/roomService";
-import {
-  getShowtimesByRoom,
-  saveShowtime,
-} from "../../services/showtimeService";
-import { Box, Grid2 } from "@mui/material";
+import { Calendar, momentLocalizer } from "react-big-calendar";
+import moment from "moment";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import { Box, Grid } from "@mui/material";
 import { toast } from "react-toastify";
-import { dateFormat } from "../../services/formatService";
-import dayjs from "dayjs";
+import "react-multi-date-picker/styles/layouts/mobile.css";
+import ReactTooltip from "react-tooltip"; // Import react-tooltip
+import { saveMultipleShowtimes } from "../../services/showtimeService";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -36,6 +31,8 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     padding: theme.spacing(1),
   },
 }));
+
+const localizer = momentLocalizer(moment); // Calendar localizer
 
 interface Movie {
   id: string;
@@ -52,8 +49,9 @@ interface Room {
   _id: string;
   name: string;
   seatLayout: number[][];
-  showtimes: string[]; // Array of existing showtimes for this room
+  showtimes: string[];
 }
+
 interface Showtime {
   id: string;
   start_time: string;
@@ -61,7 +59,6 @@ interface Showtime {
 }
 
 interface AddShowtimeDialogProps {
-  //set showtimes
   setShowtimesList: (showtimes: any) => void;
 }
 
@@ -75,17 +72,13 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [selectedTheater, setSelectedTheater] = useState<Theater | null>(null);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null); // Date state
-  const [showtimes, setShowtimes] = useState<Showtime[] | null>(null);
+  const [events, setEvents] = useState([]); // State to store calendar events
   const [startHour, setStartHour] = useState<string>(""); // Start hour
   const [startMinute, setStartMinute] = useState<string>(""); // Start minute
   const [endHour, setEndHour] = useState<string>(""); // End hour
   const [endMinute, setEndMinute] = useState<string>(""); // End minute
-
-  // Refs for input fields to control focus
-  const startMinuteRef = useRef<HTMLInputElement>(null);
-  const endHourRef = useRef<HTMLInputElement>(null);
-  const endMinuteRef = useRef<HTMLInputElement>(null);
+  const [values, setValues] = useState([]); // Selected date ranges
+  const [dateDisplay, setDateDisplay] = useState([]); // Display date ranges
 
   // Load movies and theaters when the dialog opens
   useEffect(() => {
@@ -93,25 +86,20 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
       const moviesResponse = await getMovies();
       const theatersResponse = await getTheaters();
 
-      const formattedMovie = moviesResponse.data.map((mv: any) => {
-        return {
-          id: mv._id,
-          title: mv.title,
-        };
-      });
+      const formattedMovies = moviesResponse.data.map((mv: any) => ({
+        id: mv._id,
+        title: mv.title,
+      }));
 
-      // Formatting theaters
-      const formattedTheaters = theatersResponse.data.map((th: any) => {
-        return {
-          id: th._id,
-          name: th.name,
-          rooms: th.rooms.map((roomId: string) => ({
-            id: roomId, // If room details are provided later, adjust accordingly
-          })),
-        };
-      });
+      const formattedTheaters = theatersResponse.data.map((th: any) => ({
+        id: th._id,
+        name: th.name,
+        rooms: th.rooms.map((roomId: string) => ({
+          id: roomId,
+        })),
+      }));
 
-      setMovies(formattedMovie);
+      setMovies(formattedMovies);
       setTheaters(formattedTheaters);
     };
 
@@ -120,10 +108,9 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
     }
   }, [open]);
 
+  // Fetch rooms when a theater is selected
   useEffect(() => {
     const fetchRoomsByTheaterId = async () => {
-      console.log(selectedTheater);
-
       if (selectedTheater) {
         const roomResponse = await getRoomByTheaterId(selectedTheater.id);
         setRooms(roomResponse);
@@ -134,22 +121,57 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
     fetchRoomsByTheaterId();
   }, [selectedTheater]);
 
+  // Fetch and display showtimes when a theater is selected
   useEffect(() => {
-    setShowtimes([]);
-    const fetchShowtimeByRoom = async () => {
-      if (selectedDate && selectedRoom) {
-        const response = await getShowtimesByRoom(
-          { date: selectedDate },
-          selectedRoom._id
-        );
-        console.log(selectedDate);
-        console.log(response.data);
+    const fetchShowtimes = async () => {
+      if (selectedTheater) {
+        const response = await getSchedule(selectedTheater.id);
+        const showtimes = response.data.showtimes;
 
-        setShowtimes(response.data);
+        // Format showtimes for the calendar
+        const formattedEvents = showtimes.map((showtime) => {
+          // Convert the date string and combine it with the startTime and endTime
+          const startDateTime = moment(showtime.date)
+            .set({
+              hour: parseInt(showtime.startTime.split(":")[0]),
+              minute: parseInt(showtime.startTime.split(":")[1]),
+            })
+            .toDate(); // Convert to JavaScript Date object
+
+          const endDateTime = moment(showtime.date)
+            .set({
+              hour: parseInt(showtime.endTime.split(":")[0]),
+              minute: parseInt(showtime.endTime.split(":")[1]),
+            })
+            .toDate(); // Convert to JavaScript Date object
+
+          return {
+            title: `${showtime.roomName} - ${showtime.movieTitle}`,
+            start: startDateTime, // Combined start date and time
+            end: endDateTime, // Combined end date and time
+          };
+        });
+
+        setEvents(formattedEvents); // Update events for the calendar
       }
     };
-    fetchShowtimeByRoom();
-  }, [selectedDate, selectedRoom]);
+
+    fetchShowtimes();
+  }, [selectedTheater]);
+
+  const handleDateChange = (newDates: any[]) => {
+    setValues(newDates); // Update the state with the new dates
+    let dateData = newDates.map((range) => {
+      let startDate = new Date(range[0]).toLocaleDateString(); // Convert start timestamp to date
+      let endDate = new Date(range[1]).toLocaleDateString(); // Convert end timestamp to date
+      return `From ${startDate} to ${endDate}`; // Format the date range
+    });
+    setDateDisplay(dateData);
+  };
+
+  useEffect(()=>{
+    
+  },[values])
 
   const handleClose = () => {
     setSelectedMovie(null);
@@ -159,79 +181,44 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
     setStartMinute("");
     setEndHour("");
     setEndMinute("");
-    setSelectedDate(null); // Reset the date
     setOpen(false);
+    setEvents([]); // Clear calendar events on close
+    setValues([]); // Clear selected dates
+    setDateDisplay([]);
   };
+  // Function to get all dates within a range
+  function getAllDatesInRange(start, end) {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const dates = [];
 
-  const handleSave = async () => {
+    while (startDate <= endDate) {
+      dates.push(new Date(startDate).toISOString().split("T")[0]); // Format as 'YYYY-MM-DD'
+      startDate.setDate(startDate.getDate() + 1); // Move to the next day
+    }
+
+    return dates;
+  }
+  const handleAddShowtime = async () => {
     const startTime = `${startHour}:${startMinute}`;
     const endTime = `${endHour}:${endMinute}`;
-    const [day, month, year] = selectedDate.split("/"); // Split the date into components
-    const formattedDate = `${month}/${day}/${year}`; 
-    const requestData = {
+    const allDatesRanges = values.flatMap(([start, end]) => getAllDatesInRange(start, end));
+    
+    const data = {
       movieId: selectedMovie?.id,
       roomId: selectedRoom?._id,
-      date: formattedDate,
       startTime,
       endTime,
+      dates: allDatesRanges,
     };
-
-    console.log(requestData);
-
     try {
-      const response = await saveShowtime(requestData);
-      toast.success(response.data.message);
-      console.log(response.data); // Successfully added showtime
-      const updateData = {
-        _id: response.data.showtime._id,
-        date: dateFormat(response.data.showtime.date),
-        time:
-          response.data.showtime.start_time +
-          " - " +
-          response.data.showtime.end_time,
-        room: response.data.showtime.room,
-        theater: response.data.showtime.theater,
-        movie: response.data.showtime.movie,
-      };
-      setShowtimesList((prev: any) => [...prev, updateData]);
-      setOpen(false); // Close the dialog on success
-    } catch (error: any) {
-      console.error("Error saving showtime:", error);
-      toast.error(error.response.data.message);
+      const response = await saveMultipleShowtimes(data);
+      console.log(response);
+      
+    } catch (error) {
+      console.error(error);
+
     }
-  };
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setValue: React.Dispatch<React.SetStateAction<string>>,
-    max: number, // max value (23 for hours, 59 for minutes)
-    nextFieldRef?: React.RefObject<HTMLInputElement>
-  ) => {
-    let value = e.target.value;
-
-    // If the value exceeds the max, set it to the max
-    if (parseInt(value) > max) {
-      value = max.toString();
-    }
-
-    // If the input reaches 2 characters, move to the next field
-    if (value.length === 2 && nextFieldRef?.current) {
-      nextFieldRef.current.focus();
-    }
-
-    setValue(value);
-  };
-
-  const handleEndMinuteBlur = () => {
-    if (parseInt(endMinute) > 59) {
-      setEndMinute("59"); // Automatically set minute to 59 if it exceeds
-    }
-  };
-
-  const handleSelectDate = (date: any) => {
-    // Ensure the selected date is formatted back to DD/MM/YYYY
-    const formattedDate = dayjs(date).format("DD/MM/YYYY");
-    setSelectedDate(formattedDate);
   };
 
   return (
@@ -240,9 +227,7 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
         variant="contained"
         style={{ fontWeight: "bold" }}
         color="primary"
-        onClick={() => {
-          setOpen(true);
-        }}
+        onClick={() => setOpen(true)}
       >
         Add Showtime
       </Button>
@@ -250,7 +235,7 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
         onClose={handleClose}
         aria-labelledby="customized-dialog-title"
         open={open}
-        maxWidth="sm"
+        maxWidth="md"
         fullWidth
       >
         <DialogTitle
@@ -263,12 +248,7 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
           <IconButton
             aria-label="close"
             onClick={handleClose}
-            sx={(theme) => ({
-              position: "absolute",
-              right: 8,
-              top: 8,
-              color: theme.palette.grey[500],
-            })}
+            sx={{ position: "absolute", right: 8, top: 8 }}
           >
             <CloseIcon />
           </IconButton>
@@ -287,7 +267,7 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
             onChange={(e, newValue) => setSelectedMovie(newValue)}
             renderInput={(params) => (
               <TextField {...params} label="Select Movie" margin="dense" />
-            )} // Add key based on unique movie IDs
+            )}
           />
 
           {/* Theater selection */}
@@ -305,7 +285,7 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
           />
 
           {/* Room selection */}
-          {rooms?.length > 0 && (
+          {rooms && rooms?.length > 0 && (
             <Autocomplete
               options={rooms}
               getOptionLabel={(option) => option.name}
@@ -317,129 +297,145 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
             />
           )}
 
-          {/* Date Picker */}
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DemoContainer components={["DatePicker"]}>
-              <DatePicker
-                label="Select Date"
-                onChange={(date) => handleSelectDate(date)} // Set the selected date
-                renderInput={(params) => (
-                  <TextField {...params} margin="dense" fullWidth />
-                )}
-              />
-            </DemoContainer>
-          </LocalizationProvider>
-          <Box gap="2px">
-            <Typography variant="h6" style={{ fontWeight: "bold" }}>
-              Existing Showtimes
-            </Typography>
-            {selectedDate && selectedRoom ? (
-              showtimes && showtimes.length > 0 ? (
-                <Box display="flex" gap="10px">
-                  {showtimes.map((st) => (
-                    <Button
-                      variant="contained"
-                      key={st.id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {`${st.start_time} - ${st.end_time}`}
-                    </Button>
-                  ))}
-                </Box>
+          {/* DatePicker to select range of dates */}
+          <DialogContent dividers>
+            <Typography gutterBottom>Select Dates:</Typography>
+            <DatePicker
+              multiple
+              range
+              numberOfMonths={3}
+              value={values}
+              onChange={handleDateChange}
+              format="DD/MM/YYYY"
+              calendarPosition="bottom"
+              className="rmdp-mobile"
+              minDate={new Date()}
+            />
+            {/* Display the selected date ranges */}
+            <Box sx={{ marginTop: "20px" }}>
+              <Typography variant="h6" style={{ marginBottom: "10px" }}>
+                Selected Date Ranges:
+              </Typography>
+              {dateDisplay ? (
+                dateDisplay.map((range, index) => (
+                  <Typography
+                    key={index}
+                    variant="body1"
+                    color="textPrimary"
+                    gutterBottom
+                  >
+                    {range}
+                  </Typography>
+                ))
               ) : (
-                <Typography>
-                  No showtimes available for the selected date and room.
+                <Typography variant="body1" color="textSecondary">
+                  No date ranges selected.
                 </Typography>
-              )
-            ) : (
-              <Typography>Please select a date and a room.</Typography>
-            )}
-          </Box>
+              )}
+            </Box>
+          </DialogContent>
 
-          {/* Start and End Time input in one line */}
-          <Grid2 container spacing={2}>
-            <Grid2 item xs={6}>
+          {/* Time Input */}
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
               <Typography variant="h6" style={{ fontWeight: "bold" }}>
                 Start Time:
               </Typography>
-              <Grid2 container spacing={1} alignItems="center">
-                <Grid2 item xs={5}>
+              <Grid container spacing={1} alignItems="center">
+                <Grid item xs={5}>
                   <TextField
                     label="HH"
                     type="number"
                     inputProps={{ min: 0, max: 23, maxLength: 2 }}
                     value={startHour}
-                    onChange={(e: any) =>
-                      handleInputChange(e, setStartHour, 23, startMinuteRef)
-                    }
+                    onChange={(e: any) => setStartHour(e.target.value)}
                     fullWidth
                   />
-                </Grid2>
-                <Grid2 item xs={1}>
+                </Grid>
+                <Grid item xs={1}>
                   <Typography variant="h6">:</Typography>
-                </Grid2>
-                <Grid2 item xs={5}>
+                </Grid>
+                <Grid item xs={5}>
                   <TextField
                     label="MM"
                     type="number"
                     inputProps={{ min: 0, max: 59, maxLength: 2 }}
                     value={startMinute}
-                    onChange={(e: any) =>
-                      handleInputChange(e, setStartMinute, 59, endHourRef)
-                    }
-                    inputRef={startMinuteRef}
+                    onChange={(e: any) => setStartMinute(e.target.value)}
                     fullWidth
                   />
-                </Grid2>
-              </Grid2>
-            </Grid2>
+                </Grid>
+              </Grid>
+            </Grid>
 
-            <Grid2 item xs={6}>
+            <Grid item xs={6}>
               <Typography variant="h6" style={{ fontWeight: "bold" }}>
                 End Time:
               </Typography>
-              <Grid2 container spacing={1} alignItems="center">
-                <Grid2 item xs={5}>
+              <Grid container spacing={1} alignItems="center">
+                <Grid item xs={5}>
                   <TextField
                     label="HH"
                     type="number"
                     inputProps={{ min: 0, max: 23, maxLength: 2 }}
                     value={endHour}
-                    onChange={(e: any) =>
-                      handleInputChange(e, setEndHour, 23, endMinuteRef)
-                    }
-                    inputRef={endHourRef}
+                    onChange={(e: any) => setEndHour(e.target.value)}
                     fullWidth
                   />
-                </Grid2>
-                <Grid2 item xs={1}>
+                </Grid>
+                <Grid item xs={1}>
                   <Typography variant="h6">:</Typography>
-                </Grid2>
-                <Grid2 item xs={5}>
+                </Grid>
+                <Grid item xs={5}>
                   <TextField
                     label="MM"
                     type="number"
                     inputProps={{ min: 0, max: 59, maxLength: 2 }}
                     value={endMinute}
-                    onChange={(e: any) =>
-                      handleInputChange(e, setEndMinute, 59)
-                    }
-                    inputRef={endMinuteRef}
-                    onBlur={handleEndMinuteBlur}
+                    onChange={(e: any) => setEndMinute(e.target.value)}
                     fullWidth
                   />
-                </Grid2>
-              </Grid2>
-            </Grid2>
-          </Grid2>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+
+          {/* Calendar will display only if a theater is selected */}
+          {selectedTheater && (
+            <div style={{ height: 500, marginTop: "20px" }}>
+              <Typography variant="h6" gutterBottom>
+                Showtime Schedule for {selectedTheater?.name}
+              </Typography>
+              <Calendar
+                localizer={localizer}
+                events={events} // Pass showtimes as calendar events
+                startAccessor="start"
+                endAccessor="end"
+                style={{ height: "100%", width: "100%" }}
+                formats={{
+                  timeGutterFormat: "h:mm A",
+                  eventTimeRangeFormat: ({ start, end }) =>
+                    `${moment(start).format("h:mm A")} - ${moment(end).format(
+                      "h:mm A"
+                    )}`,
+                }}
+                eventPropGetter={(event) => ({
+                  "data-tip": `${event.title} from ${moment(event.start).format(
+                    "h:mm A"
+                  )} to ${moment(event.end).format("h:mm A")}`,
+                  style: {
+                    whiteSpace: "normal", // Allow text wrapping
+                    fontSize: "12px", // Adjust font size for readability
+                  },
+                })}
+              />
+            </div>
+          )}
         </DialogContent>
+
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button variant="contained" onClick={handleSave} autoFocus>
+          <Button variant="contained" autoFocus onClick={handleAddShowtime}>
             Add Showtime
           </Button>
         </DialogActions>
