@@ -260,7 +260,6 @@ const UserProfile = () => {
                   inputProps={{ maxLength: 15 }}
                   variant="outlined"
                   margin="normal"
-                  disabled
                 />
                 <TextField
                   fullWidth

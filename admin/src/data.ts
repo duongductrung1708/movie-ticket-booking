@@ -71,18 +71,6 @@ export const menu = [
       },
     ],
   },
-  {
-    id: 4,
-    title: "Maintenance",
-    listItems: [
-      {
-        id: 1,
-        title: "Upcoming Movies",
-        url: "/upcomingMovies",
-        icon: "setting.svg",
-      },
-    ],
-  },
 ];
 
 export const topDealUsers = [
