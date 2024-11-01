@@ -7,6 +7,7 @@ const {
   createMovies,
   updateMovie,
   deleteMovie,
+  getMoviesWithoutShowtime,
 } = require("../controllers/movieController");
 const multer = require("multer");
 const path = require('path');
@@ -38,6 +39,7 @@ router.post("/", upload.single('image'), createMovie);
 router.put("/:id", upload.single('image'), updateMovie);
 
 // Movie Routes
+router.get("/without-showtime", getMoviesWithoutShowtime);
 router.get("/", getMovies);
 router.get("/:id", getMovieById);
 router.post("/", createMovie);

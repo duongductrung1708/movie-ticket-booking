@@ -1,5 +1,6 @@
 const Movie = require("../models/Movie");
 const Genre = require("../models/Genre");
+const Showtime = require("../models/Showtime");
 const { format } = require("date-fns");
 
 // Get all movies
@@ -187,5 +188,23 @@ exports.createMovies = async (req, res) => {
     res.status(201).json(newMovies);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+// Get movies without showtime
+exports.getMoviesWithoutShowtime = async (req, res) => {
+  try {
+    const showtimes = await Showtime.find().distinct("movie_id");
+    console.log("Showtimes IDs without movies:", showtimes); // kiểm tra dữ liệu showtime ID
+    
+    const moviesWithoutShowtime = await Movie.find({
+      _id: { $nin: showtimes },
+    });
+    console.log("Movies without showtime:", moviesWithoutShowtime); // kiểm tra dữ liệu phim
+
+    res.status(200).json(moviesWithoutShowtime);
+  } catch (error) {
+    console.error("Error fetching movies without showtime:", error); // in chi tiết lỗi
+    res.status(500).json({ error: "Failed to fetch movies without showtime" });
   }
 };

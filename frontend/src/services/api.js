@@ -267,7 +267,7 @@ export const getAllServices = async () => {
 // Function to get all upcoming movies
 export const getUpcomingMovies = async () => {
   try {
-    const response = await api.get("/upcoming-movie");
+    const response = await api.get("/movies/without-showtime");
     return response.data;
   } catch (error) {
     console.error("Get upcoming movies error:", error);

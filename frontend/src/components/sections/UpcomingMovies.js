@@ -222,7 +222,7 @@ const Movie = ({ img, name = "", releaseDate = "", trailerUrl = "" }) => {
   return (
     <>
       <Item>
-        <MovieImage src={img} alt={name} />
+        <MovieImage src={`http://localhost:8080/api/images/${img}`} alt={name} />
         <Name>{name}</Name>
         <ReleaseDate>{releaseDate}</ReleaseDate>
         <Button onClick={openModal}>Watch Trailer</Button>
@@ -303,10 +303,10 @@ const UpcomingMovies = () => {
         {filteredMovies.slice(0, visibleMovies).map((movie, index) => (
           <Movie
             key={index}
-            img={movie.poster_image}
+            img={movie.image}
             name={movie.title}
             releaseDate={movie.release_date}
-            trailerUrl={movie.trailer_url}
+            trailerUrl={movie.trailer}
           />
         ))}
       </Container>
