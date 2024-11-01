@@ -27,8 +27,8 @@ const Navbar = () => {
         </div>
         <div className="user">
           <img
-            src="https://images.pexels.com/photos/11038549/pexels-photo-11038549.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load"
-            alt=""
+            src="https://img.hoidap247.com/picture/question/20200508/large_1588936738888.jpg"
+            alt="admin"
           />
           <span>Admin</span>
         </div>
