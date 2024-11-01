@@ -65,7 +65,7 @@ exports.createBookingData = async (req, res) => {
           console.log(`Booking ${bookingResponse._id} canceled due to timeout.`);
         }
       },
-      10 * 10 * 1000
+      10 * 60 * 1000
     );
 
     // Create booking details

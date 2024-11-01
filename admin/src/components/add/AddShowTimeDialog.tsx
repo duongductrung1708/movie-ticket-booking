@@ -190,10 +190,11 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
   function getAllDatesInRange(start, end) {
     const startDate = new Date(start);
     const endDate = new Date(end);
-    const dates = [];
+    const dates = [];    
 
-    while (startDate <= endDate) {
-      dates.push(new Date(startDate).toISOString().split("T")[0]); // Format as 'YYYY-MM-DD'
+    while (startDate <= endDate) {      
+      dates.push(new Date(startDate).getFullYear() + '-' + String(new Date(startDate).getMonth() + 1).padStart(2, '0') + '-' + String(new Date(startDate).getDate()).padStart(2, '0'));
+ // Format as 'YYYY-MM-DD'
       startDate.setDate(startDate.getDate() + 1); // Move to the next day
     }
 
@@ -211,13 +212,15 @@ const AddShowtimeDialog: React.FC<AddShowtimeDialogProps> = ({
       endTime,
       dates: allDatesRanges,
     };
+    
     try {
       const response = await saveMultipleShowtimes(data);
       console.log(response);
+      toast.success(response.data.message)
       
     } catch (error) {
       console.error(error);
-
+      toast.error(error.response.data.message)
     }
   };
 
