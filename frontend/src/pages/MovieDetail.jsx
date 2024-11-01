@@ -362,7 +362,7 @@ const MovieDetail = () => {
 
   const imgLink =
     "https://img.hoidap247.com/picture/question/20200508/large_1588936738888.jpg";
-  const [value, setValue] = React.useState(2);
+  const [value] = React.useState(2);
 
   const resetSelection = () => {
     setSelectedCity("");
