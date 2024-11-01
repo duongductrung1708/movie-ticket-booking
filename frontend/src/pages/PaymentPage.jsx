@@ -189,6 +189,8 @@ const PaymentPage = () => {
   const [total, setTotal] = useState(0);
   const [openModal, setOpenModal] = useState(false);
 
+  const ws = useRef(null);
+
   const userRole = JSON.parse(localStorage.getItem("user"))?.role;
 
   const handleConfirmMomoPayment = async () => {
@@ -220,6 +222,27 @@ const PaymentPage = () => {
     }
   };
 
+  useEffect(() => {
+    // Establish WebSocket connection
+    ws.current = new WebSocket("ws://localhost:5000");
+
+    // Listen for messages from WebSocket server
+    ws.current.onmessage = (event) => {
+      const { rowIndex, colIndex, status, showtime: messageShowtime } = JSON.parse(event.data);
+      console.log(JSON.parse(event.data));
+
+      // Only process the update if the showtime matches
+      if (messageShowtime === showtime) {
+        const updatedSeats = [...seats];
+        updatedSeats[rowIndex][colIndex].status = status;
+      }
+    };
+
+    return () => {
+      ws.current.close();
+    };
+  }, [showtime]);
+
   const handleBackToSeatReservation = async () => {
     try {
       const seatIds = selectedSeats.map(
@@ -227,6 +250,10 @@ const PaymentPage = () => {
       );
       await updateSeatLayout(showtime, seatIds, "available")
       await deleteBooking(booking._id);
+      // Notify WebSocket server with showtime
+      selectedSeats.forEach(({ row, col }) => {
+        ws.current.send(JSON.stringify({ rowIndex: row, colIndex: col, status: "available", showtime }));
+      });
       navigate("/seat-reservation", {
         state: {
           movieTitle,

@@ -8,6 +8,16 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
+export const getShowtimeById = async (id) => {
+  try {
+    const response = await api.get(`/showtimes/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+
+}
+
 export const createBooking = async (
   userId,
   showtimeId,
@@ -45,7 +55,7 @@ export const updateSeatLayout = async (showtimeId, seatIds, status) => {
       { seatIds, status }
     );
     return response.data;
-  } catch (error) {}
+  } catch (error) { }
 };
 
 export const getMomoPaymentLink = async (orderInfo, amount, bookingId) => {

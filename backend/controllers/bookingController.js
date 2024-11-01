@@ -458,6 +458,10 @@ exports.updateBooking = async (req, res) => {
 exports.deleteBooking = async (req, res) => {
   try {
     await Booking.findByIdAndDelete(req.params.id);
+    //update seatlayout
+    const booking = await Booking.findById(req.params.id);
+     
+
     res.status(204).json({ message: "Booking deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting booking", error });
