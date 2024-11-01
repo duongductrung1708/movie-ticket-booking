@@ -61,3 +61,13 @@ export const updateShowtime = async (showtimeId: string, data: object) => {
     ...data,
   });
 };
+
+export const isBookedShowtime = async (showtimeId: string) => {
+  return await axiosInstance.get(
+    API_CODE.API_SHOWTIME_001 + "/is-booked/" + showtimeId
+  );
+};
+
+export const saveMultipleShowtimes = async (data) => {
+  return await axiosInstance.post(API_CODE.API_SHOWTIME_001 + "/dates", {...data});
+};

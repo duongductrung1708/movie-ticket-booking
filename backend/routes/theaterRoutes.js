@@ -45,5 +45,6 @@ router.get('/:id', TheaterController.getById);
 router.put('/:id', updateFields, TheaterController.update);
 router.delete('/:id', TheaterController.delete);
 router.get('/:id/showtimes', TheaterController.getShowtimesByTheater);
+router.get('/schedule/:id',TheaterController.getSchedule)
 
 module.exports = router;

@@ -10,6 +10,8 @@ const {
   getShowtimeById,
   getShowtimesByMovieId,
   updateSeatLayoutShowtime,
+  isBooked,
+  createMultipleShowtime,
 } = require("../controllers/showtimeController");
 const showtimeValidation = require("../validation/showtimeValidation");
 
@@ -30,11 +32,17 @@ showtimeRouter.get("/room/:id", getShowtimesByRoomId);
 //get showtime of theater
 showtimeRouter.get("/:theaterId", getShowtimeOfTheater);
 
+//check showtime booked or not
+showtimeRouter.get("/is-booked/:id", isBooked);
+
 //create showtime
 showtimeRouter.post("/", showtimeValidation.verifyTime, createShowtime);
 
+//create multiple date showtime
+showtimeRouter.post("/dates", showtimeValidation.verifyConflictShowtime, createMultipleShowtime)
+
 //update showtime seatlayout
-showtimeRouter.put("/:id/seat-layout",updateSeatLayoutShowtime)
+showtimeRouter.put("/:id/seat-layout", updateSeatLayoutShowtime)
 
 //update showtime
 showtimeRouter.put('/:id', showtimeValidation.verifyTime, updateShowtime)

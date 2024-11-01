@@ -65,7 +65,7 @@ exports.createBookingData = async (req, res) => {
           console.log(`Booking ${bookingResponse._id} canceled due to timeout.`);
         }
       },
-      10 * 10 * 1000
+      10 * 60 * 1000
     );
 
     // Create booking details
@@ -312,6 +312,8 @@ exports.getBookingById = async (req, res) => {
 
 exports.getBookingByUserId = async (req, res) => {
   const userId = req.params.id;
+  console.log("Get History");
+  
   try {
     console.log(userId);
 
@@ -429,6 +431,8 @@ exports.getBookingByUserId = async (req, res) => {
         }
       }
     ]);
+    console.log(bookingHistory);
+    
     return res.json(bookingHistory);
   } catch (error) {
     console.error('Error fetching booking history:', error);
@@ -454,6 +458,10 @@ exports.updateBooking = async (req, res) => {
 exports.deleteBooking = async (req, res) => {
   try {
     await Booking.findByIdAndDelete(req.params.id);
+    //update seatlayout
+    const booking = await Booking.findById(req.params.id);
+     
+
     res.status(204).json({ message: "Booking deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error deleting booking", error });

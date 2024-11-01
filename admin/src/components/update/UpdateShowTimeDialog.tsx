@@ -19,7 +19,7 @@ import { getMovies } from "../../services/movieService";
 import { getTheaters } from "../../services/theaterService";
 import { getRoomByTheaterId } from "../../services/roomService";
 import {
-  getShowtimeById,
+  getShowtimeById, 
   getShowtimes,
   getShowtimesByRoom,
   saveShowtime,
@@ -99,6 +99,8 @@ const UpdateShowtimeDialog: React.FC<UpdateShowtimeDialogProps> = ({
   const endHourRef = useRef<HTMLInputElement>(null);
   const endMinuteRef = useRef<HTMLInputElement>(null);
 
+  console.log(open);
+  
   // Load movies and theaters when the dialog opens
   useEffect(() => {
     const fetchData = async () => {

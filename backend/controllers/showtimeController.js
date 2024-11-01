@@ -213,6 +213,36 @@ const getPaginatedShowtime = async (req, res) => {
   }
 };
 
+//check showtime is booked or not
+const isBooked = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find the showtime by ID
+    const showtime = await Showtime.findById(id).lean();
+
+    // If showtime doesn't exist, return a 404 response
+    if (!showtime) {
+      return res.status(404).json({ message: "Showtime not found" });
+    }
+
+    // Check for any seat with 'reserved' or 'occupied' status
+    const isBooked = showtime.seatLayout.some(row =>
+      row.some(seat => ['reserved', 'occupied'].includes(seat.status))
+    );
+
+    // Send response based on booking status
+    if (isBooked) {
+      return res.status(200).json({ booked: true, message: "Showtime has reserved or occupied seats." });
+    } else {
+      return res.status(200).json({ booked: false, message: "Showtime is fully available." });
+    }
+  } catch (error) {
+    console.error("Error checking showtime booking status:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 //Get showtimes by room id
 const getShowtimesByRoomId = async (req, res) => {
   try {
@@ -291,6 +321,85 @@ const getShowtimeOfTheater = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+//Create multiple showtimes
+const createMultipleShowtime = async (req, res) => {
+  try {
+    const { movieId, roomId, startTime, endTime, dates } = req.body;
+
+    // Function to format time with leading zeros
+    const formatTime = (time) => {
+      const [hour, minute] = time.split(":").map(Number);
+      const formattedHour = hour < 10 ? `0${hour}` : `${hour}`;
+      const formattedMinute = minute < 10 ? `0${minute}` : `${minute}`;
+      return `${formattedHour}:${formattedMinute}`;
+    };
+
+    // Format start and end times
+    const formattedStartTime = formatTime(startTime);
+    const formattedEndTime = formatTime(endTime);
+
+    // Ensure startTime is less than endTime
+    if (formattedStartTime >= formattedEndTime) {
+      return res.status(400).json({ message: "Invalid time range: Start time must be less than end time." });
+    }
+    const room = await Room.findById(roomId);
+    // Function to convert 2D array of numbers to 2D array of seat objects
+    const convertSeatLayout = (seatLayoutNumbers) => {
+      return seatLayoutNumbers.map(row =>
+        row.map(seat => {
+          if (seat === 0) {
+            return {
+              type: "standard",
+              status: "available",
+              price: 100
+            };
+          } else if (seat === -1) {
+            return {
+              type: "standard",
+              status: "blocked",
+              price: 0
+            };
+          } else if (seat === 1) {
+            return {
+              type: "vip",
+              status: "available",
+              price: 150
+            }
+          }
+
+        })
+      );
+    };
+    const seatLayout = convertSeatLayout(room.seatLayout);
+    // Array to store showtime documents
+    const showtimesToInsert = dates.map(dateString => {
+      // Set each date to midnight for consistency
+      const formattedDate = new Date(dateString);
+      formattedDate.setHours(0, 0, 0, 0);
+
+      return {
+        movie_id: movieId,
+        room_id: roomId,
+        date: formattedDate,
+        start_time: formattedStartTime,
+        end_time: formattedEndTime,
+        seatLayout: seatLayout  // Include or format seat layout as needed
+      };
+    });
+    // Insert all formatted showtimes in one operation
+    const createdShowtimes = await Showtime.insertMany(showtimesToInsert);
+
+    res.status(201).json({
+      message: "Showtimes created successfully.",
+      showtimes: createdShowtimes
+    });
+  } catch (error) {
+    console.error("Error creating multiple showtimes:", error);
+    res.status(500).json({ message: "Internal server error." });
+  }
+
+}
 
 // Create showtime
 const createShowtime = async (req, res) => {
@@ -507,4 +616,6 @@ module.exports = {
   getShowtimeById,
   getShowtimesByMovieId,
   updateSeatLayoutShowtime,
+  isBooked,
+  createMultipleShowtime,
 };

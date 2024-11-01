@@ -1,0 +1,57 @@
+.seat-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+/* Legend and Seat Styles */
+.seat-legend {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+  justify-content: center;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+
+.row-label {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.seat {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  border-radius: 4px;
+}
+
+.seat-available {
+  background-color: #e0f7fa;
+  border: 1px solid #00acc1;
+  color: #007c91;
+}
+
+.seat-reserved {
+  background-color: #ffecb3;
+  border: 1px solid #ffa000;
+  color: #ff6f00;
+}
+
+.seat-occupied {
+  background-color: #727272;
+  border: 1px solid #3a0e0e;
+  color: #ebebeb;
+}
+
+.seat-blocked {
+  opacity: 0%;
+}
