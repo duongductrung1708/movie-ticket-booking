@@ -1,4 +1,7 @@
+
 const Showtime = require("../models/Showtime");
+const WebSocket = require("ws");
+const { wss } = require('../websocket');
 
 const showtimeService = {
     getShowtimesByRoomId: async (roomId) => {
@@ -24,11 +27,16 @@ const showtimeService = {
 
             seatArray.forEach((seatStr) => {
                 // Split into column and row (e.g., 3B -> col 3, row 2)
-                const col = parseInt(seatStr.charAt(1)) - 1; // Adjust for 0-based index
+                const col = parseInt(seatStr.slice(1)) - 1; // Adjust for 0-based index
                 const row = seatStr.charAt(0).charCodeAt(0) - 'A'.charCodeAt(0); // Convert letter to index (A -> 0, B -> 1, etc.)
 
                 // Update the status of the seat to "occupied"
                 if (showtime.seatLayout[row] && showtime.seatLayout[row][col]) {
+                    wss.clients.forEach((client) => {
+                        if (client.readyState === WebSocket.OPEN) {
+                            client.send(JSON.stringify({ rowIndex: row, colIndex: col, status: "occupied", showtime: showtime._id }));
+                        }
+                    });
                     showtime.seatLayout[row][col].status = "occupied";
                 } else {
                     throw new Error(`Invalid seat position: ${seatStr}`);
