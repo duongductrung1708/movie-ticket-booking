@@ -58,7 +58,7 @@ exports.createMovie = async (req, res) => {
     const image = req.file ? req.file.filename : null; // Lấy file ảnh nếu có
 
     // Lấy mảng các genres từ body request
-    const genres = JSON.parse(req.body.genres)
+    const genres = JSON.parse(req.body.genres);
 
     if (!genres || genres.length === 0) {
       return res.status(400).json({ error: "Genres are required" });
@@ -153,8 +153,6 @@ exports.updateMovie = async (req, res) => {
   }
 };
 
-  
-
 // Delete a movie
 exports.deleteMovie = async (req, res) => {
   try {
@@ -195,7 +193,7 @@ exports.createMovies = async (req, res) => {
 exports.getMoviesWithoutShowtime = async (req, res) => {
   try {
     const showtimes = await Showtime.find().distinct("movie_id");
-    
+
     const moviesWithoutShowtime = await Movie.find({
       _id: { $nin: showtimes },
     });

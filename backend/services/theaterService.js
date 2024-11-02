@@ -95,19 +95,21 @@ const TheaterService = {
   getTheaterOfRoom: async (roomId) => {
     try {
       // Find the theater that contains the room with the provided roomId
-      const theater = await Theater.findOne({ rooms: roomId }).populate('rooms');
+      const theater = await Theater.findOne({ rooms: roomId }).populate(
+        "rooms"
+      );
 
       if (!theater) {
-        return { message: 'Theater not found for the given room.' };
+        return { message: "Theater not found for the given room." };
       }
 
       // Return the theater information
       return theater;
     } catch (error) {
-      console.error('Error fetching theater:', error);
+      console.error("Error fetching theater:", error);
       throw error;
     }
-  }
+  },
 };
 
 module.exports = TheaterService;

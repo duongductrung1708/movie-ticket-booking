@@ -1,7 +1,7 @@
 const Booking = require("../models/Booking");
 const mongoose = require("mongoose");
 
-const { setBookingTimeout } = require('../services/timeoutManager');
+const { setBookingTimeout } = require("../services/timeoutManager");
 const {
   getShowtimeById,
   updateSeatLayoutShowtime,
@@ -62,7 +62,9 @@ exports.createBookingData = async (req, res) => {
         if (booking && booking.status === "processing") {
           await updateSeatLayoutShowtime(showtimeId, seatIds, "available");
           await deleteBooking(bookingResponse._id);
-          console.log(`Booking ${bookingResponse._id} canceled due to timeout.`);
+          console.log(
+            `Booking ${bookingResponse._id} canceled due to timeout.`
+          );
         }
       },
       10 * 60 * 1000
@@ -164,12 +166,10 @@ exports.createBookingData = async (req, res) => {
     }
 
     // Return error response
-    return res
-      .status(500)
-      .json({
-        message: "An error occurred, reverting seat status.",
-        error: error.message,
-      });
+    return res.status(500).json({
+      message: "An error occurred, reverting seat status.",
+      error: error.message,
+    });
   }
 };
 
@@ -179,72 +179,72 @@ exports.getAllBookings = async (req, res) => {
     const bookings = await Booking.aggregate([
       {
         $lookup: {
-          from: 'showtimes',
-          localField: 'showtime_id',
-          foreignField: '_id',
-          as: 'showtime'
-        }
+          from: "showtimes",
+          localField: "showtime_id",
+          foreignField: "_id",
+          as: "showtime",
+        },
       },
       { $unwind: "$showtime" },
       {
         $lookup: {
-          from: 'movies',
-          localField: 'showtime.movie_id',
-          foreignField: '_id',
-          as: 'movie'
-        }
+          from: "movies",
+          localField: "showtime.movie_id",
+          foreignField: "_id",
+          as: "movie",
+        },
       },
       { $unwind: "$movie" },
       {
         $lookup: {
-          from: 'rooms',
-          localField: 'showtime.room_id',
-          foreignField: '_id',
-          as: 'room'
-        }
+          from: "rooms",
+          localField: "showtime.room_id",
+          foreignField: "_id",
+          as: "room",
+        },
       },
       { $unwind: "$room" },
       {
         $lookup: {
-          from: 'theaters',
-          localField: 'room._id',
-          foreignField: 'rooms',
-          as: 'theater'
-        }
+          from: "theaters",
+          localField: "room._id",
+          foreignField: "rooms",
+          as: "theater",
+        },
       },
       { $unwind: "$theater" },
       {
         $lookup: {
-          from: 'payments',
-          localField: '_id',
-          foreignField: 'bookingId',
-          as: 'payment'
-        }
+          from: "payments",
+          localField: "_id",
+          foreignField: "bookingId",
+          as: "payment",
+        },
       },
       { $unwind: "$payment" },
       {
         $lookup: {
-          from: 'bookingdetails',
-          localField: '_id',
+          from: "bookingdetails",
+          localField: "_id",
           foreignField: "booking_id",
-          as: 'services'
-        }
+          as: "services",
+        },
       },
       {
         $lookup: {
-          from: 'services',
-          localField: 'services.service_id',
-          foreignField: '_id',
-          as: 'service'
-        }
+          from: "services",
+          localField: "services.service_id",
+          foreignField: "_id",
+          as: "service",
+        },
       },
       {
         $lookup: {
-          from: 'paymentmethods',
-          localField: 'payment.paymentMethodId',
-          foreignField: '_id',
-          as: 'paymentMethod'
-        }
+          from: "paymentmethods",
+          localField: "payment.paymentMethodId",
+          foreignField: "_id",
+          as: "paymentMethod",
+        },
       },
       { $unwind: "$paymentMethod" },
       {
@@ -255,12 +255,12 @@ exports.getAllBookings = async (req, res) => {
           showtime: {
             start_time: "$showtime.start_time",
             end_time: "$showtime.end_time",
-            date: "$showtime.date"
+            date: "$showtime.date",
           },
           movie: {
-            _id: '$movie._id',
-            title: '$movie.title',
-            image: '$movie.image'
+            _id: "$movie._id",
+            title: "$movie.title",
+            image: "$movie.image",
           },
           amount: "$payment.amount",
           paymentMethod: "$paymentMethod.name",
@@ -272,21 +272,45 @@ exports.getAllBookings = async (req, res) => {
               as: "serviceItem",
               in: {
                 service_id: {
-                  $arrayElemAt: ["$service._id", { $indexOfArray: ["$services.service_id", "$$serviceItem.service_id"] }]
+                  $arrayElemAt: [
+                    "$service._id",
+                    {
+                      $indexOfArray: [
+                        "$services.service_id",
+                        "$$serviceItem.service_id",
+                      ],
+                    },
+                  ],
                 },
                 name: {
-                  $arrayElemAt: ["$service.name", { $indexOfArray: ["$services.service_id", "$$serviceItem.service_id"] }]
+                  $arrayElemAt: [
+                    "$service.name",
+                    {
+                      $indexOfArray: [
+                        "$services.service_id",
+                        "$$serviceItem.service_id",
+                      ],
+                    },
+                  ],
                 },
                 price: {
-                  $arrayElemAt: ["$service.price", { $indexOfArray: ["$services.service_id", "$$serviceItem.service_id"] }]
+                  $arrayElemAt: [
+                    "$service.price",
+                    {
+                      $indexOfArray: [
+                        "$services.service_id",
+                        "$$serviceItem.service_id",
+                      ],
+                    },
+                  ],
                 },
-                quantity: "$$serviceItem.quantity"
-              }
-            }
+                quantity: "$$serviceItem.quantity",
+              },
+            },
           },
-          timestamp: "$timestamp"
-        }
-      }
+          timestamp: "$timestamp",
+        },
+      },
     ]);
 
     res.status(200).json(bookings);
@@ -297,79 +321,79 @@ exports.getAllBookings = async (req, res) => {
 
 exports.getBookingById = async (req, res) => {
   try {
-    const bookingId = req.params.id; 
+    const bookingId = req.params.id;
     const booking = await Booking.aggregate([
       {
-        $match: { _id: new mongoose.Types.ObjectId(bookingId), status: "done" } // Correct instantiation of ObjectId
+        $match: { _id: new mongoose.Types.ObjectId(bookingId), status: "done" }, // Correct instantiation of ObjectId
       },
       {
         $lookup: {
-          from: 'showtimes', // The collection name for showtimes
-          localField: 'showtime_id',
-          foreignField: '_id',
-          as: 'showtime'
-        }
+          from: "showtimes", // The collection name for showtimes
+          localField: "showtime_id",
+          foreignField: "_id",
+          as: "showtime",
+        },
       },
       { $unwind: "$showtime" }, // Unwind the showtime array
       {
         $lookup: {
-          from: 'movies', // The collection name for movies
-          localField: 'showtime.movie_id',
-          foreignField: '_id',
-          as: 'movie'
-        }
+          from: "movies", // The collection name for movies
+          localField: "showtime.movie_id",
+          foreignField: "_id",
+          as: "movie",
+        },
       },
       { $unwind: "$movie" }, // Unwind the movie array
       {
         $lookup: {
-          from: 'rooms', // The collection name for rooms
-          localField: 'showtime.room_id',
-          foreignField: '_id',
-          as: 'room'
-        }
+          from: "rooms", // The collection name for rooms
+          localField: "showtime.room_id",
+          foreignField: "_id",
+          as: "room",
+        },
       },
       { $unwind: "$room" }, // Unwind the room array
       {
         $lookup: {
-          from: 'theaters', // The collection name for theaters
-          localField: 'room._id', // Assuming the room is associated with a theater
-          foreignField: 'rooms',
-          as: 'theater'
-        }
+          from: "theaters", // The collection name for theaters
+          localField: "room._id", // Assuming the room is associated with a theater
+          foreignField: "rooms",
+          as: "theater",
+        },
       },
       { $unwind: "$theater" }, // Unwind the theater array
       {
         $lookup: {
-          from: 'payments', // The collection name for payments
-          localField: '_id', // Matching the booking ID to payment's bookingId
-          foreignField: 'bookingId',
-          as: 'payment'
-        }
+          from: "payments", // The collection name for payments
+          localField: "_id", // Matching the booking ID to payment's bookingId
+          foreignField: "bookingId",
+          as: "payment",
+        },
       },
       { $unwind: "$payment" }, // Unwind the payment array
       {
         $lookup: {
-          from: 'bookingdetails',
-          localField: '_id',
+          from: "bookingdetails",
+          localField: "_id",
           foreignField: "booking_id",
-          as: 'services'
-        }
+          as: "services",
+        },
       },
       {
         $lookup: {
-          from: 'services',
-          localField: 'services.service_id',
-          foreignField: '_id',
-          as: 'service'
-        }
+          from: "services",
+          localField: "services.service_id",
+          foreignField: "_id",
+          as: "service",
+        },
       },
       {
         $lookup: {
-          from: 'paymentmethods', // The collection name for payment methods
-          localField: 'payment.paymentMethodId',
-          foreignField: '_id',
-          as: 'paymentMethod'
-        }
+          from: "paymentmethods", // The collection name for payment methods
+          localField: "payment.paymentMethodId",
+          foreignField: "_id",
+          as: "paymentMethod",
+        },
       },
       { $unwind: "$paymentMethod" }, // Unwind the payment method array
       {
@@ -380,12 +404,12 @@ exports.getBookingById = async (req, res) => {
           showtime: {
             start_time: "$showtime.start_time",
             end_time: "$showtime.end_time",
-            date: "$showtime.date"
+            date: "$showtime.date",
           },
           movie: {
-            _id: '$movie._id',
-            title: '$movie.title',
-            image: '$movie.image'
+            _id: "$movie._id",
+            title: "$movie.title",
+            image: "$movie.image",
           },
           amount: "$payment.amount",
           paymentMethod: "$paymentMethod.name",
@@ -397,21 +421,45 @@ exports.getBookingById = async (req, res) => {
               as: "serviceItem",
               in: {
                 service_id: {
-                  $arrayElemAt: ["$service._id", { $indexOfArray: ["$services.service_id", "$$serviceItem.service_id"] }]
+                  $arrayElemAt: [
+                    "$service._id",
+                    {
+                      $indexOfArray: [
+                        "$services.service_id",
+                        "$$serviceItem.service_id",
+                      ],
+                    },
+                  ],
                 },
                 name: {
-                  $arrayElemAt: ["$service.name", { $indexOfArray: ["$services.service_id", "$$serviceItem.service_id"] }]
+                  $arrayElemAt: [
+                    "$service.name",
+                    {
+                      $indexOfArray: [
+                        "$services.service_id",
+                        "$$serviceItem.service_id",
+                      ],
+                    },
+                  ],
                 },
                 price: {
-                  $arrayElemAt: ["$service.price", { $indexOfArray: ["$services.service_id", "$$serviceItem.service_id"] }]
+                  $arrayElemAt: [
+                    "$service.price",
+                    {
+                      $indexOfArray: [
+                        "$services.service_id",
+                        "$$serviceItem.service_id",
+                      ],
+                    },
+                  ],
                 },
-                quantity: "$$serviceItem.quantity"
-              }
-            }
+                quantity: "$$serviceItem.quantity",
+              },
+            },
           },
-          timestamp: "$timestamp"
-        }
-      }
+          timestamp: "$timestamp",
+        },
+      },
     ]);
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
@@ -420,87 +468,90 @@ exports.getBookingById = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: "Error fetching booking", error });
   }
-}
+};
 
 exports.getBookingByUserId = async (req, res) => {
   const userId = req.params.id;
   console.log("Get History");
-  
+
   try {
     console.log(userId);
 
     const bookingHistory = await Booking.aggregate([
       {
-        $match: { user_id: new mongoose.Types.ObjectId(userId), status: "done" } // Correct instantiation of ObjectId
+        $match: {
+          user_id: new mongoose.Types.ObjectId(userId),
+          status: "done",
+        }, // Correct instantiation of ObjectId
       },
       {
         $lookup: {
-          from: 'showtimes', // The collection name for showtimes
-          localField: 'showtime_id',
-          foreignField: '_id',
-          as: 'showtime'
-        }
+          from: "showtimes", // The collection name for showtimes
+          localField: "showtime_id",
+          foreignField: "_id",
+          as: "showtime",
+        },
       },
       { $unwind: "$showtime" }, // Unwind the showtime array
       {
         $lookup: {
-          from: 'movies', // The collection name for movies
-          localField: 'showtime.movie_id',
-          foreignField: '_id',
-          as: 'movie'
-        }
+          from: "movies", // The collection name for movies
+          localField: "showtime.movie_id",
+          foreignField: "_id",
+          as: "movie",
+        },
       },
       { $unwind: "$movie" }, // Unwind the movie array
       {
         $lookup: {
-          from: 'rooms', // The collection name for rooms
-          localField: 'showtime.room_id',
-          foreignField: '_id',
-          as: 'room'
-        }
+          from: "rooms", // The collection name for rooms
+          localField: "showtime.room_id",
+          foreignField: "_id",
+          as: "room",
+        },
       },
       { $unwind: "$room" }, // Unwind the room array
       {
         $lookup: {
-          from: 'theaters', // The collection name for theaters
-          localField: 'room._id', // Assuming the room is associated with a theater
-          foreignField: 'rooms',
-          as: 'theater'
-        }
+          from: "theaters", // The collection name for theaters
+          localField: "room._id", // Assuming the room is associated with a theater
+          foreignField: "rooms",
+          as: "theater",
+        },
       },
       { $unwind: "$theater" }, // Unwind the theater array
       {
         $lookup: {
-          from: 'payments', // The collection name for payments
-          localField: '_id', // Matching the booking ID to payment's bookingId
-          foreignField: 'bookingId',
-          as: 'payment'
-        }
+          from: "payments", // The collection name for payments
+          localField: "_id", // Matching the booking ID to payment's bookingId
+          foreignField: "bookingId",
+          as: "payment",
+        },
       },
       { $unwind: "$payment" }, // Unwind the payment array
       {
         $lookup: {
-          from: 'bookingdetails',
-          localField: '_id',
+          from: "bookingdetails",
+          localField: "_id",
           foreignField: "booking_id",
-          as: 'services'
-        }
+          as: "services",
+        },
       },
       {
         $lookup: {
-          from: 'services',
-          localField: 'services.service_id',
-          foreignField: '_id',
-          as: 'service'
-        }
+          from: "services",
+          localField: "services.service_id",
+          foreignField: "_id",
+          as: "service",
+        },
       },
       {
         $lookup: {
-          from: 'paymentmethods', // The collection name for payment methods
-          localField: 'payment.paymentMethodId',
-          foreignField: '_id',
-          as: 'paymentMethod'
-        }
+          from: "paymentmethods", // The collection name for payment methods
+          localField: "payment.paymentMethodId",
+          foreignField: "_id",
+          as: "paymentMethod",
+        },
       },
       { $unwind: "$paymentMethod" }, // Unwind the payment method array
       {
@@ -511,11 +562,11 @@ exports.getBookingByUserId = async (req, res) => {
           showtime: {
             start_time: "$showtime.start_time",
             end_time: "$showtime.end_time",
-            date: "$showtime.date"
+            date: "$showtime.date",
           },
           movie: {
-            _id: '$movie._id',
-            title: '$movie.title',
+            _id: "$movie._id",
+            title: "$movie.title",
           },
           amount: "$payment.amount",
           paymentMethod: "$paymentMethod.name",
@@ -527,30 +578,54 @@ exports.getBookingByUserId = async (req, res) => {
               as: "serviceItem",
               in: {
                 service_id: {
-                  $arrayElemAt: ["$service._id", { $indexOfArray: ["$services.service_id", "$$serviceItem.service_id"] }]
+                  $arrayElemAt: [
+                    "$service._id",
+                    {
+                      $indexOfArray: [
+                        "$services.service_id",
+                        "$$serviceItem.service_id",
+                      ],
+                    },
+                  ],
                 },
                 name: {
-                  $arrayElemAt: ["$service.name", { $indexOfArray: ["$services.service_id", "$$serviceItem.service_id"] }]
+                  $arrayElemAt: [
+                    "$service.name",
+                    {
+                      $indexOfArray: [
+                        "$services.service_id",
+                        "$$serviceItem.service_id",
+                      ],
+                    },
+                  ],
                 },
                 price: {
-                  $arrayElemAt: ["$service.price", { $indexOfArray: ["$services.service_id", "$$serviceItem.service_id"] }]
+                  $arrayElemAt: [
+                    "$service.price",
+                    {
+                      $indexOfArray: [
+                        "$services.service_id",
+                        "$$serviceItem.service_id",
+                      ],
+                    },
+                  ],
                 },
-                quantity: "$$serviceItem.quantity"
-              }
-            }
+                quantity: "$$serviceItem.quantity",
+              },
+            },
           },
-          timestamp: "$timestamp"
-        }
-      }
+          timestamp: "$timestamp",
+        },
+      },
     ]);
     console.log(bookingHistory);
-    
+
     return res.json(bookingHistory);
   } catch (error) {
-    console.error('Error fetching booking history:', error);
+    console.error("Error fetching booking history:", error);
     throw error;
   }
-}
+};
 
 // Update booking by ID
 exports.updateBooking = async (req, res) => {
@@ -572,7 +647,6 @@ exports.deleteBooking = async (req, res) => {
     await Booking.findByIdAndDelete(req.params.id);
     //update seatlayout
     const booking = await Booking.findById(req.params.id);
-     
 
     res.status(204).json({ message: "Booking deleted successfully" });
   } catch (error) {

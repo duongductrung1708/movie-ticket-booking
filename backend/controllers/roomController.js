@@ -1,4 +1,4 @@
-const RoomService = require('../services/roomService');
+const RoomService = require("../services/roomService");
 
 const RoomController = {
   create: async (req, res) => {
@@ -25,7 +25,7 @@ const RoomController = {
       if (room) {
         res.status(200).json(room);
       } else {
-        res.status(404).json({ message: 'Room not found' });
+        res.status(404).json({ message: "Room not found" });
       }
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -51,13 +51,12 @@ const RoomController = {
   },
 
   getRoomsByTheaterId: async (req, res) => {
-
     try {
       const room = await RoomService.getRoomsByTheaterId(req.params.id);
       if (room) {
         res.status(200).json(room);
       } else {
-        res.status(404).json({ message: 'Room not found' })
+        res.status(404).json({ message: "Room not found" });
       }
     } catch (error) {
       res.status(500).json({ error: error.message });

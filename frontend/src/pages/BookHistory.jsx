@@ -88,58 +88,40 @@ const BreadcrumbLink = styled(MuiLink)`
 const dateFormat = (dateString) => {
   const date = new Date(dateString);
 
-  const day = date.getDate();            // Get day
-  const month = date.getMonth() + 1;     // Get month (add 1 because getMonth() is 0-based)
-  const year = date.getFullYear();       // Get year
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
   return `${day}/${month}/${year}`;
-}
+};
 
 const timestampFormat = (dateString) => {
   const date = new Date(dateString);
 
-  // Format date as DD/MM/YYYY
-  const formattedDate = date.toLocaleDateString('vi-VN');  // 'vi-VN' gives the format DD/MM/YYYY
+  const formattedDate = date.toLocaleDateString("vi-VN");
 
-  // Format time as HH:MM:SS (24-hour format)
-  const formattedTime = date.toLocaleTimeString('vi-VN');  // 'vi-VN' gives 24-hour time format
+  const formattedTime = date.toLocaleTimeString("vi-VN");
 
-  // Combine date and time
   return `${formattedDate} ${formattedTime}`;
-}
+};
 
 const BookHistory = () => {
-  const [bookings, setBookings] = useState([
-    {
-      serialNumber: 1,
-      ticketCode: "ABC1234567",
-      movieName: "The Matrix",
-      showtime: "2024-09-30T19:00:00",
-      theater: "Theater 1",
-      price: 100,
-      paymentStatus: "Paid",
-    },
-    {
-      serialNumber: 2,
-      ticketCode: "XYZ9876543",
-      movieName: "Inception",
-      showtime: "2024-10-01T20:00:00",
-      theater: "Theater 2",
-      price: 200,
-      paymentStatus: "Counter",
-    },
-  ]);
+  const [bookings, setBookings] = useState([]);
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchQuery, setSearchQuery] = useState("");
-  const [bookingHistory, setBookingHistory] = useState([])
-  const [filteredBookings, setFilteredBookings] = useState([])
+  const [bookingHistory, setBookingHistory] = useState([]);
+  const [filteredBookings, setFilteredBookings] = useState([]);
 
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
-    setFilteredBookings(bookingHistory.filter((booking) =>
-      booking.movie.title.toLowerCase().includes(event.target.value.toLowerCase())
-    ))
+    setFilteredBookings(
+      bookingHistory.filter((booking) =>
+        booking.movie.title
+          .toLowerCase()
+          .includes(event.target.value.toLowerCase())
+      )
+    );
   };
 
   const handleRefresh = () => {
@@ -168,20 +150,19 @@ const BookHistory = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    //Get User Id from localStorage
     const userId = JSON.parse(localStorage.getItem("user"))?._id;
     const fetchBookingHistory = async (userId) => {
       const bookingResponse = await getBookingHistory(userId);
       setBookingHistory(bookingResponse);
-      setFilteredBookings(bookingResponse.filter((booking) =>
-        booking.movie.title.toLowerCase().includes(searchQuery.toLowerCase())
-      ))
+      setFilteredBookings(
+        bookingResponse.filter((booking) =>
+          booking.movie.title.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
       return bookingResponse;
-    }
-    fetchBookingHistory(userId)
-
-  }, []);
-  console.log(filteredBookings);
+    };
+    fetchBookingHistory(userId);
+  }, [searchQuery]);
 
   return (
     <Section>
@@ -199,7 +180,6 @@ const BookHistory = () => {
           Booking History
         </Typography>
 
-        {/* Search Field */}
         <TextField
           label="Search by Movie Name"
           variant="outlined"
@@ -234,10 +214,18 @@ const BookHistory = () => {
                     <TableCell>{booking.theater}</TableCell>
                     <TableCell>{booking.room}</TableCell>
                     <TableCell>
-                      {`${booking.showtime.start_time} - ${booking.showtime.end_time} at ${dateFormat(booking.showtime.date)}`}
+                      {`${booking.showtime.start_time} - ${
+                        booking.showtime.end_time
+                      } at ${dateFormat(booking.showtime.date)}`}
                     </TableCell>
                     <TableCell>{booking.seats}</TableCell>
-                    <TableCell>{booking.services.map(service => `${service.name} x ${service.quantity}`).join(", ")}</TableCell>
+                    <TableCell>
+                      {booking.services
+                        .map(
+                          (service) => `${service.name} x ${service.quantity}`
+                        )
+                        .join(", ")}
+                    </TableCell>
                     <TableCell>{booking.paymentMethod}</TableCell>
                     <TableCell>{timestampFormat(booking.timestamp)}</TableCell>
                   </TableRow>
@@ -246,7 +234,6 @@ const BookHistory = () => {
           </Table>
         </TableContainer>
 
-        {/* Pagination */}
         <TablePagination
           component="div"
           count={filteredBookings.length}
