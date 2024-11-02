@@ -347,7 +347,7 @@ const SeatReservation = () => {
       ws.current.onmessage = (event) => {
         const { rowIndex, colIndex, status, showtime: messageShowtime } = JSON.parse(event.data);
         console.log(JSON.parse(event.data));
-
+        
         // Only process the update if the showtime matches
         if (messageShowtime === showtime) {
           const updatedSeats = [...showtimeResponse.seatLayout];
