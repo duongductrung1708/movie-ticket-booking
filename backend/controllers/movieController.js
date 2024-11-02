@@ -195,16 +195,14 @@ exports.createMovies = async (req, res) => {
 exports.getMoviesWithoutShowtime = async (req, res) => {
   try {
     const showtimes = await Showtime.find().distinct("movie_id");
-    console.log("Showtimes IDs without movies:", showtimes); // kiểm tra dữ liệu showtime ID
     
     const moviesWithoutShowtime = await Movie.find({
       _id: { $nin: showtimes },
     });
-    console.log("Movies without showtime:", moviesWithoutShowtime); // kiểm tra dữ liệu phim
 
     res.status(200).json(moviesWithoutShowtime);
   } catch (error) {
-    console.error("Error fetching movies without showtime:", error); // in chi tiết lỗi
+    console.error("Error fetching movies without showtime:", error);
     res.status(500).json({ error: "Failed to fetch movies without showtime" });
   }
 };

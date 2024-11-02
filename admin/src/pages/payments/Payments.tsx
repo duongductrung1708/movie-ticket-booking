@@ -59,7 +59,7 @@ function createPaymentData(
 function Row(props: { row: Payment }) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
-  
+
   return (
     <React.Fragment>
       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
@@ -133,13 +133,15 @@ export default function Payments() {
     setLoading(false);
   }, []);
 
-  
   return (
     <>
       <div className="info">
         <h1>Payments</h1>
       </div>
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        style={{ maxHeight: "800px", overflowY: "auto" }}
+      >
         <Table aria-label="collapsible table">
           <TableHead>
             <TableRow>
