@@ -352,7 +352,7 @@ const SeatReservation = () => {
           showtime: messageShowtime,
         } = JSON.parse(event.data);
         console.log(JSON.parse(event.data));
-
+        
         // Only process the update if the showtime matches
         if (messageShowtime === showtime) {
           const updatedSeats = [...showtimeResponse.seatLayout];

@@ -1,4 +1,8 @@
 const express = require("express");
+const WebSocket = require("ws");
+const { wss } = require('../websocket');
+
+
 const {
   getShowtime,
   getShowtimeOfTheater,
@@ -16,6 +20,18 @@ const {
 const showtimeValidation = require("../validation/showtimeValidation");
 
 const showtimeRouter = express.Router();
+
+showtimeRouter.get("/test", async (req, res) => {
+  console.log("Imported WebSocket Server:", wss);
+  console.log("WebSocket Clients:", wss ? wss.clients : "wss is undefined");
+  // Broadcast to all connected WebSocket clients
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({data:"concac"}));
+    }
+  });
+  return res.json("cc")
+});
 
 //get all showtime
 showtimeRouter.get("/", getShowtime);

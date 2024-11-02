@@ -22,6 +22,8 @@ const momoPaymentRouter = require('./routes/momoPaymentRoutes');
 const cors = require('cors');
 
 
+const { wss } = require('./websocket');
+
 const WebSocket = require('ws');
 const { handleWebSocketConnection } = require('./controllers/WebSocketController');
 
@@ -64,9 +66,7 @@ const PORT = process.env.PORT ;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 
 
-// Initialize WebSocket server (on a different port)
-const wss = new WebSocket.Server({ port: 5000 });
 
 wss.on("connection", (ws) => handleWebSocketConnection(ws, wss));
-// Export the WebSocket server instance
-module.exports = { wss };
+// server.js
+console.log("WebSocket Server Initialized:", wss);
