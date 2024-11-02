@@ -199,7 +199,10 @@ export default function Services() {
           </Button>
         </Box>
       </div>
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        style={{ maxHeight: "800px", overflowY: "auto" }}
+      >
         <Table aria-label="collapsible table">
           <TableHead>
             <TableRow>
