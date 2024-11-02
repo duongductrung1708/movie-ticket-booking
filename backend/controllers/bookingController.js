@@ -173,10 +173,122 @@ exports.createBookingData = async (req, res) => {
   }
 };
 
-// Get all bookings
+// Get all bookings with detailed data
 exports.getAllBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find();
+    const bookings = await Booking.aggregate([
+      {
+        $lookup: {
+          from: 'showtimes',
+          localField: 'showtime_id',
+          foreignField: '_id',
+          as: 'showtime'
+        }
+      },
+      { $unwind: "$showtime" },
+      {
+        $lookup: {
+          from: 'movies',
+          localField: 'showtime.movie_id',
+          foreignField: '_id',
+          as: 'movie'
+        }
+      },
+      { $unwind: "$movie" },
+      {
+        $lookup: {
+          from: 'rooms',
+          localField: 'showtime.room_id',
+          foreignField: '_id',
+          as: 'room'
+        }
+      },
+      { $unwind: "$room" },
+      {
+        $lookup: {
+          from: 'theaters',
+          localField: 'room._id',
+          foreignField: 'rooms',
+          as: 'theater'
+        }
+      },
+      { $unwind: "$theater" },
+      {
+        $lookup: {
+          from: 'payments',
+          localField: '_id',
+          foreignField: 'bookingId',
+          as: 'payment'
+        }
+      },
+      { $unwind: "$payment" },
+      {
+        $lookup: {
+          from: 'bookingdetails',
+          localField: '_id',
+          foreignField: "booking_id",
+          as: 'services'
+        }
+      },
+      {
+        $lookup: {
+          from: 'services',
+          localField: 'services.service_id',
+          foreignField: '_id',
+          as: 'service'
+        }
+      },
+      {
+        $lookup: {
+          from: 'paymentmethods',
+          localField: 'payment.paymentMethodId',
+          foreignField: '_id',
+          as: 'paymentMethod'
+        }
+      },
+      { $unwind: "$paymentMethod" },
+      {
+        $project: {
+          theater: "$theater.name",
+          address: "$theater.address",
+          room: "$room.name",
+          showtime: {
+            start_time: "$showtime.start_time",
+            end_time: "$showtime.end_time",
+            date: "$showtime.date"
+          },
+          movie: {
+            _id: '$movie._id',
+            title: '$movie.title',
+            image: '$movie.image'
+          },
+          amount: "$payment.amount",
+          paymentMethod: "$paymentMethod.name",
+          booking_status: "$status",
+          seats: "$seat",
+          services: {
+            $map: {
+              input: "$services",
+              as: "serviceItem",
+              in: {
+                service_id: {
+                  $arrayElemAt: ["$service._id", { $indexOfArray: ["$services.service_id", "$$serviceItem.service_id"] }]
+                },
+                name: {
+                  $arrayElemAt: ["$service.name", { $indexOfArray: ["$services.service_id", "$$serviceItem.service_id"] }]
+                },
+                price: {
+                  $arrayElemAt: ["$service.price", { $indexOfArray: ["$services.service_id", "$$serviceItem.service_id"] }]
+                },
+                quantity: "$$serviceItem.quantity"
+              }
+            }
+          },
+          timestamp: "$timestamp"
+        }
+      }
+    ]);
+
     res.status(200).json(bookings);
   } catch (error) {
     res.status(500).json({ message: "Error fetching bookings", error });
