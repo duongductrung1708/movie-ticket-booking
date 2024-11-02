@@ -1,4 +1,4 @@
-![MasterHead](https://user-images.githubusercontent.com/74038190/225813708-98b745f2-7d22-48cf-9150-083f1b00d6c9.gif)
+![MasterHead](https://mir-s3-cdn-cf.behance.net/project_modules/1400/973a5c54863895.596f20be25f48.gif)
 <h1 align="center">Movie Ticket Booking 🎬</h1>
 <h3 align="center">An online movie ticket booking application</h3>
 <img align="right" alt="Booking" width="400" src="https://raw.githubusercontent.com/majdimokhtar/github-images/main/rightimagemajdigithub.gif?token=GHSAT0AAAAAABUZ7SAQ6CWAJ3EWM7P3WSBUY3GNLNQ">
