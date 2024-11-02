@@ -8,6 +8,7 @@ const API_CODE = {
     API_DASHBOARD_001: '/dashboard/top-movies',
     API_DASHBOARD_002: '/dashboard/total-values',
     API_DASHBOARD_003: '/dashboard/revenue',
+    API_BOOKING_001: '/bookings',
 }
 
 export default API_CODE;

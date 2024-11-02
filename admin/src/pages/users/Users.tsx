@@ -233,8 +233,8 @@ const Users = () => {
       <DataTable
         slug="users"
         columns={columns}
-        rowCount={totalUsers}
         rows={users}
+        rowCount={totalUsers}
         pageSize={constants.PAGE_SIZE}
         onPageChange={(page) => setCurrentPage(page)}
         currentPage={currentPage}

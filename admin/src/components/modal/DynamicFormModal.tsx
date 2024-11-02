@@ -20,7 +20,8 @@ type Props = {
   onClose: () => void;
   onSubmit: (formData: Record<string, string>) => void;
   fields: Field[];
-  initialData?: Record<string, any>; // Add this line
+  initialData?: Record<string, any>;
+  viewOnly?: boolean; // New prop for view-only mode
 };
 
 const DynamicFormModal = ({
@@ -30,21 +31,26 @@ const DynamicFormModal = ({
   fields,
   title,
   width,
-  initialData = {}, // Default to an empty object
+  initialData = {},
+  viewOnly = false, // Default to false
 }: Props) => {
   const [formData, setFormData] = React.useState<Record<string, string>>({});
 
   // Use an effect to update formData when initialData changes
   React.useEffect(() => {
     setFormData(initialData);
-  }, [initialData, open]); // Dependency on open to reset when modal opens
+  }, [initialData, open]);
 
   const handleInputChange = (name: string, value: string) => {
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    if (!viewOnly) { // Only allow input change if not in view-only mode
+      setFormData((prevData) => ({ ...prevData, [name]: value }));
+    }
   };
 
   const handleSubmit = () => {
-    onSubmit(formData);
+    if (!viewOnly) { // Only submit if not in view-only mode
+      onSubmit(formData);
+    }
   };
 
   const style = {
@@ -82,6 +88,7 @@ const DynamicFormModal = ({
                       handleInputChange(field.name, e.target.value)
                     }
                     label={field.label}
+                    disabled={viewOnly} // Disable if in view-only mode
                   >
                     {field.options?.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
@@ -111,6 +118,7 @@ const DynamicFormModal = ({
                   InputLabelProps={{
                     shrink: true, // Ensures the label is positioned correctly
                   }}
+                  disabled={viewOnly} // Disable if in view-only mode
                 />
               );
             }
@@ -127,18 +135,21 @@ const DynamicFormModal = ({
                 margin="normal"
                 value={formData[field.name] || ""}
                 onChange={(e) => handleInputChange(field.name, e.target.value)}
+                disabled={viewOnly} // Disable if in view-only mode
               />
             );
           })}
         </form>
-        <Box display="flex" justifyContent="space-between" mt={2}>
-          <Button variant="outlined" color="primary" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button variant="contained" color="primary" onClick={handleSubmit}>
-            Submit
-          </Button>
-        </Box>
+        {!viewOnly && ( // Only show buttons if not in view-only mode
+          <Box display="flex" justifyContent="space-between" mt={2}>
+            <Button variant="outlined" color="primary" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button variant="contained" color="primary" onClick={handleSubmit}>
+              Submit
+            </Button>
+          </Box>
+        )}
       </Box>
     </Modal>
   );

@@ -176,7 +176,22 @@ exports.createBookingData = async (req, res) => {
 // Get all bookings with detailed data
 exports.getAllBookings = async (req, res) => {
   try {
-    const bookings = await Booking.aggregate([
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const isPaginate = req.query.isPaginate === "true";
+
+    // Base aggregation pipeline
+    let pipeline = [
+      {
+        $lookup: {
+          from: "users",
+          localField: "user_id",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: "showtimes",
@@ -185,7 +200,7 @@ exports.getAllBookings = async (req, res) => {
           as: "showtime",
         },
       },
-      { $unwind: "$showtime" },
+      { $unwind: { path: "$showtime", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: "movies",
@@ -194,7 +209,7 @@ exports.getAllBookings = async (req, res) => {
           as: "movie",
         },
       },
-      { $unwind: "$movie" },
+      { $unwind: { path: "$movie", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: "rooms",
@@ -203,7 +218,7 @@ exports.getAllBookings = async (req, res) => {
           as: "room",
         },
       },
-      { $unwind: "$room" },
+      { $unwind: { path: "$room", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: "theaters",
@@ -212,7 +227,7 @@ exports.getAllBookings = async (req, res) => {
           as: "theater",
         },
       },
-      { $unwind: "$theater" },
+      { $unwind: { path: "$theater", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: "payments",
@@ -221,7 +236,7 @@ exports.getAllBookings = async (req, res) => {
           as: "payment",
         },
       },
-      { $unwind: "$payment" },
+      { $unwind: { path: "$payment", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: "bookingdetails",
@@ -246,9 +261,14 @@ exports.getAllBookings = async (req, res) => {
           as: "paymentMethod",
         },
       },
-      { $unwind: "$paymentMethod" },
+      { $unwind: { path: "$paymentMethod", preserveNullAndEmptyArrays: true } },
       {
         $project: {
+          user: {
+            _id: "$user._id",
+            name: "$user.name",
+            email: "$user.email",
+          },
           theater: "$theater.name",
           address: "$theater.address",
           room: "$room.name",
@@ -311,9 +331,27 @@ exports.getAllBookings = async (req, res) => {
           timestamp: "$timestamp",
         },
       },
-    ]);
+    ];
 
-    res.status(200).json(bookings);
+    // Get total count of bookings
+    const totalBookings = await Booking.aggregate([...pipeline, { $count: "total" }]);
+    const total = totalBookings[0] ? totalBookings[0].total : 0;
+
+    // Conditionally add pagination stages
+    if (isPaginate) {
+      pipeline.push({ $skip: skip }, { $limit: limit });
+    }
+
+    const bookings = await Booking.aggregate(pipeline);
+
+    if (isPaginate) {
+      res.status(200).json({
+        total,
+        bookings,
+      });
+    } else {
+      res.status(200).json(bookings);
+    }
   } catch (error) {
     res.status(500).json({ message: "Error fetching bookings", error });
   }

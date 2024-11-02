@@ -24,7 +24,7 @@ const bookingSchema = new mongoose.Schema({
   status: {
     type: String,
     required: true,
-    enum: ["processing", "cancle", "done"],
+    enum: ["processing", "canceled", "done"],
   },
   customer_info: {
     type: Object,

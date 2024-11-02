@@ -1,4 +1,4 @@
-import { DataGrid, GridColDef, GridToolbarQuickFilter } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridToolbar, GridToolbarQuickFilter } from "@mui/x-data-grid";
 import "./dataTable.scss";
 import { useState } from "react";
 
@@ -15,7 +15,7 @@ type Props = {
 };
 
 const DataTable = (props: Props) => {
-  const [searchValue, setSearchValue] = useState(""); // Local state for search value
+  const [searchValue, setSearchValue] = useState("");
 
   const handleDelete = (id: string) => {
     props.onAction("delete", id);
@@ -30,29 +30,27 @@ const DataTable = (props: Props) => {
     headerName: "Action",
     width: 200,
     sortable: false,
-    renderCell: (params) => {
-      return (
-        <div>
-          <img
-            className="action"
-            onClick={() => handleView(params.row._id)}
-            src="/view.svg"
-            alt="View"
-          />
-          <img
-            className="action"
-            onClick={() => handleDelete(params.row._id)}
-            src="/delete.svg"
-            alt="Delete"
-          />
-        </div>
-      );
-    },
+    renderCell: (params) => (
+      <div>
+        <img
+          className="action"
+          onClick={() => handleView(params.row._id)}
+          src="/view.svg"
+          alt="View"
+        />
+        <img
+          className="action"
+          onClick={() => handleDelete(params.row._id)}
+          src="/delete.svg"
+          alt="Delete"
+        />
+      </div>
+    ),
   };
 
   const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
-      props.onSearch(searchValue); // Call onSearch with the current searchValue
+      props.onSearch(searchValue);
     }
   };
 
@@ -73,14 +71,16 @@ const DataTable = (props: Props) => {
         onPaginationModelChange={(model) => {
           props.onPageChange(model.page + 1);
         }}
-        slots={{ toolbar: GridToolbarQuickFilter }}
+        slots={{ toolbar: GridToolbar }}
         slotProps={{
           toolbar: {
-            value: searchValue, // Set the current searchValue as the value of the input
-            onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
-              setSearchValue(event.target.value); // Update local state with the new value
-            },
-            onKeyDown: handleSearchKeyDown, // Listen for keyDown events
+            children: (
+              <GridToolbarQuickFilter
+                value={searchValue}
+                onChange={(event) => setSearchValue(event.target.value)}
+                onKeyDown={handleSearchKeyDown}
+              />
+            ),
           },
         }}
         checkboxSelection

@@ -205,20 +205,6 @@ const SignInPage = () => {
                 onChange: (e) => setEmail(e.target.value),
               }}
             />
-            <Typography variant="body2" color="secondary" align="right">
-              <Linkhover>
-                <Link
-                  component="button"
-                  type="button"
-                  to="/forgot-password"
-                  variant="body2"
-                  sx={{ alignSelf: "baseline" }}
-                  style={{ textDecoration: "none", color: "orange" }}
-                >
-                  Forgot your password?
-                </Link>
-              </Linkhover>
-            </Typography>
             <TextField
               fullWidth
               id="password"
@@ -260,6 +246,20 @@ const SignInPage = () => {
                 onChange: (e) => setPassword(e.target.value),
               }}
             />
+            <Typography variant="body2" color="secondary" align="right">
+              <Linkhover>
+                <Link
+                  component="button"
+                  type="button"
+                  to="/forgot-password"
+                  variant="body2"
+                  sx={{ alignSelf: "baseline" }}
+                  style={{ textDecoration: "none", color: "orange" }}
+                >
+                  Forgot your password?
+                </Link>
+              </Linkhover>
+            </Typography>
             <Button
               type="submit"
               fullWidth
