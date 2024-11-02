@@ -1,4 +1,4 @@
-const Seat = require('../models/Seat');
+const Seat = require("../models/Seat");
 
 const SeatService = {
   create: async (seatData) => {
@@ -7,11 +7,11 @@ const SeatService = {
   },
 
   getAll: async () => {
-    return await Seat.find().populate('roomId');
+    return await Seat.find().populate("roomId");
   },
 
   getById: async (seatId) => {
-    return await Seat.findById(seatId).populate('roomId');
+    return await Seat.findById(seatId).populate("roomId");
   },
 
   update: async (seatId, seatData) => {
@@ -20,7 +20,7 @@ const SeatService = {
 
   delete: async (seatId) => {
     return await Seat.findByIdAndDelete(seatId);
-  }
+  },
 };
 
 module.exports = SeatService;

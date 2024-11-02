@@ -1,38 +1,39 @@
-const Room = require('../models/Room');
-const Theater = require('../models/Theater');
-const TheaterService = require('../services/theaterService');
-const path = require('path')
-const fs = require('fs');
-const { default: mongoose } = require('mongoose');
-const Showtime = require('../models/Showtime');
+const Room = require("../models/Room");
+const Theater = require("../models/Theater");
+const TheaterService = require("../services/theaterService");
+const path = require("path");
+const fs = require("fs");
+const { default: mongoose } = require("mongoose");
+const Showtime = require("../models/Showtime");
 const TheaterController = {
-
   getSchedule: async (req, res) => {
     const theaterId = req.params.id;
-  
+
     try {
       // Find the theater by its ID and populate the rooms
-      const theater = await Theater.findById(theaterId).populate('rooms');
-  
+      const theater = await Theater.findById(theaterId).populate("rooms");
+
       if (!theater) {
-        return res.status(404).json({ message: 'Theater not found' });
+        return res.status(404).json({ message: "Theater not found" });
       }
-  
+
       // Extract room IDs from the theater
-      const roomIds = theater.rooms.map(room => room._id);
-  
+      const roomIds = theater.rooms.map((room) => room._id);
+
       // Find all showtimes associated with the rooms of this theater and populate movie info
       const showtimes = await Showtime.find({ room_id: { $in: roomIds } })
-        .populate('movie_id') // Populate movie details
-        .populate('room_id');  // Optionally populate room details
-  
+        .populate("movie_id") // Populate movie details
+        .populate("room_id"); // Optionally populate room details
+
       // Check if there are showtimes
       if (!showtimes.length) {
-        return res.status(404).json({ message: 'No showtimes found for this theater' });
+        return res
+          .status(404)
+          .json({ message: "No showtimes found for this theater" });
       }
-  
+
       // Format the response data
-      const formattedShowtimes = showtimes.map(showtime => ({
+      const formattedShowtimes = showtimes.map((showtime) => ({
         showtimeId: showtime._id,
         movieTitle: showtime.movie_id.title,
         roomName: showtime.room_id.name,
@@ -40,14 +41,14 @@ const TheaterController = {
         startTime: showtime.start_time,
         endTime: showtime.end_time,
       }));
-  
+
       // Return the showtimes with movie info
       return res.json({ theaterId, showtimes: formattedShowtimes });
     } catch (error) {
-      console.error('Error retrieving showtimes:', error);
-      return res.status(500).json({ message: 'Internal server error' });
+      console.error("Error retrieving showtimes:", error);
+      return res.status(500).json({ message: "Internal server error" });
     }
-  },  
+  },
   create: async (req, res) => {
     try {
       const theater = await TheaterService.create(req.body);
@@ -74,10 +75,12 @@ const TheaterController = {
       if (theater) {
         res.status(200).json(theater);
       } else {
-        res.status(404).json({ message: 'Theater not found' });
+        res.status(404).json({ message: "Theater not found" });
       }
     } catch (error) {
-      res.status(500).json({ error: error.message, message: 'Theater not found' });
+      res
+        .status(500)
+        .json({ error: error.message, message: "Theater not found" });
     }
   },
 
@@ -87,9 +90,9 @@ const TheaterController = {
       const { name, address, city, rooms, removedRooms } = req.body; // `removedRooms` for rooms to be deleted
 
       // Find the theater by ID
-      const theater = await Theater.findById(id).populate('rooms');
+      const theater = await Theater.findById(id).populate("rooms");
       if (!theater) {
-        return res.status(404).json({ message: 'Theater not found' });
+        return res.status(404).json({ message: "Theater not found" });
       }
 
       // Update theater fields if they are provided
@@ -98,11 +101,18 @@ const TheaterController = {
       theater.city = city || theater.city;
 
       // Handle the theater image if it is uploaded
-      const theaterImageFile = req.files.find((file) => file.fieldname === 'theaterImage');
+      const theaterImageFile = req.files.find(
+        (file) => file.fieldname === "theaterImage"
+      );
       if (theaterImageFile) {
         // Delete the old theater image if it exists
         if (theater.image) {
-          const oldImagePath = path.join(__dirname, '..', 'assets', theater.image);
+          const oldImagePath = path.join(
+            __dirname,
+            "..",
+            "assets",
+            theater.image
+          );
           if (fs.existsSync(oldImagePath)) {
             fs.unlinkSync(oldImagePath);
           }
@@ -140,11 +150,18 @@ const TheaterController = {
           }
 
           // Find if an image was uploaded for this specific room based on its ID
-          const roomImageFile = req.files.find((file) => file.fieldname === `roomImage_${roomData.id}`);
+          const roomImageFile = req.files.find(
+            (file) => file.fieldname === `roomImage_${roomData.id}`
+          );
           if (roomImageFile) {
             // Delete the old room image if it's different from the new one
             if (room.image && room.image !== roomImageFile.filename) {
-              const oldRoomImagePath = path.join(__dirname, '..', 'assets', room.image);
+              const oldRoomImagePath = path.join(
+                __dirname,
+                "..",
+                "assets",
+                room.image
+              );
               if (fs.existsSync(oldRoomImagePath)) {
                 fs.unlinkSync(oldRoomImagePath);
               }
@@ -173,7 +190,12 @@ const TheaterController = {
             if (roomToRemove) {
               // Delete room image from filesystem
               if (roomToRemove.image) {
-                const roomImagePath = path.join(__dirname, '..', 'assets', roomToRemove.image);
+                const roomImagePath = path.join(
+                  __dirname,
+                  "..",
+                  "assets",
+                  roomToRemove.image
+                );
                 if (fs.existsSync(roomImagePath)) {
                   fs.unlinkSync(roomImagePath);
                 }
@@ -188,11 +210,11 @@ const TheaterController = {
 
       // Save the updated theater
       await theater.save();
-      await theater.populate('rooms');
+      await theater.populate("rooms");
       res.status(200).json(theater);
     } catch (error) {
       console.error("Error updating theater:", error);
-      res.status(500).json({ message: 'Error updating theater', error });
+      res.status(500).json({ message: "Error updating theater", error });
     }
   },
 
@@ -207,11 +229,15 @@ const TheaterController = {
 
   getShowtimesByTheater: async (req, res) => {
     try {
-      const showtimes = await TheaterService.getShowtimesByTheater(req.params.id);
+      const showtimes = await TheaterService.getShowtimesByTheater(
+        req.params.id
+      );
       if (showtimes.length > 0) {
         res.status(200).json(showtimes);
       } else {
-        res.status(404).json({ message: 'No showtimes found for this theater' });
+        res
+          .status(404)
+          .json({ message: "No showtimes found for this theater" });
       }
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -222,7 +248,9 @@ const TheaterController = {
     try {
       // Ensure that the theater image file is present before proceeding
       if (!req.files || !req.files.theaterImage) {
-        return res.status(400).json({ success: false, message: "Theater image file is required" });
+        return res
+          .status(400)
+          .json({ success: false, message: "Theater image file is required" });
       }
 
       // Extract the theater image filename
@@ -234,16 +262,19 @@ const TheaterController = {
         try {
           roomsData = JSON.parse(req.body.rooms);
         } catch (parseError) {
-          return res.status(400).json({ success: false, message: "Invalid rooms data format" });
+          return res
+            .status(400)
+            .json({ success: false, message: "Invalid rooms data format" });
         }
       }
 
       // Create Room documents for each room in roomsData
       const roomPromises = roomsData.map(async (room, index) => {
         // Extract the room image if available
-        const roomImageFilename = req.files.roomImages && req.files.roomImages[index]
-          ? req.files.roomImages[index].filename
-          : null;
+        const roomImageFilename =
+          req.files.roomImages && req.files.roomImages[index]
+            ? req.files.roomImages[index].filename
+            : null;
 
         // Create a new Room instance
         const newRoom = new Room({
@@ -274,46 +305,67 @@ const TheaterController = {
       // Save the theater to the database
       await theater.save();
       //populate room
-      await theater.populate('rooms');
+      await theater.populate("rooms");
       res.status(201).json(theater);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ success: false, message: "Server error, please try again later" });
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: "Server error, please try again later",
+        });
     }
   },
 
   getTheater: async (req, res) => {
     try {
       // Find the theater by ID and populate the 'rooms' field with the room documents
-      const theater = await Theater.find().populate('rooms');
+      const theater = await Theater.find().populate("rooms");
 
       // If the theater is not found, return a 404 response
       if (!theater) {
-        return res.status(404).json({ success: false, message: 'Theater not found' });
+        return res
+          .status(404)
+          .json({ success: false, message: "Theater not found" });
       }
 
       // Return the theater data, including the populated rooms
       res.status(200).json(theater);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ success: false, message: 'Server error, please try again later' });
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: "Server error, please try again later",
+        });
     }
   },
   getTheaterByRoomId: async (req, res) => {
     try {
       const roomId = req.params.id;
-      const theater = await Theater.findOne({ rooms: roomId }).populate('rooms');
+      const theater = await Theater.findOne({ rooms: roomId }).populate(
+        "rooms"
+      );
       console.log(theater);
-      
+
       if (!theater) {
-        return res.status(404).json({ success: false, message: 'Theater not found' })
+        return res
+          .status(404)
+          .json({ success: false, message: "Theater not found" });
       }
       res.status(200).json(theater);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ success: false, message: 'Server error, please try again later' });
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: "Server error, please try again later",
+        });
     }
-  }
+  },
 };
 
 module.exports = TheaterController;

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const seatSchema = new Schema({
@@ -8,7 +8,7 @@ const seatSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ['available', 'reserved', 'occupied'], // Example statuses
+    enum: ["available", "reserved", "occupied"],
     required: true,
   },
   price: {
@@ -17,10 +17,10 @@ const seatSchema = new Schema({
   },
   type: {
     type: String,
-    enum: ['Regular', 'VIP'],
+    enum: ["Regular", "VIP"],
     required: true,
   },
 });
 
-const Seat = mongoose.model('Seat', seatSchema);
+const Seat = mongoose.model("Seat", seatSchema);
 module.exports = Seat;

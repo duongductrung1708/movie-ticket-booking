@@ -22,7 +22,11 @@ import "@fontsource/sora";
 import "../styles/StepperStyles.css";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
-import { createBooking, getAllServices, getShowtimeById } from "../services/api";
+import {
+  createBooking,
+  getAllServices,
+  getShowtimeById,
+} from "../services/api";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
@@ -56,16 +60,16 @@ const SeatButton = styled(IconButton)`
     props.type === "empty"
       ? "#45444433 !important"
       : props.type === "vip"
-        ? "blue !important"
-        : props.type === "selected"
-          ? "orange !important"
-          : props.status === "available"
-            ? "#45444433 !important"
-            : props.status === "reserved"
-              ? "orange !important"
-              : props.status === "occupied"
-                ? "red !important"
-                : "gray !important"};
+      ? "blue !important"
+      : props.type === "selected"
+      ? "orange !important"
+      : props.status === "available"
+      ? "#45444433 !important"
+      : props.status === "reserved"
+      ? "orange !important"
+      : props.status === "occupied"
+      ? "red !important"
+      : "gray !important"};
   border-radius: 5px;
   width: 50px;
   height: 50px;
@@ -75,19 +79,19 @@ const SeatButton = styled(IconButton)`
 
   &:hover {
     background-color: ${(props) =>
-    props.type === "empty"
-      ? "#d0d0d0 !important"
-      : props.type === "vip"
+      props.type === "empty"
+        ? "#d0d0d0 !important"
+        : props.type === "vip"
         ? "#ffb300 !important"
         : props.type === "selected"
-          ? "#45444433 !important"
-          : props.status === "available"
-            ? "#d0d0d0 !important"
-            : props.status === "reserved"
-              ? "#ffb300 !important"
-              : props.status === "occupied"
-                ? "#ff8a8a !important"
-                : "#ff8a8a !important"};
+        ? "#45444433 !important"
+        : props.status === "available"
+        ? "#d0d0d0 !important"
+        : props.status === "reserved"
+        ? "#ffb300 !important"
+        : props.status === "occupied"
+        ? "#ff8a8a !important"
+        : "#ff8a8a !important"};
   }
 `;
 
@@ -251,11 +255,9 @@ const SeatReservation = () => {
   const [total, setTotal] = useState(0);
 
   const [seats, setSeats] = useState(seatLayout || []);
-  const [selectedSeats, setSelectedSeats] = useState( []
-  );
+  const [selectedSeats, setSelectedSeats] = useState([]);
 
-  const [selectedServices, setSelectedService] = useState([]
-  );
+  const [selectedServices, setSelectedService] = useState([]);
 
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -335,17 +337,20 @@ const SeatReservation = () => {
     // Establish WebSocket connection
     ws.current = new WebSocket("ws://localhost:5000");
 
-
-
     const fetchSeatLayout = async (id) => {
       const showtimeResponse = await getShowtimeById(id);
       console.log(showtimeResponse.seatLayout);
-      setSeatLayout(showtimeResponse.seatLayout)
+      setSeatLayout(showtimeResponse.seatLayout);
       setTotalRows(showtimeResponse.seatLayout.length);
       setTotalColumns(showtimeResponse.seatLayout[0]?.length || 0);
-      setSeats(showtimeResponse.seatLayout)// Listen for messages from WebSocket server
+      setSeats(showtimeResponse.seatLayout); // Listen for messages from WebSocket server
       ws.current.onmessage = (event) => {
-        const { rowIndex, colIndex, status, showtime: messageShowtime } = JSON.parse(event.data);
+        const {
+          rowIndex,
+          colIndex,
+          status,
+          showtime: messageShowtime,
+        } = JSON.parse(event.data);
         console.log(JSON.parse(event.data));
 
         // Only process the update if the showtime matches
@@ -355,8 +360,8 @@ const SeatReservation = () => {
           setSeats(updatedSeats);
         }
       };
-    }
-    fetchSeatLayout(showtime)
+    };
+    fetchSeatLayout(showtime);
 
     return () => {
       ws.current.close();
@@ -378,7 +383,14 @@ const SeatReservation = () => {
 
     // Notify WebSocket server with showtime
     selectedSeats.forEach(({ row, col }) => {
-      ws.current.send(JSON.stringify({ rowIndex: row, colIndex: col, status: "reserved", showtime }));
+      ws.current.send(
+        JSON.stringify({
+          rowIndex: row,
+          colIndex: col,
+          status: "reserved",
+          showtime,
+        })
+      );
     });
 
     const userId = JSON.parse(localStorage.getItem("user"))?._id;
@@ -781,11 +793,11 @@ const SeatReservation = () => {
                 <Content variant="body1">
                   {selectedSeats.length > 0
                     ? selectedSeats
-                      ?.map((seat) => {
-                        const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
-                        return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
-                      })
-                      .join(", ")
+                        ?.map((seat) => {
+                          const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+                          return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+                        })
+                        .join(", ")
                     : ""}
                 </Content>
               </div>

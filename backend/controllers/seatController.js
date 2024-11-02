@@ -1,4 +1,4 @@
-const SeatService = require('../services/seatService');
+const SeatService = require("../services/seatService");
 
 const SeatController = {
   create: async (req, res) => {
@@ -25,7 +25,7 @@ const SeatController = {
       if (seat) {
         res.status(200).json(seat);
       } else {
-        res.status(404).json({ message: 'Seat not found' });
+        res.status(404).json({ message: "Seat not found" });
       }
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -48,7 +48,7 @@ const SeatController = {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 };
 
 module.exports = SeatController;

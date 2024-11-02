@@ -60,12 +60,9 @@ exports.updateGenre = async (req, res) => {
     }
 
     if (Object.keys(updateFields).length === 0) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "At least one field (name or description) is required to update",
-        });
+      return res.status(400).json({
+        error: "At least one field (name or description) is required to update",
+      });
     }
 
     const updatedGenre = await Genre.findByIdAndUpdate(

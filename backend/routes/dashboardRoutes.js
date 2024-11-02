@@ -8,7 +8,11 @@ const {
 } = require("../controllers/dashboardController");
 
 // Movie Routes
-router.get("/top-movies", middleware.verifyToken, getListTopBookingMoviesByMonth);
+router.get(
+  "/top-movies",
+  middleware.verifyToken,
+  getListTopBookingMoviesByMonth
+);
 router.get("/total-values", middleware.verifyToken, getTotalValues);
 router.get("/revenue", middleware.verifyToken, getRevenueByYear);
 

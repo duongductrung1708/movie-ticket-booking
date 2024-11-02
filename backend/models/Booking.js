@@ -22,12 +22,13 @@ const bookingSchema = new mongoose.Schema({
   },
   timestamp: { type: Date, default: Date.now },
   status: {
-    type: String, required: true,
+    type: String,
+    required: true,
     enum: ["processing", "cancle", "done"],
   },
-  customer_info:{
+  customer_info: {
     type: Object,
-  }
+  },
 });
 
 module.exports = mongoose.model("Booking", bookingSchema);

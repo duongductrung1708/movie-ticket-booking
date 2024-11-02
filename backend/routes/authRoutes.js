@@ -104,7 +104,9 @@ router.post("/google-login", async (req, res) => {
     console.log("User from findOrCreateUserFromGoogle:", user);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found or could not be created" });
+      return res
+        .status(404)
+        .json({ message: "User not found or could not be created" });
     }
 
     const userData = {

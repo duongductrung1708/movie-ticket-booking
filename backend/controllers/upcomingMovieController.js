@@ -25,7 +25,8 @@ exports.getUpcomingMovieById = async (req, res) => {
       "genre",
       "name"
     );
-    if (!movie) return res.status(404).json({ msg: "Upcoming movie not found" });
+    if (!movie)
+      return res.status(404).json({ msg: "Upcoming movie not found" });
 
     const formattedMovie = {
       ...movie._doc,
@@ -123,7 +124,8 @@ exports.updateUpcomingMovie = async (req, res) => {
       { new: true }
     ).populate("genre", "name");
 
-    if (!updatedMovie) return res.status(404).json({ msg: "Upcoming movie not found" });
+    if (!updatedMovie)
+      return res.status(404).json({ msg: "Upcoming movie not found" });
 
     res.status(200).json(updatedMovie);
   } catch (error) {
@@ -135,8 +137,11 @@ exports.updateUpcomingMovie = async (req, res) => {
 // Delete an upcoming movie
 exports.deleteUpcomingMovie = async (req, res) => {
   try {
-    const deletedMovie = await UpcomingMovie.findByIdAndDelete(req.params.movieId);
-    if (!deletedMovie) return res.status(404).json({ msg: "Upcoming movie not found" });
+    const deletedMovie = await UpcomingMovie.findByIdAndDelete(
+      req.params.movieId
+    );
+    if (!deletedMovie)
+      return res.status(404).json({ msg: "Upcoming movie not found" });
 
     res.status(200).json({ msg: "Upcoming movie deleted successfully" });
   } catch (error) {
@@ -156,9 +161,13 @@ exports.createUpcomingMovies = async (req, res) => {
         const parsedReleaseDate = parse(release_date, "MM/dd/yyyy", new Date());
 
         const genreExists = await Genre.findById(genre);
-        if (!genreExists) throw new Error(`Genre not found for genre ID: ${genre}`);
+        if (!genreExists)
+          throw new Error(`Genre not found for genre ID: ${genre}`);
 
-        const newMovie = new UpcomingMovie({ ...movieData, release_date: parsedReleaseDate });
+        const newMovie = new UpcomingMovie({
+          ...movieData,
+          release_date: parsedReleaseDate,
+        });
         return newMovie.save();
       })
     );

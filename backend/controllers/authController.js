@@ -6,7 +6,7 @@ const User = require("../models/User");
 const Role = require("../models/Role");
 const sendEmail = require("../utils/sendEmail");
 const generateToken = require("../utils/generateToken");
-const { format } = require('date-fns');
+const { format } = require("date-fns");
 
 // @desc     Register user
 // @access   Public
@@ -407,7 +407,7 @@ exports.loginUser = async (req, res) => {
       }
     }
 
-    const formattedDob = new Date(user.dob).toISOString().split('T')[0];
+    const formattedDob = new Date(user.dob).toISOString().split("T")[0];
 
     const accessToken = jwt.sign(
       {

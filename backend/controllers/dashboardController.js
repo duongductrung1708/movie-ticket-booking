@@ -17,14 +17,18 @@ exports.getListTopBookingMoviesByMonth = async (req, res) => {
     const currentYear = new Date().getFullYear();
 
     const startDate = new Date(`${currentYear}-${month}-01`);
-    const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
+    const endDate = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth() + 1,
+      0
+    );
 
     const bookings = await Booking.find({
       timestamp: {
         $gte: startDate,
         $lt: endDate,
       },
-      status: "done"
+      status: "done",
     }).populate({
       path: "showtime_id",
       populate: { path: "movie_id", model: "Movie" },
@@ -69,8 +73,12 @@ exports.getTotalValues = async (req, res) => {
     const currentYear = new Date().getFullYear();
 
     const startDate = new Date(`${currentYear}-${month}-01`);
-    const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 0);
-    
+    const endDate = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth() + 1,
+      0
+    );
+
     const customerRole = await Role.findOne({ name: "customer" }); // Adjust based on your Role model's structure
 
     if (!customerRole) {
@@ -147,6 +155,3 @@ exports.getRevenueByYear = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
-
-

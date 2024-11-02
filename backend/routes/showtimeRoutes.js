@@ -39,13 +39,17 @@ showtimeRouter.get("/is-booked/:id", isBooked);
 showtimeRouter.post("/", showtimeValidation.verifyTime, createShowtime);
 
 //create multiple date showtime
-showtimeRouter.post("/dates", showtimeValidation.verifyConflictShowtime, createMultipleShowtime)
+showtimeRouter.post(
+  "/dates",
+  showtimeValidation.verifyConflictShowtime,
+  createMultipleShowtime
+);
 
 //update showtime seatlayout
-showtimeRouter.put("/:id/seat-layout", updateSeatLayoutShowtime)
+showtimeRouter.put("/:id/seat-layout", updateSeatLayoutShowtime);
 
 //update showtime
-showtimeRouter.put('/:id', showtimeValidation.verifyTime, updateShowtime)
+showtimeRouter.put("/:id", showtimeValidation.verifyTime, updateShowtime);
 
 //delete showtime
 showtimeRouter.delete("/:id", deleteShowtime);

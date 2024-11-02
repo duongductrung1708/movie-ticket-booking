@@ -175,13 +175,12 @@ const PaymentPage = () => {
     selectedRoom,
     showtime,
     booking,
-    bookingDetails,
   } = location.state || {};
 
   const navigate = useNavigate();
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
-  const [showQRCode, setShowQRCode] = useState(false);
+  const [showQRCode] = useState(false);
   const paymentSectionRef = useRef(null);
   const completeSectionRef = useRef(null);
   const [activeStep, setActiveStep] = useState(0);
@@ -194,15 +193,15 @@ const PaymentPage = () => {
   const userRole = JSON.parse(localStorage.getItem("user"))?.role;
 
   const handleConfirmMomoPayment = async () => {
-    const seatData =
-      selectedSeats.length > 0
-        ? selectedSeats
-          .map((seat) => {
-            const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
-            return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
-          })
-          .join(", ")
-        : "";
+    // const seatData =
+    //   selectedSeats.length > 0
+    //     ? selectedSeats
+    //       .map((seat) => {
+    //         const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+    //         return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+    //       })
+    //       .join(", ")
+    //     : "";
     const orderInfo = booking._id;
 
     try {
@@ -223,15 +222,12 @@ const PaymentPage = () => {
   };
 
   useEffect(() => {
-    // Establish WebSocket connection
     ws.current = new WebSocket("ws://localhost:5000");
 
-    // Listen for messages from WebSocket server
     ws.current.onmessage = (event) => {
       const { rowIndex, colIndex, status, showtime: messageShowtime } = JSON.parse(event.data);
       console.log(JSON.parse(event.data));
 
-      // Only process the update if the showtime matches
       if (messageShowtime === showtime) {
         const updatedSeats = [...seats];
         updatedSeats[rowIndex][colIndex].status = status;
@@ -241,7 +237,7 @@ const PaymentPage = () => {
     return () => {
       ws.current.close();
     };
-  }, [showtime]);
+  }, [showtime, seats]);
 
   const handleBackToSeatReservation = async () => {
     try {
@@ -250,7 +246,6 @@ const PaymentPage = () => {
       );
       await updateSeatLayout(showtime, seatIds, "available")
       await deleteBooking(booking._id);
-      // Notify WebSocket server with showtime
       selectedSeats.forEach(({ row, col }) => {
         ws.current.send(JSON.stringify({ rowIndex: row, colIndex: col, status: "available", showtime }));
       });
@@ -318,7 +313,7 @@ const PaymentPage = () => {
       0
     );
     setTotal((prev) => prev + totalService + totalSeat);
-  }, []);
+  }, [seats, selectedSeats, selectedServices]);
 
   return (
     <Section>

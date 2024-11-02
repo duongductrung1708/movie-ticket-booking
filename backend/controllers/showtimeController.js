@@ -14,13 +14,13 @@ const getShowtime = async (req, res) => {
 
     const formattedShowtimes = showtimes.map((st) => ({
       movie_id: st.movie_id._id,
-      movie_title: st.movie_id.title || 'Unknown Movie',
+      movie_title: st.movie_id.title || "Unknown Movie",
       room_id: st.room_id._id,
-      room_name: st.room_id.name || 'Unknown Room',
+      room_name: st.room_id.name || "Unknown Room",
       date: st.date,
       start_time: st.start_time,
       end_time: st.end_time,
-      seatLayout: st.seatLayout
+      seatLayout: st.seatLayout,
     }));
     res.json(formattedShowtimes);
   } catch (error) {
@@ -227,30 +227,37 @@ const isBooked = async (req, res) => {
     }
 
     // Check for any seat with 'reserved' or 'occupied' status
-    const isBooked = showtime.seatLayout.some(row =>
-      row.some(seat => ['reserved', 'occupied'].includes(seat.status))
+    const isBooked = showtime.seatLayout.some((row) =>
+      row.some((seat) => ["reserved", "occupied"].includes(seat.status))
     );
 
     // Send response based on booking status
     if (isBooked) {
-      return res.status(200).json({ booked: true, message: "Showtime has reserved or occupied seats." });
+      return res
+        .status(200)
+        .json({
+          booked: true,
+          message: "Showtime has reserved or occupied seats.",
+        });
     } else {
-      return res.status(200).json({ booked: false, message: "Showtime is fully available." });
+      return res
+        .status(200)
+        .json({ booked: false, message: "Showtime is fully available." });
     }
   } catch (error) {
     console.error("Error checking showtime booking status:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
-}
+};
 
 //Get showtimes by room id
 const getShowtimesByRoomId = async (req, res) => {
   try {
     const roomId = req.params.id;
-    const [day, month, year] = req.query.date.split("/").map(Number);  // Split and parse the date
+    const [day, month, year] = req.query.date.split("/").map(Number); // Split and parse the date
 
-    const requestDate = new Date(year, month - 1, day);  // Create a Date object
-    requestDate.setHours(0, 0, 0, 0);  // Set time to 00:00:00 for accurate date comparison
+    const requestDate = new Date(year, month - 1, day); // Create a Date object
+    requestDate.setHours(0, 0, 0, 0); // Set time to 00:00:00 for accurate date comparison
 
     console.log(requestDate);
     const showtimes = await showtimeService.getShowtimesByRoomId(roomId);
@@ -341,39 +348,42 @@ const createMultipleShowtime = async (req, res) => {
 
     // Ensure startTime is less than endTime
     if (formattedStartTime >= formattedEndTime) {
-      return res.status(400).json({ message: "Invalid time range: Start time must be less than end time." });
+      return res
+        .status(400)
+        .json({
+          message: "Invalid time range: Start time must be less than end time.",
+        });
     }
     const room = await Room.findById(roomId);
     // Function to convert 2D array of numbers to 2D array of seat objects
     const convertSeatLayout = (seatLayoutNumbers) => {
-      return seatLayoutNumbers.map(row =>
-        row.map(seat => {
+      return seatLayoutNumbers.map((row) =>
+        row.map((seat) => {
           if (seat === 0) {
             return {
               type: "standard",
               status: "available",
-              price: 100
+              price: 100,
             };
           } else if (seat === -1) {
             return {
               type: "standard",
               status: "blocked",
-              price: 0
+              price: 0,
             };
           } else if (seat === 1) {
             return {
               type: "vip",
               status: "available",
-              price: 150
-            }
+              price: 150,
+            };
           }
-
         })
       );
     };
     const seatLayout = convertSeatLayout(room.seatLayout);
     // Array to store showtime documents
-    const showtimesToInsert = dates.map(dateString => {
+    const showtimesToInsert = dates.map((dateString) => {
       // Set each date to midnight for consistency
       const formattedDate = new Date(dateString);
       formattedDate.setHours(0, 0, 0, 0);
@@ -384,7 +394,7 @@ const createMultipleShowtime = async (req, res) => {
         date: formattedDate,
         start_time: formattedStartTime,
         end_time: formattedEndTime,
-        seatLayout: seatLayout  // Include or format seat layout as needed
+        seatLayout: seatLayout, // Include or format seat layout as needed
       };
     });
     // Insert all formatted showtimes in one operation
@@ -392,14 +402,13 @@ const createMultipleShowtime = async (req, res) => {
 
     res.status(201).json({
       message: "Showtimes created successfully.",
-      showtimes: createdShowtimes
+      showtimes: createdShowtimes,
     });
   } catch (error) {
     console.error("Error creating multiple showtimes:", error);
     res.status(500).json({ message: "Internal server error." });
   }
-
-}
+};
 
 // Create showtime
 const createShowtime = async (req, res) => {
@@ -409,19 +418,19 @@ const createShowtime = async (req, res) => {
     const room = await Room.findById(roomId);
     // Function to convert 2D array of numbers to 2D array of seat objects
     const convertSeatLayout = (seatLayoutNumbers) => {
-      return seatLayoutNumbers.map(row =>
-        row.map(seat => {
+      return seatLayoutNumbers.map((row) =>
+        row.map((seat) => {
           if (seat === 0) {
             return {
               type: "standard",
               status: "available",
-              price: 100
+              price: 100,
             };
           } else if (seat === -1) {
             return {
               type: "standard",
               status: "blocked",
-              price: 0
+              price: 0,
             };
           }
         })
@@ -439,10 +448,9 @@ const createShowtime = async (req, res) => {
     });
 
     await showtime.save();
-    await showtime.populate('movie_id', 'title');
-    await showtime.populate('room_id', 'name');
+    await showtime.populate("movie_id", "title");
+    await showtime.populate("room_id", "name");
     const theater = await getTheaterOfRoom(showtime.room_id._id);
-
 
     const formattedShowtime = {
       _id: showtime._id,
@@ -470,47 +478,49 @@ const updateShowtime = async (req, res) => {
     const showtimeId = req.params.id; // Create a Date object
     const { movieId, roomId, date, startTime, endTime } = req.body;
 
-
     const room = await Room.findById(req.body.room_id);
     // Function to convert 2D array of numbers to 2D array of seat objects
     const convertSeatLayout = (seatLayoutNumbers) => {
-      return seatLayoutNumbers.map(row =>
-        row.map(seat => {
+      return seatLayoutNumbers.map((row) =>
+        row.map((seat) => {
           if (seat === 0) {
             return {
               type: "standard",
               status: "available",
-              price: 100
+              price: 100,
             };
           } else if (seat === -1) {
             return {
               type: "standard",
               status: "blocked",
-              price: 0
+              price: 0,
             };
           } else if (seat === 1) {
             return {
               type: "vip",
               status: "available",
-              price: 150
-            }
+              price: 150,
+            };
           }
-
         })
       );
     };
     const seatLayout = convertSeatLayout(room.seatLayout);
 
-    const showtime = await Showtime.findByIdAndUpdate(showtimeId, {
-      movie_id: movieId,
-      room_id: roomId,
-      date: date,
-      start_time: startTime,
-      end_time: endTime,
-      seatLayout: seatLayout,
-    }, {
-      new: true,
-    })
+    const showtime = await Showtime.findByIdAndUpdate(
+      showtimeId,
+      {
+        movie_id: movieId,
+        room_id: roomId,
+        date: date,
+        start_time: startTime,
+        end_time: endTime,
+        seatLayout: seatLayout,
+      },
+      {
+        new: true,
+      }
+    )
       .populate("movie_id", "title")
       .populate("room_id", "name");
 
@@ -539,19 +549,21 @@ const updateShowtime = async (req, res) => {
   }
 };
 
-//update Seat Layout frontend 
+//update Seat Layout frontend
 const updateSeatLayoutShowtime = async (req, res) => {
   const showtimeId = req.params.id;
   const { seatIds, status } = req.body;
   try {
-    const showtime = await showtimeService.updateSeatLayoutShowtime(showtimeId, seatIds, status);
+    const showtime = await showtimeService.updateSeatLayoutShowtime(
+      showtimeId,
+      seatIds,
+      status
+    );
     return res.status(200).json(showtime);
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
-
-}
-
+};
 
 const deleteShowtime = async (req, res) => {
   try {

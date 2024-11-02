@@ -1,4 +1,4 @@
-const { OAuth2Client } = require('google-auth-library');
+const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 async function verifyGoogleToken(token) {
@@ -15,7 +15,7 @@ async function verifyGoogleToken(token) {
       sub: payload.sub,
     };
   } catch (error) {
-    console.error('Error verifying Google token:', error);
+    console.error("Error verifying Google token:", error);
     return null;
   }
 }
