@@ -11,8 +11,9 @@ const sendEmail = require("../utils/sendEmail");
 
 var accessKey = "F8BBA842ECF85";
 var secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz";
-const publicPort = "https://5008-118-70-211-232.ngrok-free.app";
-// const publicPort = 'https://2475-2001-ee0-40c1-5d82-6189-13b5-9db6-72b4.ngrok-free.app'
+// const publicPort = "https://5008-118-70-211-232.ngrok-free.app";
+const publicPort =
+  "https://9891-2001-ee0-40c1-dbad-44ef-60f5-a1a9-ac14.ngrok-free.app";
 
 const momoController = {
   createPayment: async (req, res) => {
@@ -222,6 +223,47 @@ const momoController = {
 
     let result = await axios(options);
     return res.status(200).json(result.data);
+  },
+  payAtCounter: async (req, res) => {
+    try {
+      const { bookingId } = req.body;
+
+      const amount = 100000;
+
+      console.log("Request Body:", req.body);
+      console.log("Amount Value:", amount);
+
+      if (!bookingId) {
+        return res.status(400).json({ message: "Booking ID is required." });
+      }
+
+      const paymentResponse = await createPayment(
+        amount,
+        bookingId,
+        "Cash",
+        "pending"
+      );
+
+      if (!paymentResponse) {
+        return res.status(400).json({ message: "Failed to create payment." });
+      }
+
+      req.body = {
+        message: "Successful.",
+        orderInfo: `${bookingId}-${paymentResponse._id}`,
+      };
+
+      await momoController.getPaymentCallBack(req, res);
+
+      res
+        .status(200)
+        .json({ message: "Counter payment created successfully." });
+    } catch (error) {
+      console.error("Error creating counter payment: ", error);
+      res
+        .status(500)
+        .json({ message: "Error processing counter payment.", error });
+    }
   },
 };
 

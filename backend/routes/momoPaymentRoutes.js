@@ -8,5 +8,6 @@ momoPaymentRouter.post(
   momoController.getTransactionStatus
 );
 momoPaymentRouter.post("/", momoController.createPayment);
+momoPaymentRouter.post('/pay-at-counter', momoController.payAtCounter);
 
 module.exports = momoPaymentRouter;

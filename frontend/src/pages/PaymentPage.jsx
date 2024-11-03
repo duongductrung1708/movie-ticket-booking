@@ -21,7 +21,12 @@ import styled from "styled-components";
 import { toast, ToastContainer } from "react-toastify";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
-import { deleteBooking, getMomoPaymentLink, updateSeatLayout } from "../services/api";
+import {
+  deleteBooking,
+  getMomoPaymentLink,
+  updateSeatLayout,
+  payAtCounter,
+} from "../services/api";
 
 const Container = styled.div`
   width: 75%;
@@ -225,7 +230,12 @@ const PaymentPage = () => {
     ws.current = new WebSocket("ws://localhost:5000");
 
     ws.current.onmessage = (event) => {
-      const { rowIndex, colIndex, status, showtime: messageShowtime } = JSON.parse(event.data);
+      const {
+        rowIndex,
+        colIndex,
+        status,
+        showtime: messageShowtime,
+      } = JSON.parse(event.data);
       console.log(JSON.parse(event.data));
 
       if (messageShowtime === showtime) {
@@ -244,10 +254,17 @@ const PaymentPage = () => {
       const seatIds = selectedSeats.map(
         (seat) => seatLayout[seat.row][seat.col]._id
       );
-      await updateSeatLayout(showtime, seatIds, "available")
+      await updateSeatLayout(showtime, seatIds, "available");
       await deleteBooking(booking._id);
       selectedSeats.forEach(({ row, col }) => {
-        ws.current.send(JSON.stringify({ rowIndex: row, colIndex: col, status: "available", showtime }));
+        ws.current.send(
+          JSON.stringify({
+            rowIndex: row,
+            colIndex: col,
+            status: "available",
+            showtime,
+          })
+        );
       });
       navigate("/seat-reservation", {
         state: {
@@ -277,9 +294,26 @@ const PaymentPage = () => {
       toast.warning("Please agree to the terms and select a payment method.");
       return;
     }
-
+    if (selectedPaymentMethod === "counter") {
+      handleCounterPayment();
+    }
     setActiveStep(1);
   };
+
+  const handleCounterPayment = async () => {
+    try {
+      const response = await payAtCounter(booking._id, total * 1000);
+      if (response.success) {
+        toast.success("Your booking is confirmed. Please pay at the counter.");
+        setActiveStep(1);
+      } else {
+        toast.error("Your booking is confirmed. Please pay at the counter.");
+      }
+    } catch (error) {
+      console.error("Error with Pay at Counter:", error);
+      toast.error("Your booking is confirmed. Please pay at the counter.");
+    }
+  };  
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -406,13 +440,13 @@ const PaymentPage = () => {
                         <strong>Selected Seats:</strong>{" "}
                         {selectedSeats.length > 0
                           ? selectedSeats
-                            .map((seat) => {
-                              const rowLetter = String.fromCharCode(
-                                65 + seat.row
-                              ); // Converts row index to a letter (A, B, C, etc.)
-                              return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
-                            })
-                            .join(", ")
+                              .map((seat) => {
+                                const rowLetter = String.fromCharCode(
+                                  65 + seat.row
+                                ); // Converts row index to a letter (A, B, C, etc.)
+                                return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+                              })
+                              .join(", ")
                           : ""}
                       </Typography>
                       <Typography>
@@ -571,11 +605,11 @@ const PaymentPage = () => {
             <strong>Seats:</strong>{" "}
             {selectedSeats.length > 0
               ? selectedSeats
-                .map((seat) => {
-                  const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
-                  return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
-                })
-                .join(", ")
+                  .map((seat) => {
+                    const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+                    return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+                  })
+                  .join(", ")
               : ""}
           </Typography>
 
