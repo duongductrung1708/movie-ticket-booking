@@ -67,9 +67,9 @@ export const getMomoPaymentLink = async (orderInfo, amount, bookingId) => {
   }
 };
 
-export const payAtCounter = async (bookingId, paymentId) => {
+export const payAtCounter = async (bookingId, amount, paymentId) => {
   try {
-    const response = await api.post("/momo/pay-at-counter", { bookingId, paymentId });
+    const response = await api.post("/momo/pay-at-counter", { bookingId, amount, paymentId });
     return response.data;
   } catch (error) {
     console.error("Error in Pay at Counter:", error);

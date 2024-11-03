@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import PaymentPage from "./pages/PaymentPage";
 import BookingResult from "./pages/PaymentResult";
 import BookingDetails from "./pages/BookingDetails";
+import BookingManagement from "./pages/BookingManagement";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
         <Route path="/payment" element={<ProtectedRoute element={<PaymentPage />} />} />
         <Route path="/user-profile" element={<ProtectedRoute element={<UserProfile />} />} />
         <Route path="/booking-history" element={<ProtectedRoute element={<BookHistory />} />} />
+        <Route path="/booking-management" element={<ProtectedRoute element={<BookingManagement />} role="66ffe8db0fffedcac8a5561f" />} />
         <Route path="/booking-result" element={<ProtectedRoute element={<BookingResult />} />} />
         <Route path="/booking/:id" element={<BookingDetails />} />
         <Route path="/404" element={<NotFound />} />
