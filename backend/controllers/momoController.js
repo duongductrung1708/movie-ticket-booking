@@ -226,35 +226,30 @@ const momoController = {
   },
   payAtCounter: async (req, res) => {
     try {
-      const { bookingId } = req.body;
-
-      const amount = 100000;
-
-      console.log("Request Body:", req.body);
-      console.log("Amount Value:", amount);
-
+      const { amount, bookingId } = req.body;
+  
       if (!bookingId) {
         return res.status(400).json({ message: "Booking ID is required." });
       }
-
+  
       const paymentResponse = await createPayment(
         amount,
         bookingId,
         "Cash",
         "pending"
       );
-
+  
       if (!paymentResponse) {
         return res.status(400).json({ message: "Failed to create payment." });
       }
-
+  
       req.body = {
         message: "Successful.",
         orderInfo: `${bookingId}-${paymentResponse._id}`,
       };
-
+  
       await momoController.getPaymentCallBack(req, res);
-
+  
       res
         .status(200)
         .json({ message: "Counter payment created successfully." });
@@ -264,7 +259,7 @@ const momoController = {
         .status(500)
         .json({ message: "Error processing counter payment.", error });
     }
-  },
+  },  
 };
 
 module.exports = momoController;

@@ -11,6 +11,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import HistoryIcon from "@mui/icons-material/History";
 import KeyIcon from "@mui/icons-material/Key";
 import LogoutIcon from "@mui/icons-material/Logout";
+import BookOnlineIcon from '@mui/icons-material/BookOnline';
 import { logoutUser } from "../services/api";
 import { useAuth } from "../hooks/AuthProvider";
 
@@ -150,6 +151,8 @@ const Navigation = () => {
   const [click, setClick] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
 
+  const userRole = JSON.parse(localStorage.getItem("user"))?.role;
+
   const handleAccountClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -180,6 +183,10 @@ const Navigation = () => {
 
   const handleBookingHistory = () => {
     navigate("/booking-history");
+  };
+
+  const handleBookingManagement = () => {
+    navigate("/booking-management");
   };
 
   const handleChangePassword = () => {
@@ -264,6 +271,12 @@ const Navigation = () => {
                   <HistoryIcon />
                   <Item>Booking History</Item>
                 </MenuItem>
+                {userRole === "66ffe8db0fffedcac8a5561f" && (
+                  <MenuItem onClick={handleBookingManagement}>
+                    <BookOnlineIcon />
+                    <Item>Booking Management</Item>
+                  </MenuItem>
+                )}
                 <MenuItem onClick={handleChangePassword}>
                   <KeyIcon />
                   <Item>Change Password</Item>

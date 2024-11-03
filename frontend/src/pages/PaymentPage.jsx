@@ -303,17 +303,18 @@ const PaymentPage = () => {
   const handleCounterPayment = async () => {
     try {
       const response = await payAtCounter(booking._id, total * 1000);
-      if (response.success) {
+      console.log(response);
+      if (response.message === "Counter payment created successfully.") {
         toast.success("Your booking is confirmed. Please pay at the counter.");
         setActiveStep(1);
       } else {
-        toast.error("Your booking is confirmed. Please pay at the counter.");
+        toast.error("There was an issue processing your counter payment.");
       }
     } catch (error) {
       console.error("Error with Pay at Counter:", error);
-      toast.error("Your booking is confirmed. Please pay at the counter.");
+      toast.error("There was an issue processing your counter payment.");
     }
-  };  
+  };
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -546,7 +547,9 @@ const PaymentPage = () => {
                 <Btn onClick={handleConfirmPayment}>Confirm Payment</Btn>
               )}
 
-              <Btn onClick={handleBackToSeatReservation}>Back to Booking</Btn>
+              {activeStep === 0 && (
+                <Btn onClick={handleBackToSeatReservation}>Back to Booking</Btn>
+              )}
 
               {activeStep === 1 && (
                 <Complete ref={completeSectionRef}>

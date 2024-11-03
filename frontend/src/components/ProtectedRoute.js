@@ -6,7 +6,16 @@ export const RedirectRoute = ({ element }) => {
   return user ? <Navigate to="/home" replace /> : element;
 };
 
-export const ProtectedRoute = ({ element }) => {
+export const ProtectedRoute = ({ element, role }) => {
   const { user } = useAuth();
-  return user ? element : <Navigate to="/signin" replace />;
+
+  if (!user) {
+    return <Navigate to="/signin" replace />;
+  }
+
+  if (role && user.role !== role) {
+    return <Navigate to="/404" replace />;
+  }
+
+  return element;
 };
