@@ -87,6 +87,13 @@ const MovieItem = styled.div`
   text-align: center;
   height: 100%;
   justify-content: space-between;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
 
   @media (max-width: 30em) {
     width: 70vw;
@@ -246,7 +253,10 @@ const MovieListItem = React.forwardRef(({ movie, onShowtimeClick }, ref) => {
 
   return (
     <MovieItem ref={ref}>
-      <MovieImage src={`http://localhost:8080/api/images/${movie.image}`} alt={movie.title} />
+      <MovieImage
+        src={`http://localhost:8080/api/images/${movie.image}`}
+        alt={movie.title}
+      />
       <MovieInfo>
         <MovieTitle>{movie.title}</MovieTitle>
         <MovieRating>Rating: {movie.rating} / 10</MovieRating>
@@ -285,8 +295,10 @@ const MovieList = () => {
         const filteredMovies = await Promise.all(
           movieData.map(async (movie) => {
             const movieShowtimes = await getShowtimesByMovieId(movie._id);
-            const validShowtimes = movieShowtimes.filter(showtime =>
-              dayjs(showtime.date).isAfter(today) || dayjs(showtime.date).isSame(today, 'day')
+            const validShowtimes = movieShowtimes.filter(
+              (showtime) =>
+                dayjs(showtime.date).isAfter(today) ||
+                dayjs(showtime.date).isSame(today, "day")
             );
 
             if (validShowtimes.length > 0) {
@@ -296,7 +308,7 @@ const MovieList = () => {
           })
         );
 
-        setMovies(filteredMovies.filter(movie => movie !== null));
+        setMovies(filteredMovies.filter((movie) => movie !== null));
       } catch (error) {
         console.error("Failed to fetch movies:", error);
       }

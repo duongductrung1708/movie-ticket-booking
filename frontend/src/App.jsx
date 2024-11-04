@@ -11,9 +11,9 @@ import ChangePassword from "./sections/auth/signin/ChangePassword";
 import ForgetPassword from "./sections/auth/signin/ForgetPassword";
 import "./index.css";
 import { ToastContainer } from "react-toastify";
-import { AuthProvider } from './hooks/AuthProvider';
+import { AuthProvider } from "./hooks/AuthProvider";
 
-import { RedirectRoute, ProtectedRoute } from './components/ProtectedRoute';
+import { RedirectRoute, ProtectedRoute } from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import PaymentPage from "./pages/PaymentPage";
 import BookingResult from "./pages/PaymentResult";
@@ -25,18 +25,50 @@ function App() {
     <AuthProvider>
       <Routes>
         <Route path="/" element={<RedirectRoute element={<StarterPage />} />} />
-        <Route path="/signup" element={<RedirectRoute element={<RegistrationPage />} />} />
-        <Route path="/signin" element={<RedirectRoute element={<SignInPage />} />} />
-        <Route path="/change-password" element={<ProtectedRoute element={<ChangePassword />} />} />
+        <Route
+          path="/signup"
+          element={<RedirectRoute element={<RegistrationPage />} />}
+        />
+        <Route
+          path="/signin"
+          element={<RedirectRoute element={<SignInPage />} />}
+        />
+        <Route
+          path="/change-password"
+          element={<ProtectedRoute element={<ChangePassword />} />}
+        />
         <Route path="/forgot-password" element={<ForgetPassword />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/movie/:id" element={<MovieDetail />} />
-        <Route path="/seat-reservation" element={<ProtectedRoute element={<SeatReservation />} />} />
-        <Route path="/payment" element={<ProtectedRoute element={<PaymentPage />} />} />
-        <Route path="/user-profile" element={<ProtectedRoute element={<UserProfile />} />} />
-        <Route path="/booking-history" element={<ProtectedRoute element={<BookHistory />} />} />
-        <Route path="/booking-management" element={<ProtectedRoute element={<BookingManagement />} role="66ffe8db0fffedcac8a5561f" />} />
-        <Route path="/booking-result" element={<ProtectedRoute element={<BookingResult />} />} />
+        <Route
+          path="/seat-reservation"
+          element={<ProtectedRoute element={<SeatReservation />} />}
+        />
+        <Route
+          path="/payment"
+          element={<ProtectedRoute element={<PaymentPage />} />}
+        />
+        <Route
+          path="/user-profile"
+          element={<ProtectedRoute element={<UserProfile />} />}
+        />
+        <Route
+          path="/booking-history"
+          element={<ProtectedRoute element={<BookHistory />} />}
+        />
+        <Route
+          path="/booking-management"
+          element={
+            <ProtectedRoute
+              element={<BookingManagement />}
+              role="66ffe8db0fffedcac8a5561f"
+            />
+          }
+        />
+        <Route
+          path="/booking-result"
+          element={<ProtectedRoute element={<BookingResult />} />}
+        />
         <Route path="/booking/:id" element={<BookingDetails />} />
         <Route path="/404" element={<NotFound />} />
         <Route path="*" element={<NotFound />} />
