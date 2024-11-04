@@ -71,16 +71,24 @@ const Item = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
   padding: 1rem;
   color: ${(props) => props.theme.body};
   position: relative;
+  z-index: 5;
   backdrop-filter: blur(4px);
   border: 2px solid ${(props) => props.theme.text};
   border-radius: 20px;
   overflow: hidden;
   text-align: center;
   height: 100%;
+  justify-content: space-between;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
 
   @media (max-width: 30em) {
     width: 70vw;
@@ -198,7 +206,8 @@ const StyledYouTube = styled(YouTube)`
 `;
 
 const extractYouTubeVideoId = (url) => {
-  const regExp = /^.*(youtu.be\/|v\/|\/u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const regExp =
+    /^.*(youtu.be\/|v\/|\/u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
   const match = url.match(regExp);
   return match && match[2].length === 11 ? match[2] : null;
 };
@@ -222,7 +231,10 @@ const Movie = ({ img, name = "", releaseDate = "", trailerUrl = "" }) => {
   return (
     <>
       <Item>
-        <MovieImage src={`http://localhost:8080/api/images/${img}`} alt={name} />
+        <MovieImage
+          src={`http://localhost:8080/api/images/${img}`}
+          alt={name}
+        />
         <Name>{name}</Name>
         <ReleaseDate>{releaseDate}</ReleaseDate>
         <Button onClick={openModal}>Watch Trailer</Button>
