@@ -36,7 +36,7 @@ exports.createBookingData = async (req, res) => {
   let bookingDetailsResponse;
   try {
     const { userId, showtimeId, seatIds, serviceIds, status } = req.body;
-
+    
     const showtime = await getShowtimeById(showtimeId);
 
     // Update seatLayout status
@@ -53,18 +53,14 @@ exports.createBookingData = async (req, res) => {
       seat.toString(),
       status
     );
-
+    
     setBookingTimeout(
       bookingResponse._id,
       async () => {
-        console.log(`Booking Timeout.`);
         const booking = await Booking.findById(bookingResponse._id);
         if (booking && booking.status === "processing") {
           await updateSeatLayoutShowtime(showtimeId, seatIds, "available");
           await deleteBooking(bookingResponse._id);
-          console.log(
-            `Booking ${bookingResponse._id} canceled due to timeout.`
-          );
         }
       },
       10 * 60 * 1000
@@ -75,12 +71,11 @@ exports.createBookingData = async (req, res) => {
       const [_id, quantity] = item.split("*"); // Split the string into id and quantity
       return { _id, quantity: Number(quantity) }; // Return an object with id and quantity as a number
     });
-
     bookingDetailsResponse = await createBookingDetails(
       bookingResponse._id,
       services
     );
-
+    
     //     const bookingDetailsUrl = `${process.env.FRONT_END_URL}/booking/${bookingResponse._id}`
 
     //     //send email booking
@@ -143,14 +138,12 @@ exports.createBookingData = async (req, res) => {
     //       user.email,
     //       "Booking Movie Success",
     //       emailTemplate
-    //     );
-
+    //     );    
     return res.json({
       booking: bookingResponse,
       bookingDetails: bookingDetailsResponse,
     });
   } catch (error) {
-    console.error("Error occurred: ", error.message);
     const { showtimeId, seatIds } = req.body;
     // Revert seatLayout status back to "available" in case of error
     await updateSeatLayoutShowtime(showtimeId, seatIds, preSaveStatus);
