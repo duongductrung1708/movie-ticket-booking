@@ -101,6 +101,14 @@ const Text = styled.div`
   }
 `;
 
+const ChatBotIframe = styled.iframe`
+  position: fixed;
+  bottom: 1rem;
+  right: 5rem;
+  border: none;
+  z-index: 100;
+`;
+
 const HomePage = () => {
   const [showButton, setShowButton] = useState(false);
   const [isBookingTabOpen, setIsBookingTabOpen] = useState(false);
@@ -114,15 +122,11 @@ const HomePage = () => {
         const scrollPosition = window.scrollY;
         const movieListPosition = top + window.scrollY;
 
-        if (
+        setShowButton(
           scrollPosition >= movieListPosition &&
-          scrollPosition <=
-            document.documentElement.scrollHeight - window.innerHeight
-        ) {
-          setShowButton(true);
-        } else {
-          setShowButton(false);
-        }
+            scrollPosition <=
+              document.documentElement.scrollHeight - window.innerHeight
+        );
       }
     };
 
@@ -147,7 +151,7 @@ const HomePage = () => {
         <Footer />
         <ScrollToTop />
         <BookTicketButton
-          show={showButton && !isBookingTabOpen ? "true" : undefined}
+          show={showButton && !isBookingTabOpen}
           onClick={() => setIsBookingTabOpen(true)}
         >
           <Text className="text">Book Here</Text>
@@ -159,6 +163,14 @@ const HomePage = () => {
           isOpen={isBookingTabOpen}
           onClose={() => setIsBookingTabOpen(false)}
         />
+        <ChatBotIframe
+          className="chat-bot-iframe"
+          title="chatbot"
+          width="350"
+          height="430"
+          allow="microphone;"
+          src="https://console.dialogflow.com/api-client/demo/embedded/6271bc8f-8a5c-4b54-924a-b87deb806d41"
+        ></ChatBotIframe>
       </ThemeProvider>
     </>
   );
