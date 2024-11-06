@@ -168,6 +168,7 @@ const UpdateTheaterDialog: React.FC<UpdateTheaterDialogProps> = ({
     } catch (error) {
       toast.error(error);
       console.error("Error updating theater:", error);
+      toast.error("Fail to update theater");
     }
   };
 

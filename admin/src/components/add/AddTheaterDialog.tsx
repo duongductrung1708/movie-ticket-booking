@@ -109,6 +109,7 @@ const AddTheaterDialog: React.FC<AddTheaterDialogProps> = ({
       setOpen(false); // Close the dialog on success
     } catch (error) {
       console.error("Error saving theater:", error);
+      toast.error("Failed to add theater")
     }
   };
 
