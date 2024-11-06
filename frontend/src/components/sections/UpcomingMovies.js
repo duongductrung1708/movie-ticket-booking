@@ -247,6 +247,7 @@ const Movie = ({ img, name = "", releaseDate = "", trailerUrl = "" }) => {
         style={{
           overlay: {
             backgroundColor: "rgba(0, 0, 0, 0.75)",
+            zIndex: "999",
           },
           content: {
             maxWidth: "650px",
