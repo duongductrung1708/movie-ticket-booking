@@ -42,6 +42,9 @@ connectDB().then(() => {
   createDefaultRoles();
 });
 
+app.get("/", async (req, res) => {
+  res.send("Server is running")
+})
 //Get image route
 app.use("/api/images", express.static(path.join(__dirname, "assets")));
 
