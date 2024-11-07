@@ -197,6 +197,10 @@ const Navigation = () => {
     navigate("/signin");
   };
 
+  const handleContact = () => {
+    navigate("/contact");
+  };
+
   const handleLogout = async () => {
     try {
       await logoutUser();
@@ -234,6 +238,9 @@ const Navigation = () => {
               </MenuItemStyled>
               <MenuItemStyled onClick={() => scrollTo("faq")}>
                 Faq
+              </MenuItemStyled>
+              <MenuItemStyled onClick={handleContact}>
+                Contact
               </MenuItemStyled>
             </Menu>
           </>

@@ -71,6 +71,18 @@ export const menu = [
       },
     ],
   },
+  {
+    id: 4,
+    title: "Maintain",
+    listItems: [
+      {
+        id: 1,
+        title: "Contacts",
+        url: "/contacts",
+        icon: "element.svg",
+      },
+    ],
+  },
 ];
 
 export const topDealUsers = [

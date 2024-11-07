@@ -317,3 +317,25 @@ export const loginWithGoogle = async (token) => {
     throw error.response ? error.response.data : error.message;
   }
 };
+
+// Function to create a new contact
+export const createContact = async (contactData) => {
+  try {
+    const response = await api.post("/contact", contactData);
+    return response.data;
+  } catch (error) {
+    console.error("Create contact error:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+// Function to get all contacts
+export const getContacts = async () => {
+  try {
+    const response = await api.get("/contact");
+    return response.data;
+  } catch (error) {
+    console.error("Get contacts error:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};

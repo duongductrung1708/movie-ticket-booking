@@ -19,6 +19,7 @@ import PaymentPage from "./pages/PaymentPage";
 import BookingResult from "./pages/PaymentResult";
 import BookingDetails from "./pages/BookingDetails";
 import BookingManagement from "./pages/BookingManagement";
+import ContactPage from "./pages/ContactPage";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
         />
         <Route path="/forgot-password" element={<ForgetPassword />} />
         <Route path="/home" element={<HomePage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/movie/:id" element={<MovieDetail />} />
         <Route
           path="/seat-reservation"

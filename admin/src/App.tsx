@@ -18,6 +18,7 @@ import Showtimes from "./pages/Showtimes/Showtimes";
 import Genres from "./pages/genres/Genres";
 import ProtectedRoute from "./routers/ProtectedRouter"; // Adjust the import path
 import UpcomingMovies from "./pages/upcomingMovies/UpcomingMovies";
+import Contacts from "./pages/contacts/Contacts";
 
 const queryClient = new QueryClient();
 
@@ -134,6 +135,14 @@ function App() {
           element: (
             <ProtectedRoute>
               <UpcomingMovies />
+            </ProtectedRoute>
+          ),
+        },
+        {
+          path: "/contacts",
+          element: (
+            <ProtectedRoute>
+              <Contacts />
             </ProtectedRoute>
           ),
         },
