@@ -19,6 +19,7 @@ const upcomingMovieRoutes = require("./routes/upcomingMovieRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const path = require("path");
 const momoPaymentRouter = require("./routes/momoPaymentRoutes");
+const contactRoutes = require("./routes/contactRoutes");
 const cors = require("cors");
 
 const app = express();
@@ -54,6 +55,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/booking-details", bookingDetailRoutes);
 app.use("/api/upcoming-movie", upcomingMovieRoutes);
 app.use("/api/momo", momoPaymentRouter);
+app.use("/api/contact", contactRoutes);
 
 // Export the app instance for testing
 module.exports = app;

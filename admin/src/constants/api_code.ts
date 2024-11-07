@@ -9,6 +9,7 @@ const API_CODE = {
     API_DASHBOARD_002: '/dashboard/total-values',
     API_DASHBOARD_003: '/dashboard/revenue',
     API_BOOKING_001: '/bookings',
+    API_CONTACT_001: '/contact',
 }
 
 export default API_CODE;
