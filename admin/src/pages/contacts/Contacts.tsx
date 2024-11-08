@@ -12,13 +12,14 @@ import constants from "../../constants/constants";
 type Field = SimpleField | SelectField;
 
 const columns: GridColDef<Contact>[] = [
-  { field: "fullName", headerName: "Full Name", width: 200 },
-  { field: "phoneNumber", headerName: "Phone Number", width: 150 },
+  { field: "fullName", headerName: "Full Name", width: 150 },
+  { field: "phoneNumber", headerName: "Phone Number", width: 120 },
   { field: "email", headerName: "Email", width: 200 },
-  { field: "service", headerName: "Service", width: 150 },
-  { field: "area", headerName: "Area", width: 150 },
-  { field: "theater", headerName: "Theater", width: 150 },
-  { field: "details", headerName: "Details", width: 300 },
+  { field: "service", headerName: "Service", width: 200 },
+  { field: "area", headerName: "Area", width: 100 },
+  { field: "theater", headerName: "Theater", width: 200 },
+  { field: "details", headerName: "Details", width: 200 },
+  { field: "time", headerName: "Time", width: 150 },
 ];
 
 const Contacts = () => {
@@ -38,7 +39,31 @@ const Contacts = () => {
           isPaginate: true,
         });
         setTotalContacts(response.data.total);
-        setContacts(response.data.contacts);
+
+        const formatDateTime = (date: Date) => {
+          const d = new Date(date);
+          return d.toLocaleString();
+        };
+
+        const fetchedContacts = response.data.contacts.map((contact: any) => ({
+          _id: contact._id || "",
+          fullName: contact.fullName || "",
+          phoneNumber: contact.phoneNumber || "",
+          email: contact.email || "",
+          service: contact.service || "",
+          area: contact.area || "",
+          theater: contact.theater?.name || "",
+          details: contact.details || "",
+          time: formatDateTime(contact.timestamp || new Date()),
+        }));
+
+        const uniqueContacts = Array.from(
+          new Set(fetchedContacts.map((contact: Contact) => contact._id))
+        ).map((id) =>
+          fetchedContacts.find((contact: Contact) => contact._id === id)
+        );
+
+        setContacts(uniqueContacts);
       } catch (error) {
         console.error("Failed to fetch contacts:", error);
       }
@@ -92,6 +117,7 @@ const Contacts = () => {
     { label: "Area", name: "area", type: "text" },
     { label: "Theater", name: "theater", type: "text" },
     { label: "Details", name: "details", type: "text" },
+    { label: "Time", name: "time", type: "text"},
   ];
 
   return (
@@ -101,6 +127,7 @@ const Contacts = () => {
         justifyContent="space-between"
         alignItems="center"
         mb={2}
+        maxWidth="800px" // Set max width for smaller table
       >
         <Typography variant="h4">Contacts</Typography>
       </Box>
@@ -109,7 +136,7 @@ const Contacts = () => {
         columns={columns}
         rows={contacts}
         rowCount={totalContacts}
-        pageSize={constants.PAGE_SIZE}
+        pageSize={5} // Reduce page size for a smaller table
         onPageChange={(page) => setCurrentPage(page)}
         currentPage={currentPage}
         onAction={handleTableAction}

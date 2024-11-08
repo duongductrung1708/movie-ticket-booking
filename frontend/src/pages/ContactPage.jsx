@@ -18,6 +18,7 @@ import Navigation from "../components/Navigation";
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
 import { createContact, getAllTheater } from "../services/api";
+import { toast, ToastContainer } from "react-toastify";
 
 const Section = styled.section`
   min-height: ${(props) => `calc(100vh - ${props.theme.navHeight})`};
@@ -202,11 +203,11 @@ const ContactPage = () => {
 
     try {
       const response = await createContact(contactData);
-      alert("Your message has been sent successfully!");
+      toast.success("Your message has been sent successfully!");
       console.log(response);
     } catch (error) {
       console.error("Error submitting the form:", error);
-      alert("There was an error sending your message. Please try again later.");
+      toast.error("There was an error sending your message. Please try again later.");
     }
   };
 
@@ -340,6 +341,7 @@ const ContactPage = () => {
         </ContactForm>
       </Container>
       <Footer />
+      <ToastContainer />
     </Section>
   );
 };
