@@ -10,7 +10,7 @@ import {
   Divider,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { loginUser, loginWithGoogle } from "../../../services/api";
 import { useAuth } from "../../../hooks/AuthProvider";
@@ -81,6 +81,7 @@ const SignInPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const location = useLocation();
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -103,7 +104,18 @@ const SignInPage = () => {
 
       toast.success("Login successful!");
       login(userData);
-      navigate("/home");
+
+
+      // Check if location.state and location.state.showtime exist
+      if (location.state?.from?.state?.showtime) {
+        // Navigate to /seat-reservation if showtime exists
+        navigate(location.state?.from?.pathname, { state: location.state?.from?.state });
+        return null; // Stop further rendering
+      } else {
+        // Navigate to /home if showtime does not exist
+        navigate("/home", { replace: true });
+        return null; // Stop further rendering
+      }
     } catch (error) {
       console.error("Login error:", error.msg);
       toast.error(
@@ -133,7 +145,17 @@ const SignInPage = () => {
 
       toast.success("Google Login successful!");
       login(userData);
-      navigate("/home");
+
+      // Check if location.state and location.state.showtime exist
+      if (location.state?.from?.state?.showtime) {
+        // Navigate to /seat-reservation if showtime exists
+        navigate(location.state?.from?.pathname, { state: location.state?.from?.state});
+        return null; // Stop further rendering
+      } else {
+        // Navigate to /home if showtime does not exist
+        navigate("/home", { replace: true });
+        return null; // Stop further rendering
+      }
     } catch (error) {
       console.error("Google Login error:", error);
       toast.error("Google login failed. Please try again.");
