@@ -212,8 +212,8 @@ const ShowtimeButton = styled.button`
 
 const ShowtimeContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  margin-top: 20px;
+  flex-wrap: wrap;
+  gap: 1rem;
 `;
 
 const ShowtimeCard = styled.div`
@@ -243,6 +243,20 @@ const ModalOverlay = styled.div`
   z-index: 999;
   display: ${(props) => (props.isOpen ? "block" : "none")};
 `;
+
+const ShowtimeColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  max-width: 120px;
+  margin-top: 10px;
+`;
+
+function chunkArray(arr, size) {
+  return arr.reduce(
+    (acc, _, i) => (i % size ? acc : [...acc, arr.slice(i, i + size)]),
+    []
+  );
+}
 
 const MovieListItem = React.forwardRef(({ movie, onShowtimeClick }, ref) => {
   const navigate = useNavigate();
@@ -328,7 +342,32 @@ const MovieList = () => {
   };
 
   const handleShowtimeClick = async (movie) => {
-    setShowtimes(movie.validShowtimes);
+    const groupedShowtimes = {};
+
+    for (const showtime of movie.validShowtimes) {
+      const showtimeDate = dayjs(showtime.date).format("MM/DD/YYYY");
+      const theaterResponse = await getTheaterByRoomId(showtime.room_id);
+      const theaterName = theaterResponse.name;
+      const theaterAddress = theaterResponse.address;
+
+      if (!groupedShowtimes[showtimeDate]) {
+        groupedShowtimes[showtimeDate] = {};
+      }
+
+      if (!groupedShowtimes[showtimeDate][theaterName]) {
+        groupedShowtimes[showtimeDate][theaterName] = {};
+      }
+
+      if (!groupedShowtimes[showtimeDate][theaterName][theaterAddress]) {
+        groupedShowtimes[showtimeDate][theaterName][theaterAddress] = [];
+      }
+
+      groupedShowtimes[showtimeDate][theaterName][theaterAddress].push(
+        showtime
+      );
+    }
+
+    setShowtimes(groupedShowtimes);
     setSelectedMovie(movie);
     setModalOpen(true);
   };
@@ -397,19 +436,41 @@ const MovieList = () => {
       </ButtonWrapper>
       <ModalOverlay isOpen={modalOpen} onClick={() => setModalOpen(false)} />
       <Modal isOpen={modalOpen}>
-        <h2>{selectedMovie?.title} Showtimes</h2>
+        <Title>{selectedMovie?.title} Showtimes</Title>
         <ShowtimeContainer>
-          {showtimes.map((showtime, index) => (
-            <ShowtimeCard key={index}>
-              {dayjs(showtime.date).format("MM/DD/YYYY")} at{" "}
-              <ShowtimeButton
-                onClick={() => {
-                  handlSelectShowtime(showtime);
-                }}
-              >
-                {showtime.start_time}
-              </ShowtimeButton>
-            </ShowtimeCard>
+          {Object.keys(showtimes).map((date) => (
+            <div key={date}>
+              <h3>{date}</h3>
+              {Object.keys(showtimes[date]).map((theater) => {
+                return Object.keys(showtimes[date][theater]).map((address) => {
+                  const showtimeChunks = chunkArray(
+                    showtimes[date][theater][address],
+                    5
+                  );
+                  return (
+                    <div key={`${theater}-${address}`}>
+                      <h4>{theater}</h4>
+                      <p>{address}</p>
+                      <div style={{ display: "flex", gap: "1rem" }}>
+                        {showtimeChunks.map((chunk, chunkIndex) => (
+                          <ShowtimeColumn key={chunkIndex}>
+                            {chunk.map((showtime, index) => (
+                              <ShowtimeCard key={index}>
+                                <ShowtimeButton
+                                  onClick={() => handlSelectShowtime(showtime)}
+                                >
+                                  {showtime.start_time}
+                                </ShowtimeButton>
+                              </ShowtimeCard>
+                            ))}
+                          </ShowtimeColumn>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                });
+              })}
+            </div>
           ))}
         </ShowtimeContainer>
         <Button onClick={() => setModalOpen(false)}>Close</Button>
