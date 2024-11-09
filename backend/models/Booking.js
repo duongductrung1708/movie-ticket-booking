@@ -22,8 +22,12 @@ const bookingSchema = new mongoose.Schema({
   },
   timestamp: { type: Date, default: Date.now },
   status: {
-    type: String, required: true,
-    enum: ["processing", "cancle", "done"],
+    type: String,
+    required: true,
+    enum: ["processing", "canceled", "done"],
+  },
+  customer_info: {
+    type: Object,
   },
 });
 

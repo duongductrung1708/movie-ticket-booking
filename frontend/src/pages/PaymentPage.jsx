@@ -21,7 +21,12 @@ import styled from "styled-components";
 import { toast, ToastContainer } from "react-toastify";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
-import { deleteBooking, getMomoPaymentLink } from "../services/api";
+import {
+  deleteBooking,
+  getMomoPaymentLink,
+  updateSeatLayout,
+  payAtCounter,
+} from "../services/api";
 
 const Container = styled.div`
   width: 75%;
@@ -175,14 +180,12 @@ const PaymentPage = () => {
     selectedRoom,
     showtime,
     booking,
-    bookingDetails,
   } = location.state || {};
-  console.log(booking, bookingDetails);
 
   const navigate = useNavigate();
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
-  const [showQRCode, setShowQRCode] = useState(false);
+  const [showQRCode] = useState(false);
   const paymentSectionRef = useRef(null);
   const completeSectionRef = useRef(null);
   const [activeStep, setActiveStep] = useState(0);
@@ -190,19 +193,20 @@ const PaymentPage = () => {
   const [total, setTotal] = useState(0);
   const [openModal, setOpenModal] = useState(false);
 
+  const ws = useRef(null);
+
+  const userRole = JSON.parse(localStorage.getItem("user"))?.role;
+
   const handleConfirmMomoPayment = async () => {
-    const userId = JSON.parse(localStorage.getItem("user"))?._id;
-    // const seatIds = selectedSeats.map(seat => seatLayout[seat.row][seat.col]._id);
-    // const serviceIds = selectedServices.map(service => service._id + "x" + service.number)
-    const seatData =
-      selectedSeats.length > 0
-        ? selectedSeats
-            .map((seat) => {
-              const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
-              return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
-            })
-            .join(", ")
-        : "";
+    // const seatData =
+    //   selectedSeats.length > 0
+    //     ? selectedSeats
+    //       .map((seat) => {
+    //         const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
+    //         return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
+    //       })
+    //       .join(", ")
+    //     : "";
     const orderInfo = booking._id;
 
     try {
@@ -222,9 +226,46 @@ const PaymentPage = () => {
     }
   };
 
+  useEffect(() => {
+    ws.current = new WebSocket("ws://localhost:5000");
+
+    ws.current.onmessage = (event) => {
+      const {
+        rowIndex,
+        colIndex,
+        status,
+        showtime: messageShowtime,
+      } = JSON.parse(event.data);
+      console.log(JSON.parse(event.data));
+
+      if (messageShowtime === showtime) {
+        const updatedSeats = [...seats];
+        updatedSeats[rowIndex][colIndex].status = status;
+      }
+    };
+
+    return () => {
+      ws.current.close();
+    };
+  }, [showtime, seats]);
+
   const handleBackToSeatReservation = async () => {
     try {
+      const seatIds = selectedSeats.map(
+        (seat) => seatLayout[seat.row][seat.col]._id
+      );
+      await updateSeatLayout(showtime, seatIds, "available");
       await deleteBooking(booking._id);
+      selectedSeats.forEach(({ row, col }) => {
+        ws.current.send(
+          JSON.stringify({
+            rowIndex: row,
+            colIndex: col,
+            status: "available",
+            showtime,
+          })
+        );
+      });
       navigate("/seat-reservation", {
         state: {
           movieTitle,
@@ -253,8 +294,26 @@ const PaymentPage = () => {
       toast.warning("Please agree to the terms and select a payment method.");
       return;
     }
-
+    if (selectedPaymentMethod === "counter") {
+      handleCounterPayment();
+    }
     setActiveStep(1);
+  };
+
+  const handleCounterPayment = async () => {
+    try {
+      const response = await payAtCounter(booking._id, total * 1000);
+      console.log(response);
+      if (response.message === "Counter payment created successfully.") {
+        toast.success("Your booking is confirmed. Please pay at the counter.");
+        setActiveStep(1);
+      } else {
+        toast.error("There was an issue processing your counter payment.");
+      }
+    } catch (error) {
+      console.error("Error with Pay at Counter:", error);
+      toast.error("There was an issue processing your counter payment.");
+    }
   };
 
   const handleBack = () => {
@@ -289,7 +348,7 @@ const PaymentPage = () => {
       0
     );
     setTotal((prev) => prev + totalService + totalSeat);
-  }, []);
+  }, [seats, selectedSeats, selectedServices]);
 
   return (
     <Section>
@@ -352,7 +411,7 @@ const PaymentPage = () => {
                   <Grid container spacing={4}>
                     <Grid item xs={2}>
                       <img
-                        src={movieImage}
+                        src={`http://localhost:8080/api/images/${movieImage}`}
                         alt={movieTitle}
                         style={{
                           width: "100%",
@@ -424,15 +483,18 @@ const PaymentPage = () => {
 
               {activeStep === 0 && (
                 <PaymentMethod>
-                  <PayCounterBtn
-                    variant={
-                      selectedPaymentMethod === "counter"
-                        ? "contained"
-                        : "outlined"
-                    }
-                  >
-                    Pay at Counter
-                  </PayCounterBtn>
+                  {userRole === "66ffe8db0fffedcac8a5561f" && (
+                    <PayCounterBtn
+                      variant={
+                        selectedPaymentMethod === "counter"
+                          ? "contained"
+                          : "outlined"
+                      }
+                      onClick={() => setSelectedPaymentMethod("counter")}
+                    >
+                      Pay at Counter
+                    </PayCounterBtn>
+                  )}
                   <PayBankBtn
                     variant={
                       selectedPaymentMethod === "bank"
@@ -485,7 +547,9 @@ const PaymentPage = () => {
                 <Btn onClick={handleConfirmPayment}>Confirm Payment</Btn>
               )}
 
-              <Btn onClick={handleBackToSeatReservation}>Back to Booking</Btn>
+              {activeStep === 0 && (
+                <Btn onClick={handleBackToSeatReservation}>Back to Booking</Btn>
+              )}
 
               {activeStep === 1 && (
                 <Complete ref={completeSectionRef}>

@@ -1,4 +1,6 @@
 interface RevenueModel {
-    name: string,
-    revenue: string | number,
-}
+    name: string;
+    revenue: number; // Original number value
+    formattedRevenue: string; // Formatted string value
+  }
+  

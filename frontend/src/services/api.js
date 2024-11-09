@@ -8,25 +8,55 @@ const api = axios.create({
   baseURL: API_URL,
 });
 
-export const createBooking = async (userId, showtimeId, seatIds, serviceIds, status) => {
+export const getShowtimeById = async (id) => {
   try {
-    const response = await api.post('/bookings/create', { userId, showtimeId, seatIds, serviceIds, status });
+    const response = await api.get(`/showtimes/${id}`);
     return response.data;
   } catch (error) {
     console.error(error);
   }
 
 }
+
+export const createBooking = async (
+  userId,
+  showtimeId,
+  seatIds,
+  serviceIds,
+  status
+) => {
+  try {
+    const response = await api.post("/bookings/create", {
+      userId,
+      showtimeId,
+      seatIds,
+      serviceIds,
+      status,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 export const deleteBooking = async (id) => {
   try {
-    const response = await api.delete('/bookings/' + id);
+    const response = await api.delete("/bookings/" + id);
     return response.data;
   } catch (error) {
     console.error(error);
   }
+};
 
-}
+export const updateSeatLayout = async (showtimeId, seatIds, status) => {
+  try {
+    const response = await api.put(
+      "/showtimes/" + showtimeId + "/seat-layout",
+      { seatIds, status }
+    );
+    return response.data;
+  } catch (error) { }
+};
 
 export const getMomoPaymentLink = async (orderInfo, amount, bookingId) => {
   try {
@@ -35,7 +65,17 @@ export const getMomoPaymentLink = async (orderInfo, amount, bookingId) => {
   } catch (error) {
     throw error.response ? error.response.data : error.message;
   }
-}
+};
+
+export const payAtCounter = async (bookingId, amount, paymentId) => {
+  try {
+    const response = await api.post("/momo/pay-at-counter", { bookingId, amount, paymentId });
+    return response.data;
+  } catch (error) {
+    console.error("Error in Pay at Counter:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};
 
 export const getTheaterByRoomId = async (id) => {
   try {
@@ -44,7 +84,7 @@ export const getTheaterByRoomId = async (id) => {
   } catch (error) {
     throw error.response ? error.response.data : error.message;
   }
-}
+};
 
 // Function to register a user
 export const registerUser = async (userData) => {
@@ -60,7 +100,7 @@ export const registerUser = async (userData) => {
 export const loginUser = async (credentials) => {
   try {
     const response = await api.post("/auth/login", credentials);
-    localStorage.setItem('user', JSON.stringify(response.data));
+    localStorage.setItem("user", JSON.stringify(response.data));
     return response.data;
   } catch (error) {
     throw error.response ? error.response.data : error.message;
@@ -81,7 +121,7 @@ export const verifyEmail = async (token) => {
 export const logoutUser = async () => {
   try {
     await api.post("/auth/logout");
-    localStorage.removeItem('user');
+    localStorage.removeItem("user");
   } catch (error) {
     throw error.response ? error.response.data : error.message;
   }
@@ -90,16 +130,16 @@ export const logoutUser = async () => {
 // Function to update user information
 export const updateUser = async (updatedData) => {
   try {
-    const userData = JSON.parse(localStorage.getItem('user'));
-    const userId = userData?._id;
+    const userData = JSON.parse(localStorage.getItem("user"));
+    const userId = userData?._id || userData?._doc?._id;
     const token = userData?.accessToken;
     if (!userId || !token) {
       throw new Error("UserId or Token not found in localStorage");
     }
 
-    const response = await api.put(`/users/${userId}`, updatedData, {
+    const response = await api.put(`/users/fe/${userId}`, updatedData, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
@@ -112,8 +152,8 @@ export const updateUser = async (updatedData) => {
 // Function to get user details by user ID
 export const getUser = async () => {
   try {
-    const userData = JSON.parse(localStorage.getItem('user'));
-    const userId = userData?._id;
+    const userData = JSON.parse(localStorage.getItem("user"));
+    const userId = userData?._id || userData?._doc?._id;
     const token = userData?.accessToken;
     if (!userId || !token) {
       throw new Error("UserId or Token not found in localStorage");
@@ -121,7 +161,7 @@ export const getUser = async () => {
 
     const response = await api.get(`/users/${userId}`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -135,7 +175,7 @@ export const getUser = async () => {
 // Function to change the user's password
 export const changePassword = async (oldPassword, newPassword) => {
   try {
-    const userData = JSON.parse(localStorage.getItem('user'));
+    const userData = JSON.parse(localStorage.getItem("user"));
     const userId = userData?._id;
     const token = userData?.accessToken;
 
@@ -143,14 +183,18 @@ export const changePassword = async (oldPassword, newPassword) => {
       throw new Error("UserId or Token not found in localStorage");
     }
 
-    const response = await api.post(`/users/change-password/${userId}`, {
-      oldPassword,
-      newPassword,
-    }, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
+    const response = await api.post(
+      `/users/change-password/${userId}`,
+      {
+        oldPassword,
+        newPassword,
       },
-    });
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     return response.data;
   } catch (error) {
@@ -173,7 +217,11 @@ export const sendForgotPasswordOTP = async (email) => {
 // Function to reset password with OTP
 export const resetPasswordWithOTP = async (email, otp, newPassword) => {
   try {
-    const response = await api.post("/auth/reset-password", { email, otp, newPassword });
+    const response = await api.post("/auth/reset-password", {
+      email,
+      otp,
+      newPassword,
+    });
     return response.data;
   } catch (error) {
     console.error("Reset password error:", error);
@@ -239,7 +287,7 @@ export const getAllServices = async () => {
 // Function to get all upcoming movies
 export const getUpcomingMovies = async () => {
   try {
-    const response = await api.get("/upcoming-movie");
+    const response = await api.get("/movies/without-showtime");
     return response.data;
   } catch (error) {
     console.error("Get upcoming movies error:", error);
@@ -254,6 +302,40 @@ export const getShowtimesByMovieId = async (movieId) => {
     return response.data;
   } catch (error) {
     console.error("Error fetching showtimes:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+// Function to login with google
+export const loginWithGoogle = async (token) => {
+  try {
+    const response = await api.post("/auth/google-login", { token });
+    localStorage.setItem("user", JSON.stringify(response.data));
+    return response.data;
+  } catch (error) {
+    console.error("Error in Google login:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+// Function to create a new contact
+export const createContact = async (contactData) => {
+  try {
+    const response = await api.post("/contact", contactData);
+    return response.data;
+  } catch (error) {
+    console.error("Create contact error:", error);
+    throw error.response ? error.response.data : error.message;
+  }
+};
+
+// Function to get all contacts
+export const getContacts = async () => {
+  try {
+    const response = await api.get("/contact");
+    return response.data;
+  } catch (error) {
+    console.error("Get contacts error:", error);
     throw error.response ? error.response.data : error.message;
   }
 };

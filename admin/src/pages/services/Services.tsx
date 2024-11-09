@@ -190,6 +190,7 @@ export default function Services() {
           <Typography variant="h4">Services</Typography>
           <Button
             variant="contained"
+            style={{ fontWeight: "bold" }}
             color="primary"
             onClick={() => setOpen(true)}
             className="add-service"
@@ -198,7 +199,10 @@ export default function Services() {
           </Button>
         </Box>
       </div>
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        style={{ maxHeight: "800px", overflowY: "auto" }}
+      >
         <Table aria-label="collapsible table">
           <TableHead>
             <TableRow>

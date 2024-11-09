@@ -20,6 +20,7 @@ import styled from "styled-components";
 import Navigation from "../components/Navigation";
 import { Link } from "react-router-dom";
 import Footer from "../components/Footer";
+import { getBookingHistory } from "../services/bookingService";
 
 const Section = styled.section`
   min-height: ${(props) => `calc(100vh - ${props.theme.navHeight})`};
@@ -84,34 +85,43 @@ const BreadcrumbLink = styled(MuiLink)`
   }
 `;
 
+const dateFormat = (dateString) => {
+  const date = new Date(dateString);
+
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+const timestampFormat = (dateString) => {
+  const date = new Date(dateString);
+
+  const formattedDate = date.toLocaleDateString("vi-VN");
+
+  const formattedTime = date.toLocaleTimeString("vi-VN");
+
+  return `${formattedDate} ${formattedTime}`;
+};
+
 const BookHistory = () => {
-  const [bookings, setBookings] = useState([
-    {
-      serialNumber: 1,
-      ticketCode: "ABC1234567",
-      movieName: "The Matrix",
-      showtime: "2024-09-30T19:00:00",
-      theater: "Theater 1",
-      price: 100,
-      paymentStatus: "Paid",
-    },
-    {
-      serialNumber: 2,
-      ticketCode: "XYZ9876543",
-      movieName: "Inception",
-      showtime: "2024-10-01T20:00:00",
-      theater: "Theater 2",
-      price: 200,
-      paymentStatus: "Counter",
-    },
-  ]);
+  const [bookings, setBookings] = useState([]);
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [searchQuery, setSearchQuery] = useState("");
+  const [bookingHistory, setBookingHistory] = useState([]);
+  const [filteredBookings, setFilteredBookings] = useState([]);
 
   const handleSearch = (event) => {
     setSearchQuery(event.target.value);
+    setFilteredBookings(
+      bookingHistory.filter((booking) =>
+        booking.movie.title
+          .toLowerCase()
+          .includes(event.target.value.toLowerCase())
+      )
+    );
   };
 
   const handleRefresh = () => {
@@ -138,13 +148,21 @@ const BookHistory = () => {
     setPage(0);
   };
 
-  const filteredBookings = bookings.filter((booking) =>
-    booking.movieName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+    const userId = JSON.parse(localStorage.getItem("user"))?._id;
+    const fetchBookingHistory = async (userId) => {
+      const bookingResponse = await getBookingHistory(userId);
+      setBookingHistory(bookingResponse);
+      setFilteredBookings(
+        bookingResponse.filter((booking) =>
+          booking.movie.title.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
+      return bookingResponse;
+    };
+    fetchBookingHistory(userId);
+  }, [searchQuery]);
 
   return (
     <Section>
@@ -162,7 +180,6 @@ const BookHistory = () => {
           Booking History
         </Typography>
 
-        {/* Search Field */}
         <TextField
           label="Search by Movie Name"
           variant="outlined"
@@ -176,36 +193,47 @@ const BookHistory = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Serial Number</TableCell>
-                <TableCell>Ticket Code</TableCell>
-                <TableCell>Movie Name</TableCell>
-                <TableCell>Showtime</TableCell>
+                <TableCell>BookingId</TableCell>
+                <TableCell>Movie</TableCell>
                 <TableCell>Theater</TableCell>
-                <TableCell>Price</TableCell>
-                <TableCell>Payment Status</TableCell>
+                <TableCell>Room</TableCell>
+                <TableCell>Showtime</TableCell>
+                <TableCell>Seats</TableCell>
+                <TableCell>Services</TableCell>
+                <TableCell>Payment Method</TableCell>
+                <TableCell>TimeStamp</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {filteredBookings
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((booking) => (
-                  <TableRow key={booking.serialNumber}>
-                    <TableCell>{booking.serialNumber}</TableCell>
-                    <TableCell>{booking.ticketCode}</TableCell>
-                    <TableCell>{booking.movieName}</TableCell>
-                    <TableCell>
-                      {new Date(booking.showtime).toLocaleString()}
-                    </TableCell>
+                  <TableRow key={booking._id}>
+                    <TableCell>{booking._id}</TableCell>
+                    <TableCell>{booking.movie.title}</TableCell>
                     <TableCell>{booking.theater}</TableCell>
-                    <TableCell>{booking.price.toFixed(3)}đ</TableCell>
-                    <TableCell>{booking.paymentStatus}</TableCell>
+                    <TableCell>{booking.room}</TableCell>
+                    <TableCell>
+                      {`${booking.showtime.start_time} - ${
+                        booking.showtime.end_time
+                      } at ${dateFormat(booking.showtime.date)}`}
+                    </TableCell>
+                    <TableCell>{booking.seats}</TableCell>
+                    <TableCell>
+                      {booking.services
+                        .map(
+                          (service) => `${service.name} x ${service.quantity}`
+                        )
+                        .join(", ")}
+                    </TableCell>
+                    <TableCell>{booking.paymentMethod}</TableCell>
+                    <TableCell>{timestampFormat(booking.timestamp)}</TableCell>
                   </TableRow>
                 ))}
             </TableBody>
           </Table>
         </TableContainer>
 
-        {/* Pagination */}
         <TablePagination
           component="div"
           count={filteredBookings.length}

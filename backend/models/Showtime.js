@@ -3,12 +3,12 @@ const mongoose = require("mongoose");
 const seatSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ['standard', 'vip'],
+    enum: ["standard", "vip"],
     required: true,
   },
   status: {
     type: String,
-    enum: ['available', 'reserved', 'occupied','blocked'],
+    enum: ["available", "reserved", "occupied", "blocked"],
     required: true,
   },
   price: {

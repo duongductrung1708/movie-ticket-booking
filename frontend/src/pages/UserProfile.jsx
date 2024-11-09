@@ -166,7 +166,7 @@ const UserProfile = () => {
         const formattedDOB = new Date(userData.dob).toISOString().split('T')[0];
         setFormData({ ...userData, dob: formattedDOB });
       } catch (error) {
-        toast.error("Failed to fetch user data: " + error);
+        toast.error("Failed to fetch user data: " + error.msg);
       }
     };
   
@@ -206,7 +206,7 @@ const UserProfile = () => {
       await updateUser({ ...formData });
       toast.success("Profile updated successfully!");
     } catch (error) {
-      toast.error(error);
+      toast.error(error.msg);
     }
   
     console.log("Form submitted:", formData);
@@ -260,7 +260,6 @@ const UserProfile = () => {
                   inputProps={{ maxLength: 15 }}
                   variant="outlined"
                   margin="normal"
-                  disabled
                 />
                 <TextField
                   fullWidth

@@ -42,8 +42,12 @@ const AddUpcomingMovieDialog: React.FC<AddUpcomingMovieDialogProps> = ({
     trailer_url: "",
     poster_image: "",
   });
+  interface Genre {
+    _id: string;
+    name: string;
+  }
 
-  const [genres, setGenres] = React.useState([]);
+  const [genres, setGenres] = React.useState<Genre[]>([]);
 
   React.useEffect(() => {
     axiosInstance.get("/genres").then(({ data }) => {
@@ -179,7 +183,11 @@ const AddUpcomingMovieDialog: React.FC<AddUpcomingMovieDialogProps> = ({
               value={movieData.genre}
               onChange={handleGenreChange}
               input={<OutlinedInput label="Genres" />}
-              renderValue={(selected) => selected.join(", ")}
+              renderValue={(selected) =>
+                (selected as string[])
+                  .map((id) => genres.find((genre) => genre._id === id)?.name)
+                  .join(", ")
+              }
             >
               {genres.map((genre: any) => (
                 <MenuItem key={genre._id} value={genre._id}>

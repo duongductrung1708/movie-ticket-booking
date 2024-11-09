@@ -7,7 +7,7 @@ import {
   getMovies,
   getShowtimesByMovieId,
   getTheaterByRoomId,
-} from "../../services/api"; // Import the getMovies function
+} from "../../services/api";
 import dayjs from "dayjs";
 
 const Section = styled.section`
@@ -85,6 +85,15 @@ const MovieItem = styled.div`
   border-radius: 20px;
   overflow: hidden;
   text-align: center;
+  height: 100%;
+  justify-content: space-between;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
 
   @media (max-width: 30em) {
     width: 70vw;
@@ -117,13 +126,14 @@ const MovieRating = styled.span`
 `;
 
 const Button = styled.button`
+  display: block;
+  margin-top: 0.5rem;
   padding: 0.5rem 1rem;
   background-color: ${(props) => props.theme.text};
   color: ${(props) => props.theme.body};
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  margin-top: 0.5rem;
   transition: background-color 0.3s ease;
 
   &:hover {
@@ -202,8 +212,8 @@ const ShowtimeButton = styled.button`
 
 const ShowtimeContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  margin-top: 20px;
+  flex-wrap: wrap;
+  gap: 1rem;
 `;
 
 const ShowtimeCard = styled.div`
@@ -234,6 +244,20 @@ const ModalOverlay = styled.div`
   display: ${(props) => (props.isOpen ? "block" : "none")};
 `;
 
+const ShowtimeColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  max-width: 120px;
+  margin-top: 10px;
+`;
+
+function chunkArray(arr, size) {
+  return arr.reduce(
+    (acc, _, i) => (i % size ? acc : [...acc, arr.slice(i, i + size)]),
+    []
+  );
+}
+
 const MovieListItem = React.forwardRef(({ movie, onShowtimeClick }, ref) => {
   const navigate = useNavigate();
 
@@ -243,7 +267,10 @@ const MovieListItem = React.forwardRef(({ movie, onShowtimeClick }, ref) => {
 
   return (
     <MovieItem ref={ref}>
-      <MovieImage src={movie.image} alt={movie.title} />
+      <MovieImage
+        src={`http://localhost:8080/api/images/${movie.image}`}
+        alt={movie.title}
+      />
       <MovieInfo>
         <MovieTitle>{movie.title}</MovieTitle>
         <MovieRating>Rating: {movie.rating} / 10</MovieRating>
@@ -274,16 +301,34 @@ const MovieList = () => {
   gsap.registerPlugin(ScrollTrigger);
 
   useEffect(() => {
-    const fetchMovies = async () => {
+    const fetchMoviesWithValidShowtimes = async () => {
       try {
         const movieData = await getMovies();
-        setMovies(movieData);
+        const today = dayjs();
+
+        const filteredMovies = await Promise.all(
+          movieData.map(async (movie) => {
+            const movieShowtimes = await getShowtimesByMovieId(movie._id);
+            const validShowtimes = movieShowtimes.filter(
+              (showtime) =>
+                dayjs(showtime.date).isAfter(today) ||
+                dayjs(showtime.date).isSame(today, "day")
+            );
+
+            if (validShowtimes.length > 0) {
+              return { ...movie, validShowtimes };
+            }
+            return null;
+          })
+        );
+
+        setMovies(filteredMovies.filter((movie) => movie !== null));
       } catch (error) {
         console.error("Failed to fetch movies:", error);
       }
     };
 
-    fetchMovies();
+    fetchMoviesWithValidShowtimes();
   }, []);
 
   const filteredMovies = movies.filter((movie) =>
@@ -297,33 +342,48 @@ const MovieList = () => {
   };
 
   const handleShowtimeClick = async (movie) => {
-    try {
-      const fetchedShowtimes = await getShowtimesByMovieId(movie._id);
-      console.log(fetchedShowtimes);
+    const groupedShowtimes = {};
 
-      setShowtimes(fetchedShowtimes);
-      setSelectedMovie(movie);
-      setModalOpen(true);
-    } catch (error) {
-      console.error("Failed to fetch showtimes:", error);
+    for (const showtime of movie.validShowtimes) {
+      const showtimeDate = dayjs(showtime.date).format("MM/DD/YYYY");
+      const theaterResponse = await getTheaterByRoomId(showtime.room_id);
+      const theaterName = theaterResponse.name;
+      const theaterAddress = theaterResponse.address;
+
+      if (!groupedShowtimes[showtimeDate]) {
+        groupedShowtimes[showtimeDate] = {};
+      }
+
+      if (!groupedShowtimes[showtimeDate][theaterName]) {
+        groupedShowtimes[showtimeDate][theaterName] = {};
+      }
+
+      if (!groupedShowtimes[showtimeDate][theaterName][theaterAddress]) {
+        groupedShowtimes[showtimeDate][theaterName][theaterAddress] = [];
+      }
+
+      groupedShowtimes[showtimeDate][theaterName][theaterAddress].push(
+        showtime
+      );
     }
+
+    setShowtimes(groupedShowtimes);
+    setSelectedMovie(movie);
+    setModalOpen(true);
   };
 
   const handlSelectShowtime = async (showtime) => {
     const selectedMovie = movies.find(
       (movie) => movie._id === showtime.movie_id._id
     );
-    console.log(selectedMovie);
 
     if (selectedMovie) {
       const showtimeDate = showtime.date;
-
       const movieDuration = selectedMovie.duration;
       const movieImage = selectedMovie.image;
       const seatLayout = showtime.seatLayout;
       const time = showtime.start_time;
       const theaterResponse = await getTheaterByRoomId(showtime.room_id);
-      console.log(theaterResponse);
 
       navigate("/seat-reservation", {
         state: {
@@ -342,8 +402,6 @@ const MovieList = () => {
       });
     }
   };
-
-  console.log(showtimes);
 
   return (
     <Section id="movie-list">
@@ -378,19 +436,41 @@ const MovieList = () => {
       </ButtonWrapper>
       <ModalOverlay isOpen={modalOpen} onClick={() => setModalOpen(false)} />
       <Modal isOpen={modalOpen}>
-        <h2>{selectedMovie?.title} Showtimes</h2>
+        <Title>{selectedMovie?.title} Showtimes</Title>
         <ShowtimeContainer>
-          {showtimes.map((showtime, index) => (
-            <ShowtimeCard key={index}>
-              {dayjs(showtime.date).format("MM/DD/YYYY")} at{" "}
-              <ShowtimeButton
-                onClick={() => {
-                  handlSelectShowtime(showtime);
-                }}
-              >
-                {showtime.start_time}
-              </ShowtimeButton>
-            </ShowtimeCard>
+          {Object.keys(showtimes).map((date) => (
+            <div key={date}>
+              <h3>{date}</h3>
+              {Object.keys(showtimes[date]).map((theater) => {
+                return Object.keys(showtimes[date][theater]).map((address) => {
+                  const showtimeChunks = chunkArray(
+                    showtimes[date][theater][address],
+                    5
+                  );
+                  return (
+                    <div key={`${theater}-${address}`}>
+                      <h4>{theater}</h4>
+                      <p>{address}</p>
+                      <div style={{ display: "flex", gap: "1rem" }}>
+                        {showtimeChunks.map((chunk, chunkIndex) => (
+                          <ShowtimeColumn key={chunkIndex}>
+                            {chunk.map((showtime, index) => (
+                              <ShowtimeCard key={index}>
+                                <ShowtimeButton
+                                  onClick={() => handlSelectShowtime(showtime)}
+                                >
+                                  {showtime.start_time}
+                                </ShowtimeButton>
+                              </ShowtimeCard>
+                            ))}
+                          </ShowtimeColumn>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                });
+              })}
+            </div>
           ))}
         </ShowtimeContainer>
         <Button onClick={() => setModalOpen(false)}>Close</Button>

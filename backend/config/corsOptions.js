@@ -1,8 +1,8 @@
-const cors = require('cors');
+const cors = require("cors");
 
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5173',
+  "http://localhost:3000",
+  "http://localhost:5173",
   // Thêm các origin khác vào đây
 ];
 
@@ -12,11 +12,10 @@ const corsOptions = {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true, // Cho phép gửi cookie và các thông tin chứng thực khác
 };
-
 
 module.exports = cors(corsOptions);

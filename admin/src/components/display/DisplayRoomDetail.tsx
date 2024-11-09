@@ -67,23 +67,6 @@ const DisplayRoomDetail: React.FC<DisplayRoomDetailProps> = ({
     setOpen(false);
   };
 
-  const handleSaveSetup = () => {
-    // Pass the updated layout back to the parent component
-    setOpen(false);
-  };
-
-  const onSeatClick = (rowIndex: number, colIndex: number) => {
-    const newLayout = seatLayout.map((row, rIndex) =>
-      row.map((seat, cIndex) => {
-        if (rIndex === rowIndex && cIndex === colIndex) {
-          return seat === 0 ? -1 : 0; // Toggle between available (0) and invisible (-1)
-        }
-        return seat;
-      })
-    );
-    setSeatLayout(newLayout);
-  };
-
   const renderSeats = () => {
     return seatLayout?.map((row, rowIndex) => (
       <div key={`row-${rowIndex}`} className="row">

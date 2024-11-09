@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const roomSchema = new Schema({
@@ -9,11 +9,11 @@ const roomSchema = new Schema({
   image: String,
   type: {
     type: String,
-    enum: ['2D', '3D', 'IMAX'],
+    enum: ["2D", "3D", "IMAX"],
     required: true,
   },
-  seatLayout:[[Number]],
+  seatLayout: [[Number]],
 });
 
-const Room = mongoose.model('Room', roomSchema);
+const Room = mongoose.model("Room", roomSchema);
 module.exports = Room;

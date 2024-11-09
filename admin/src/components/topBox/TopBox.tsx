@@ -18,7 +18,7 @@ const TopBox = ({ movies, month }: TopBoxProps) => {
           movies.map((data, index) => (
             <div className="listItem" key={index}>
               <div className="user">
-                <img src={data.movie.image} />
+                <img src={`http://localhost:8080/api/images/${data.movie.image}`} />
                 <div className="userTexts">
                   <h5 className="username">{data.movie.title}</h5>
                 </div>

@@ -3,19 +3,22 @@ import React, {
   useContext,
   useState,
   ReactNode,
+  useEffect,
 } from "react";
+import { jwtDecode } from 'jwt-decode';
 
-// Define a type for the context value
+interface AuthData {
+  accessToken: string;
+}
+
 interface AuthContextType {
   user: AuthData | null;
   login: (userData: AuthData) => void;
   logout: () => void;
 }
 
-// Create the AuthContext with a default value (null initially)
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Create a hook to use the AuthContext
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -24,28 +27,60 @@ export const useAuth = (): AuthContextType => {
   return context;
 };
 
-// Define the type for the children prop in the AuthProvider component
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Create the AuthProvider component
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<AuthData | null>(null);
+  const [user, setUser] = useState<AuthData | null>(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
-  // Function to log the user in and store the user data
   const login = (userData: AuthData) => {
     setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData)); // Save to localStorage
+    localStorage.setItem("user", JSON.stringify(userData));
   };
 
-  // Function to log the user out and clear the state
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("user"); // Clear localStorage
+    localStorage.removeItem("user");
+    window.location.reload();
   };
 
-  // Provide the context value (user and authentication functions)
+  useEffect(() => {
+    const checkTokenExpiration = () => {
+      const storedUser = localStorage.getItem('user');
+      
+      if (storedUser) {
+        const { accessToken } = JSON.parse(storedUser);
+  
+        if (typeof accessToken === 'string' && accessToken.trim() !== '') {
+          try {
+            const decodedToken: any = jwtDecode(accessToken);
+            const currentTime = Date.now() / 1000;
+  
+            if (decodedToken.exp < currentTime) {
+              logout();
+            }
+          } catch (error) {
+            console.error('Failed to decode token:', error);
+            logout();
+          }
+        } else {
+          console.error('Invalid token format');
+          logout();
+        }
+      }
+    };
+  
+    checkTokenExpiration();
+  
+    const interval = setInterval(checkTokenExpiration, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, [user]);
+
   const value = {
     user,
     login,

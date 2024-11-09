@@ -118,11 +118,11 @@ const NftItem = ({ img, name = "", price = 0, description = "", passRef }) => {
         <div>
           <span>{description}</span> <br />
           <h1>{name}</h1>
-        </div>
-        <div>
           <Price>
-            <img src={ETH} alt="ETH" />
-            <h1>{Number(price).toFixed(1)} đ</h1>
+            <h1>{new Intl.NumberFormat("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            }).format(price * 1000)}</h1>
           </Price>
         </div>
       </Details>

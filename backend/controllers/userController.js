@@ -220,6 +220,59 @@ const updateUser = async (req, res) => {
   }
 };
 
+// Update user information
+const updateUserFE = async (req, res) => {
+  const { id } = req.params;
+  const {
+    username,
+    email,
+    phoneNumber,
+    dob,
+    role,
+    address,
+    city,
+    district,
+    gender,
+  } = req.body;
+
+  console.log("Update User Request Body:", req.body);
+
+  if (!username || !email || !phoneNumber) {
+    return res.status(400).json({ msg: "All fields are required" });
+  }
+
+  try {
+    const existRole = await Role.findById(role);
+    
+    if (!existRole) {
+      console.log(`Role not found for ID: ${role}`);
+      return res.status(400).json({ msg: "Role not found" });
+    }
+
+    const updatedData = {
+      username,
+      email,
+      phoneNumber,
+      dob,
+      role,
+      address,
+      city,
+      district,
+      gender,
+    };
+
+    const user = await User.findByIdAndUpdate(id, updatedData, { new: true });
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    res.status(200).json({ msg: "User updated successfully", user });
+  } catch (err) {
+    console.error("Error updating user:", err.message);
+    res.status(500).json({ msg: "Error updating user", error: err.message });
+  }
+};
+
 // Delete a user
 const deleteUser = async (req, res) => {
   const { id } = req.params;
@@ -277,11 +330,46 @@ const changePassword = async (req, res) => {
   }
 };
 
+//find or create a new user from google account
+async function findOrCreateUserFromGoogle(googleUser) {
+  try {
+    let user = await User.findOne({ email: googleUser.email });
+
+    if (user) {
+      return user;
+    }
+
+    const defaultRole = await Role.findOne({ name: "customer" });
+
+    user = new User({
+      username: googleUser.name,
+      email: googleUser.email,
+      password: "google-" + generatePassword(10),
+      dob: '2024-01-01T00:00:00.000Z',
+      phoneNumber: googleUser.phoneNumber || '0000000000',
+      address: googleUser.address || '',
+      city: googleUser.city || '',
+      district: googleUser.district || '',
+      gender: googleUser.gender || 'male',
+      role: defaultRole._id,
+      isVerified: true,
+    });
+
+    await user.save();
+    return user;
+  } catch (error) {
+    console.error("Error in findOrCreateUserFromGoogle:", error);
+    throw new Error("User creation failed");
+  }
+}
+
 module.exports = {
   createUser,
   getUsers,
   getUser,
   updateUser,
+  updateUserFE,
   deleteUser,
   changePassword,
+  findOrCreateUserFromGoogle
 };

@@ -45,11 +45,14 @@ const UpdateUpcomingMovieDialog: React.FC<UpdateUpcomingMovieDialogProps> = ({
   const [open, setOpen] = React.useState(false);
   const [updatedMovieData, setUpdatedMovieData] = React.useState({
     ...movieData,
-    genre: Array.isArray(movieData.genre) ? movieData.genre : [],
+    genre: Array.isArray(movieData.genre) ? movieData.genre.map(g => g._id) : [], 
     cast: Array.isArray(movieData.cast) ? movieData.cast : [],
   });
-
-  const [genres, setGenres] = React.useState([]);
+  interface Genre {
+    _id: string;
+    name: string;
+  }
+  const [genres, setGenres] = React.useState<Genre[]>([]);
 
   React.useEffect(() => {
     axiosInstance.get("/genres").then(({ data }) => {
@@ -159,7 +162,11 @@ const UpdateUpcomingMovieDialog: React.FC<UpdateUpcomingMovieDialogProps> = ({
             label="Cast (comma-separated)"
             fullWidth
             variant="outlined"
-            value={updatedMovieData.cast.join(", ")}
+            value={
+              Array.isArray(updatedMovieData.cast)
+                ? updatedMovieData.cast.join(", ")
+                : updatedMovieData.cast || ""
+            }
             onChange={handleChange}
           />
           <TextField
@@ -201,9 +208,8 @@ const UpdateUpcomingMovieDialog: React.FC<UpdateUpcomingMovieDialogProps> = ({
               onChange={handleGenreChange}
               input={<OutlinedInput label="Genres" />}
               renderValue={(selected) =>
-                genres
-                  .filter((g: any) => selected.includes(g._id))
-                  .map((g: any) => g.name)
+                (selected as string[])
+                  .map((id) => genres.find((genre) => genre._id === id)?.name)
                   .join(", ")
               }
             >
@@ -259,7 +265,7 @@ const UpdateUpcomingMovieDialog: React.FC<UpdateUpcomingMovieDialogProps> = ({
           <Button onClick={handleUpdateMovie}>Update Movie</Button>
         </DialogActions>
       </Dialog>
-      
+
       {/* Toast container */}
       <ToastContainer />
     </>

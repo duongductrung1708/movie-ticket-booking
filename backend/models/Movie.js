@@ -20,7 +20,7 @@ const movieSchema = new Schema({
   synopsis: {
     type: String,
   },
-  language: { 
+  language: {
     type: String,
     required: true,
   },
@@ -49,10 +49,10 @@ const movieSchema = new Schema({
     type: String,
   },
   cast: [String],
-  status :{
+  status: {
     type: String,
     default: "Available",
-    enum:["Available", "Unavailable"],
+    enum: ["Available", "Unavailable"],
   },
   createdAt: {
     type: Date,

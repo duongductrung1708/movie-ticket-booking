@@ -6,6 +6,7 @@ const User = require("../models/User");
 const Role = require("../models/Role");
 const sendEmail = require("../utils/sendEmail");
 const generateToken = require("../utils/generateToken");
+const { format } = require("date-fns");
 
 // @desc     Register user
 // @access   Public
@@ -377,7 +378,7 @@ exports.loginUser = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ msg: "Invalid credentials" });
+      return res.status(400).json({ msg: "User not found" });
     }
 
     if (!user.isVerified) {
@@ -386,12 +387,17 @@ exports.loginUser = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ msg: "Invalid credentials" });
+      return res.status(400).json({ msg: "Email or password does not match" });
     }
 
     const customerRole = await Role.findOne({ name: "customer" });
     if (!customerRole) {
       return res.status(500).json({ msg: "Customer role not found" });
+    }
+
+    const userRole = await Role.findById(user.role);
+    if (!userRole) {
+      return res.status(500).json({ msg: "User role not found" });
     }
 
     if (isAdmin) {
@@ -401,6 +407,8 @@ exports.loginUser = async (req, res) => {
       }
     }
 
+    const formattedDob = new Date(user.dob).toISOString().split("T")[0];
+
     const accessToken = jwt.sign(
       {
         id: user.id,
@@ -408,11 +416,11 @@ exports.loginUser = async (req, res) => {
         email: user.email,
         isVerified: user.isVerified,
         date: user.date,
-        birthdate: user.dob,
+        birthdate: formattedDob,
         phone: user.phoneNumber,
         address: user.address,
         gender: user.gender,
-        role: customerRole._id,
+        role: userRole.name,
       },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
@@ -469,7 +477,6 @@ exports.forgotPassword = async (req, res) => {
              <p>This OTP is valid for 5 minutes.</p>`,
     };
 
-    // Send email
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Error sending OTP:", error);

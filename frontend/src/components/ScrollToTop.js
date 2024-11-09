@@ -15,7 +15,7 @@ const Up = styled.div`
   font-size: ${(props) => props.theme.fontxl};
   position: fixed;
   right: 1rem;
-  bottom: 1rem;
+  bottom: 5rem;
 
   cursor: pointer;
 

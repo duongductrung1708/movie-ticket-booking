@@ -11,7 +11,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import "../../../styles/registrationPage.css";
 import styled from "styled-components";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { registerUser } from "../../../services/api";
 
@@ -129,9 +129,9 @@ const RegistrationPage = () => {
       toast.success("Registration successful! Please verify your email.");
       navigate("/signin");
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error("Registration error:", error.msg);
       toast.error(
-        error.response?.data?.message ||
+        error.msg ||
           "Registration failed. Please try again."
       );
     }
@@ -285,6 +285,7 @@ const RegistrationPage = () => {
           </Button>
         </Box>
       </Box>
+      <ToastContainer />
     </Container>
   );
 };

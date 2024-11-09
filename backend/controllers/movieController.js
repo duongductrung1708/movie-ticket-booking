@@ -1,5 +1,6 @@
 const Movie = require("../models/Movie");
 const Genre = require("../models/Genre");
+const Showtime = require("../models/Showtime");
 const { format } = require("date-fns");
 
 // Get all movies
@@ -57,7 +58,7 @@ exports.createMovie = async (req, res) => {
     const image = req.file ? req.file.filename : null; // Lấy file ảnh nếu có
 
     // Lấy mảng các genres từ body request
-    const genres = JSON.parse(req.body.genres)
+    const genres = JSON.parse(req.body.genres);
 
     if (!genres || genres.length === 0) {
       return res.status(400).json({ error: "Genres are required" });
@@ -152,8 +153,6 @@ exports.updateMovie = async (req, res) => {
   }
 };
 
-  
-
 // Delete a movie
 exports.deleteMovie = async (req, res) => {
   try {
@@ -187,5 +186,21 @@ exports.createMovies = async (req, res) => {
     res.status(201).json(newMovies);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+// Get movies without showtime
+exports.getMoviesWithoutShowtime = async (req, res) => {
+  try {
+    const showtimes = await Showtime.find().distinct("movie_id");
+
+    const moviesWithoutShowtime = await Movie.find({
+      _id: { $nin: showtimes },
+    });
+
+    res.status(200).json(moviesWithoutShowtime);
+  } catch (error) {
+    console.error("Error fetching movies without showtime:", error);
+    res.status(500).json({ error: "Failed to fetch movies without showtime" });
   }
 };

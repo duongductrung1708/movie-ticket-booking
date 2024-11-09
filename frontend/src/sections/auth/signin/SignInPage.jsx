@@ -7,15 +7,18 @@ import {
   Box,
   IconButton,
   InputAdornment,
+  Divider,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { loginUser } from "../../../services/api";
+import { loginUser, loginWithGoogle } from "../../../services/api";
 import { useAuth } from "../../../hooks/AuthProvider";
 import "../../../styles/signInPage.css";
 import backgroundImage from "../../../assets/netflix-junio.jpg";
 import styled from "styled-components";
+import { GoogleLogin } from "@react-oauth/google";
+import GoogleIcon from "@mui/icons-material/Google";
 
 const LogoText = styled.h1`
   font-family: "Akaya Telivigala", cursive;
@@ -33,12 +36,52 @@ const LogoText = styled.h1`
   }
 `;
 
+const StyledGoogleButton = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+
+  .google-btn {
+    background-color: #4285f4;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: #357ae8;
+    }
+
+    img {
+      width: 24px;
+      height: 24px;
+    }
+  }
+`;
+
+const Linkhover = styled.div`
+  display: inline-block;
+  margin: 0.2rem;
+  &:hover {
+    border-bottom: 1px solid orange;
+  }
+`;
+
 const SignInPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const location = useLocation();
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -61,12 +104,61 @@ const SignInPage = () => {
 
       toast.success("Login successful!");
       login(userData);
-      navigate("/home");
+
+
+      // Check if location.state and location.state.showtime exist
+      if (location.state?.from?.state?.showtime) {
+        // Navigate to /seat-reservation if showtime exists
+        navigate(location.state?.from?.pathname, { state: location.state?.from?.state });
+        return null; // Stop further rendering
+      } else {
+        // Navigate to /home if showtime does not exist
+        navigate("/home", { replace: true });
+        return null; // Stop further rendering
+      }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login error:", error.msg);
       toast.error(
-        error.response?.data?.message || "Login failed. Please try again."
+        error.msg || "Email or password does not match."
       );
+    }
+  };
+
+  const handleGoogleLogin = async (credentialResponse) => {
+    try {
+      const token = credentialResponse.credential;
+      const userData = await loginWithGoogle(token);
+
+      console.log("User Data from Google:", userData);
+
+      if (!userData) {
+        throw new Error("No user data received from Google login");
+      }
+
+      const { accessToken } = userData;
+
+      if (accessToken) {
+        localStorage.setItem("user", JSON.stringify(userData));
+      } else {
+        throw new Error("Access token is missing");
+      }
+
+      toast.success("Google Login successful!");
+      login(userData);
+
+      // Check if location.state and location.state.showtime exist
+      if (location.state?.from?.state?.showtime) {
+        // Navigate to /seat-reservation if showtime exists
+        navigate(location.state?.from?.pathname, { state: location.state?.from?.state});
+        return null; // Stop further rendering
+      } else {
+        // Navigate to /home if showtime does not exist
+        navigate("/home", { replace: true });
+        return null; // Stop further rendering
+      }
+    } catch (error) {
+      console.error("Google Login error:", error);
+      toast.error("Google login failed. Please try again.");
     }
   };
 
@@ -77,7 +169,7 @@ const SignInPage = () => {
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        minHeight: "96vh",
+        minHeight: "100vh",
       }}
     >
       <Container maxWidth="lg" className="signin-container">
@@ -100,7 +192,6 @@ const SignInPage = () => {
           <Typography variant="h3" className="signin-title" gutterBottom>
             Sign in
           </Typography>
-
           <Box
             component="form"
             noValidate
@@ -178,12 +269,18 @@ const SignInPage = () => {
               }}
             />
             <Typography variant="body2" color="secondary" align="right">
-              <Link
-                to="/forgot-password"
-                style={{ textDecoration: "none", color: "orange" }}
-              >
-                Forgot Password?
-              </Link>
+              <Linkhover>
+                <Link
+                  component="button"
+                  type="button"
+                  to="/forgot-password"
+                  variant="body2"
+                  sx={{ alignSelf: "baseline" }}
+                  style={{ textDecoration: "none", color: "orange" }}
+                >
+                  Forgot your password?
+                </Link>
+              </Linkhover>
             </Typography>
             <Button
               type="submit"
@@ -195,16 +292,34 @@ const SignInPage = () => {
               Sign In
             </Button>
           </Box>
-
           <Typography variant="body1" className="signup-link">
             Don't have an account?{" "}
-            <Button
-              className="signup-btn"
-              onClick={() => navigate("/signup")}
-            >
-              Sign up
-            </Button>
+            <Linkhover>
+              <Link to="/signup" variant="body2" sx={{ alignSelf: "center" }}>
+                Sign up
+              </Link>
+            </Linkhover>
           </Typography>
+          <Divider style={{ color: "white" }}>or</Divider>
+          <Box mt={2}>
+            <StyledGoogleButton>
+              <GoogleLogin
+                onSuccess={handleGoogleLogin}
+                onError={() => console.log("Google Login Failed")}
+                render={(renderProps) => (
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    onClick={renderProps.onClick}
+                    disabled={renderProps.disabled}
+                    startIcon={<GoogleIcon />}
+                  >
+                    Sign in with Google
+                  </Button>
+                )}
+              />
+            </StyledGoogleButton>
+          </Box>
         </Box>
       </Container>
     </div>

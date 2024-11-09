@@ -25,6 +25,36 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>K. Cinema</title>
+    <style>
+      /* Chatbot Container Styling */
+      df-messenger {
+        --df-messenger-bot-message: #f44336; /* Bot message bubble background */
+        --df-messenger-button-titlebar-color: #ff0000; /* Title bar text color */
+        --df-messenger-chat-background-color: #f9f9f9; /* Chat background color */
+        --df-messenger-font-color: #ffffff; /* Font color */
+        --df-messenger-input-box-color: #ffffff; /* Input box background color */
+        --df-messenger-send-icon: #f44336; /* Send button color */
+        --df-messenger-user-message: #919191; /* User message bubble background */
+        --df-messenger-titlebar-color: #000; /* Title bar background */
+        --df-messenger-minimized-chatbot-icon: url('%PUBLIC_URL%/kcinema.png'); /* Icon for minimized chatbot */
+      }
+    
+      /* Customize Chat Bubble Text Styling */
+      df-messenger .df-messenger-bot-message, 
+      df-messenger .df-messenger-user-message {
+        font-size: 14px;
+        font-family: 'Arial', sans-serif;
+      }
+    
+      /* Adjust the Width and Position */
+      df-messenger {
+        width: 350px;
+        max-height: 500px;
+        right: 5rem !important; /* Align the chatbot to the right */
+        bottom: 2rem; /* Adjust positioning from the bottom */
+      }
+    </style>
+    
   </head>
   <body style="margin: 0;">
     <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -39,5 +69,13 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+    <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+    <df-messenger
+      intent="WELCOME"
+      chat-title="K.Cinema_Assistant"
+      agent-id="6271bc8f-8a5c-4b54-924a-b87deb806d41"
+      allow="microphone"
+      language-code="en"
+    </df-messenger>
   </body>
 </html>

@@ -22,7 +22,11 @@ import "@fontsource/sora";
 import "../styles/StepperStyles.css";
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
-import { createBooking, getAllServices } from "../services/api";
+import {
+  createBooking,
+  getAllServices,
+  getShowtimeById,
+} from "../services/api";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
@@ -239,24 +243,21 @@ const SeatReservation = () => {
     selectedTheater,
     selectedTheaterAddress,
     duration,
-    seatLayout,
+    // seatLayout,
     selectedRoom,
     showtime,
   } = location.state || {};
 
+  const [seatLayout, setSeatLayout] = useState([]);
   const steps = ["Select Seats"];
-  const totalRows = seatLayout ? seatLayout.length : 0;
-  const totalColumns = seatLayout ? seatLayout[0].length : 0;
-  const [total, setTotal] = useState(location.state.total || 0);
+  const [totalRows, setTotalRows] = useState(0);
+  const [totalColumns, setTotalColumns] = useState(0);
+  const [total, setTotal] = useState(0);
 
   const [seats, setSeats] = useState(seatLayout || []);
-  const [selectedSeats, setSelectedSeats] = useState(
-    location.state.selectedSeats || []
-  );
+  const [selectedSeats, setSelectedSeats] = useState([]);
 
-  const [selectedServices, setSelectedService] = useState(
-    location.state.selectedServices || []
-  );
+  const [selectedServices, setSelectedService] = useState([]);
 
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -266,6 +267,8 @@ const SeatReservation = () => {
 
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const ws = useRef(null);
 
   const handleTimeOut = useCallback(() => {
     setSeats(
@@ -329,8 +332,41 @@ const SeatReservation = () => {
       setTotal((prev) => prev - seat.price);
     }
   };
-  console.log(seats);
 
+  useEffect(() => {
+    // Establish WebSocket connection
+    ws.current = new WebSocket("ws://localhost:5000");
+
+    const fetchSeatLayout = async (id) => {
+      const showtimeResponse = await getShowtimeById(id);
+      console.log(showtimeResponse.seatLayout);
+      setSeatLayout(showtimeResponse.seatLayout);
+      setTotalRows(showtimeResponse.seatLayout.length);
+      setTotalColumns(showtimeResponse.seatLayout[0]?.length || 0);
+      setSeats(showtimeResponse.seatLayout); // Listen for messages from WebSocket server
+      ws.current.onmessage = (event) => {
+        const {
+          rowIndex,
+          colIndex,
+          status,
+          showtime: messageShowtime,
+        } = JSON.parse(event.data);
+        console.log(JSON.parse(event.data));
+        
+        // Only process the update if the showtime matches
+        if (messageShowtime === showtime) {
+          const updatedSeats = [...showtimeResponse.seatLayout];
+          updatedSeats[rowIndex][colIndex].status = status;
+          setSeats(updatedSeats);
+        }
+      };
+    };
+    fetchSeatLayout(showtime);
+
+    return () => {
+      ws.current.close();
+    };
+  }, [showtime]);
   const handleSelectSeatButton = async () => {
     if (selectedSeats.length === 0) {
       setSnackbarMessage("Please select at least one seat before proceeding.");
@@ -338,11 +374,30 @@ const SeatReservation = () => {
       return;
     }
 
+    // Update seat status to 'reserved' locally
+    const updatedSeats = [...seats];
+    selectedSeats.forEach(({ row, col }) => {
+      updatedSeats[row][col].status = "reserved";
+    });
+    setSeats(updatedSeats);
+
+    // Notify WebSocket server with showtime
+    selectedSeats.forEach(({ row, col }) => {
+      ws.current.send(
+        JSON.stringify({
+          rowIndex: row,
+          colIndex: col,
+          status: "reserved",
+          showtime,
+        })
+      );
+    });
+
     const userId = JSON.parse(localStorage.getItem("user"))?._id;
-    const seatIds = selectedSeats.map(
-      (seat) => seatLayout[seat.row][seat.col]._id
+    const seatIds = selectedSeats?.map(
+      (seat) => seatLayout?.[seat.row]?.[seat.col]?._id
     );
-    const serviceIds = selectedServices.map(
+    const serviceIds = selectedServices?.map(
       (service) => service._id + "*" + service.number
     );
 
@@ -435,7 +490,7 @@ const SeatReservation = () => {
       setSelectedService((prev) => [...prev, service]);
     } else {
       setSelectedService((prev) =>
-        prev.map((s) =>
+        prev?.map((s) =>
           s.id === service.id ? { ...s, number: s.number + 1 } : s
         )
       );
@@ -458,7 +513,7 @@ const SeatReservation = () => {
 
   const handleIncreaseQuantity = (service) => {
     setSelectedService((prev) =>
-      prev.map((s) =>
+      prev?.map((s) =>
         s._id === service._id ? { ...s, number: s.number + 1 } : s
       )
     );
@@ -487,7 +542,7 @@ const SeatReservation = () => {
           <Grid item xs={1}>
             <StepContainer>
               <Stepper orientation="vertical">
-                {steps.map((label, index) => (
+                {steps?.map((label, index) => (
                   <Step key={label}>
                     <StepLabel>{label}</StepLabel>
                   </Step>
@@ -541,7 +596,7 @@ const SeatReservation = () => {
                       <strong>A</strong> {/* Row letters (A, B, C, ...) */}
                     </Typography>
                   </Box>
-                  {seats[0].map((_, colIndex) => (
+                  {seats?.[0]?.map((_, colIndex) => (
                     <Grid
                       key={`colLabel-${colIndex}`}
                       containeritem
@@ -554,7 +609,7 @@ const SeatReservation = () => {
                     </Grid>
                   ))}
                 </Grid>
-                {seats.map((row, rowIndex) => (
+                {seats?.map((row, rowIndex) => (
                   <Grid container item key={rowIndex} justifyContent="center">
                     <Box
                       display="flex"
@@ -568,7 +623,7 @@ const SeatReservation = () => {
                         {/* Row letters (A, B, C, ...) */}
                       </Typography>
                     </Box>
-                    {row.map((seat, colIndex) => (
+                    {row?.map((seat, colIndex) => (
                       <Grid item key={`${rowIndex}-${colIndex}`}>
                         <SeatButton
                           type={seat?.status}
@@ -639,7 +694,7 @@ const SeatReservation = () => {
               </SeatType>
 
               <Slider {...settings} style={{ marginTop: "3rem" }}>
-                {services.map((service) => {
+                {services?.map((service) => {
                   const selected = selectedServices.find(
                     (s) => s._id === service._id
                   );
@@ -701,7 +756,7 @@ const SeatReservation = () => {
             <MovieInfo>
               <div>
                 <img
-                  src={movieImage}
+                  src={`http://localhost:8080/api/images/${movieImage}`}
                   alt={`${movieTitle} poster`}
                   style={{
                     width: "100%",
@@ -738,7 +793,7 @@ const SeatReservation = () => {
                 <Content variant="body1">
                   {selectedSeats.length > 0
                     ? selectedSeats
-                        .map((seat) => {
+                        ?.map((seat) => {
                           const rowLetter = String.fromCharCode(65 + seat.row); // Converts row index to a letter (A, B, C, etc.)
                           return `${rowLetter}${seat.col + 1}`; // Combines row letter with column number
                         })

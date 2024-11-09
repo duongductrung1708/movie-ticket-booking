@@ -73,13 +73,13 @@ export const menu = [
   },
   {
     id: 4,
-    title: "Maintenance",
+    title: "Maintain",
     listItems: [
       {
         id: 1,
-        title: "Upcoming Movies",
-        url: "/upcomingMovies",
-        icon: "setting.svg",
+        title: "Contacts",
+        url: "/contacts",
+        icon: "element.svg",
       },
     ],
   },

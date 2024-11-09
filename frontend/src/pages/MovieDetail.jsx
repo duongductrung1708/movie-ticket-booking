@@ -12,6 +12,10 @@ import {
   Select,
   MenuItem,
   Button,
+  Avatar,
+  Grid,
+  Paper,
+  Rating,
 } from "@mui/material";
 import YouTube from "react-youtube";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -92,7 +96,7 @@ const MoviePoster = styled.img`
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 `;
 
-const MovieSynopsis = styled.p`
+const MovieSynopsis = styled.div`
   font-family: "Sora", sans-serif;
   font-size: 1.2rem;
   margin-top: 1rem;
@@ -356,7 +360,10 @@ const MovieDetail = () => {
 
   const bookingRef = useRef(null);
 
-  // Reset Select State Function
+  const imgLink =
+    "https://img.hoidap247.com/picture/question/20200508/large_1588936738888.jpg";
+  const [value] = React.useState(2);
+
   const resetSelection = () => {
     setSelectedCity("");
     setFilteredTheaters([]);
@@ -411,13 +418,20 @@ const MovieDetail = () => {
             const showtimesData = await getShowtimesByTheater(theaterId);
 
             const filteredShowtimes = showtimesData.filter((showtime) => {
+              const showtimeDate = dayjs(showtime.date);
+              const currentDate = dayjs();
+
               if (selectedDate) {
                 return (
-                  dayjs(showtime.date).isSame(selectedDate, "day") &&
+                  showtimeDate.isSame(selectedDate, "day") &&
                   showtime.movie_id._id === movie._id
                 );
               }
-              return showtime.movie_id._id === movie._id;
+              return (
+                (showtimeDate.isAfter(currentDate, "day") ||
+                  showtimeDate.isSame(currentDate, "day")) &&
+                showtime.movie_id._id === movie._id
+              );
             });
 
             const uniqueMovies = {};
@@ -427,39 +441,49 @@ const MovieDetail = () => {
               const movieTitle = showtime.movie_id.title;
               const movieLanguage = showtime.movie_id.language;
               const movieDuration = showtime.movie_id.duration;
-              const showtimeLayout = showtime.seatLayout;
-
               const movieGenres = showtime.movie_id.genre
                 .map((genre) => genre.name)
                 .join(", ");
               const showtimeDate = dayjs(showtime.date).format("MM/DD/YYYY");
 
-              const room = showtime.room_id.name;
-              const showtimeId = showtime._id;
+              // Kiểm tra xem ngày chiếu đã tồn tại chưa
+              if (!uniqueMovies[showtimeDate]) {
+                uniqueMovies[showtimeDate] = [];
+              }
 
-              if (!uniqueMovies[movieId]) {
-                uniqueMovies[movieId] = {
+              if (
+                !uniqueMovies[showtimeDate].find(
+                  (time) => time === showtime.start_time
+                )
+              ) {
+                uniqueMovies[showtimeDate].push({
                   title: movieTitle,
-                  showtimes: [],
+                  time: showtime.start_time,
                   date: showtimeDate,
                   movieId: movieId,
                   language: movieLanguage,
                   duration: movieDuration,
                   genres: movieGenres,
-                  seatLayout: showtimeLayout,
-                  room: room,
-                  showtimeId: showtimeId,
-                };
+                  seatLayout: showtime.seatLayout,
+                  room: showtime.room_id.name,
+                  showtimeId: showtime._id,
+                });
               }
-
-              uniqueMovies[movieId].showtimes.push(showtime.start_time);
             });
 
-            const formattedMovies = Object.values(uniqueMovies);
+            const formattedMovies = Object.entries(uniqueMovies).map(
+              ([date, showtimes]) => ({
+                date,
+                showtimes,
+              })
+            );
+
             setMovies(formattedMovies);
           } catch (error) {
             console.error("Error fetching showtimes:", error);
           }
+        } else {
+          setMovies([]);
         }
       }
     };
@@ -468,34 +492,38 @@ const MovieDetail = () => {
   }, [selectedTheater, selectedDate, filteredTheaters, movie]);
 
   const handleShowtimeSelect = (movieTitle, time) => {
-    const selectedMovie = movies.find((movie) => movie.title === movieTitle);
-    console.log(selectedMovie);
-
+    let selectedMovie = null;
+  
+    movies.forEach((movie) => {
+      movie.showtimes.forEach((showtime) => {
+        if (showtime.title === movieTitle && showtime.time === time) {
+          selectedMovie = showtime;
+        }
+      });
+    });
+  
     if (selectedMovie) {
       const showtimeDate = selectedMovie.date;
-
+  
       if (!selectedDate) {
         setSelectedDate(dayjs(showtimeDate, "MM/DD/YYYY"));
       }
-
+  
       setSelectedShowtimes((prevShowtimes) => ({
         ...prevShowtimes,
         [movieTitle]: time,
       }));
-
+  
       const movieDuration = selectedMovie.duration;
       const movieImage = movie.image || selectedMovie.image;
-
       const selectedRoom = selectedMovie.room;
       const showtimeId = selectedMovie.showtimeId;
-
       const seatLayout = selectedMovie.seatLayout;
       const selectedTheaterDetails = filteredTheaters.find(
         (theater) => theater.name === selectedTheater
       );
-
       const theaterAddress = selectedTheaterDetails?.address;
-
+  
       navigate("/seat-reservation", {
         state: {
           showtime: showtimeId,
@@ -510,8 +538,10 @@ const MovieDetail = () => {
           selectedRoom: selectedRoom,
         },
       });
+    } else {
+      console.error("Showtime not found.");
     }
-  };
+  };  
 
   const handleCityChange = (e) => {
     setSelectedCity(e.target.value);
@@ -556,7 +586,10 @@ const MovieDetail = () => {
         {movie ? (
           <>
             <MovieInfoGrid>
-              <MoviePoster src={movie.image} alt={movie.title} />
+              <MoviePoster
+                src={`http://localhost:8080/api/images/${movie.image}`}
+                alt={movie.title}
+              />
               <VideoWrapper>
                 <StyledYouTube
                   videoId={movie.trailer.split("v=")[1]}
@@ -698,6 +731,7 @@ const MovieDetail = () => {
                       value={selectedDate}
                       onChange={(newValue) => setSelectedDate(newValue)}
                       format="MM/DD/YYYY"
+                      minDate={dayjs()}
                       sx={{
                         width: "40%",
                         ".MuiInputBase-input": { color: "orange" },
@@ -726,7 +760,6 @@ const MovieDetail = () => {
                     />
                   </LocalizationProvider>
 
-                  {/* Reset Button */}
                   <Button
                     style={{ width: "15%", marginTop: "1rem" }}
                     variant="contained"
@@ -740,22 +773,24 @@ const MovieDetail = () => {
                   {Array.isArray(filteredMovies) &&
                   filteredMovies.length > 0 ? (
                     filteredMovies.map((movie, movieIndex) => (
-                      <div key={movie.movieId}>
-                        <Subtitle>
-                          {dayjs(movie.date).format("MM/DD/YYYY")}
-                        </Subtitle>
+                      <div key={movie.date}>
+                        <Subtitle>{movie.date}</Subtitle>
                         <div style={{ display: "flex", flexWrap: "wrap" }}>
-                          {movie.showtimes.map((time, timeIndex) => (
+                          {movie.showtimes.map((showtime, timeIndex) => (
                             <Showtime key={timeIndex}>
                               <ShowtimeButton
                                 selected={
-                                  selectedShowtimes[movie.title] === time
+                                  selectedShowtimes[showtime.title] ===
+                                  showtime.time
                                 }
                                 onClick={() =>
-                                  handleShowtimeSelect(movie.title, time)
+                                  handleShowtimeSelect(
+                                    showtime.title,
+                                    showtime.time
+                                  )
                                 }
                               >
-                                {time}
+                                {showtime.time}
                               </ShowtimeButton>
                             </Showtime>
                           ))}
@@ -772,6 +807,66 @@ const MovieDetail = () => {
         ) : (
           <Typography variant="h5">Movie not found</Typography>
         )}
+        {/* Comments */}
+        <div style={{ marginTop: 100 }}>
+          <Heading>Comments</Heading>
+          <Paper style={{ padding: "40px 20px" }}>
+            <Grid container wrap="nowrap" spacing={2}>
+              <Grid item>
+                <Avatar alt="Remy Sharp" src={imgLink} />
+              </Grid>
+              <Grid justifyContent="left" item xs zeroMinWidth>
+                <h4
+                  style={{
+                    margin: 0,
+                    textAlign: "left",
+                    paddingRight: "0.5rem",
+                  }}
+                >
+                  Duong Duc Trung
+                </h4>
+                <div style={{ alignItems: "center", display: "flex" }}>
+                  <Rating name="read-only" value={value} readOnly />{" "}
+                  <div style={{ marginLeft: "0.2rem" }}>10/25/2024</div>
+                </div>
+                <div style={{ textAlign: "left" }}>
+                  Phim rất hay, các bạn nên xem
+                </div>
+                <div style={{ textAlign: "left", color: "gray" }}>
+                  posted 1 minute ago
+                </div>
+              </Grid>
+            </Grid>
+          </Paper>
+          <Paper style={{ padding: "40px 20px", marginTop: "0.5rem" }}>
+            <Grid container wrap="nowrap" spacing={2}>
+              <Grid item>
+                <Avatar alt="Remy Sharp" src={imgLink} />
+              </Grid>
+              <Grid justifyContent="left" item xs zeroMinWidth>
+                <h4
+                  style={{
+                    margin: 0,
+                    textAlign: "left",
+                    paddingRight: "0.5rem",
+                  }}
+                >
+                  Kieu Thanh Binh
+                </h4>
+                <div style={{ alignItems: "center", display: "flex" }}>
+                  <Rating name="read-only" value={value} readOnly />{" "}
+                  <div style={{ marginLeft: "0.2rem" }}>10/25/2024</div>
+                </div>
+                <div style={{ textAlign: "left" }}>
+                  Không từ nào có thể diễn tả, quá hay
+                </div>
+                <div style={{ textAlign: "left", color: "gray" }}>
+                  posted 1 hour ago
+                </div>
+              </Grid>
+            </Grid>
+          </Paper>
+        </div>
       </Container>
       <Footer />
     </Section>
